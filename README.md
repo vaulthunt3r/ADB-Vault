@@ -6,7 +6,7 @@ from one desktop application.
 
 [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
-![ADB Vault application workspace with demonstration data](docs/images/apps.png)
+![Applications — search, inspect and keep personal notes](docs/images/showcase-apps.png)
 
 ## Download and install
 
@@ -46,12 +46,11 @@ workspace order, badge colors and configurable search websites.
 The interface is **English only**. The optional **Quick tour** can be skipped and
 replayed from the question-mark button in the title bar.
 
-<details>
-<summary>Zero Cool appearance</summary>
+There’s a little Easter egg, too. Happy hunting 😉
 
-![Zero Cool appearance with demonstration data](docs/images/zero-cool.png)
+![Files — browse your computer and phone side by side](docs/images/showcase-files.png)
 
-</details>
+![Screen and camera — desktop sessions powered by scrcpy](docs/images/showcase-display.png)
 
 ## Connect a phone
 

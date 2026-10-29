@@ -1,0 +1,130 @@
+import { _electron as electron, expect } from '@playwright/test'
+import assert from 'node:assert/strict'
+import { mkdtemp, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { build } from 'esbuild'
+
+const root = await mkdtemp(path.resolve('desktop-test-results/apps-polish-'))
+const fixture = path.join(root, 'fixture.mjs'), harness = path.join(root, 'main.cjs')
+await build({ entryPoints: ['tests/backend-fixture.ts'], bundle: true, platform: 'node', format: 'esm', outfile: fixture, logLevel: 'silent' })
+const { installBackendFixture, connectionEvent } = await import(pathToFileURL(fixture).href)
+await writeFile(harness, `const { app, BrowserWindow } = require('electron'); app.whenReady().then(() => { const window = new BrowserWindow({ width: 1440, height: 940, show: false, webPreferences: { contextIsolation: false, nodeIntegration: false } }); window.loadURL('about:blank'); });`)
+const env = { ...process.env }; delete env.ELECTRON_RUN_AS_NODE
+let desktop, page
+try {
+  desktop = await electron.launch({ args: [harness, `--user-data-dir=${path.join(root, 'profile')}`], env })
+  page = await desktop.firstWindow(); page.setDefaultTimeout(12000)
+  const errors = []; page.on('pageerror', e => errors.push(e.message))
+  await installBackendFixture(page)
+  await page.addInitScript(() => {
+    if (!localStorage.getItem('adb-vault-toolbar')) localStorage.setItem('adb-vault-toolbar', JSON.stringify({ version: 1, state: { pinned: ['virtualDisplay', 'camera', 'screenshot'], showDevice: false } }))
+    if (!localStorage.getItem('adb-vault-layout')) localStorage.setItem('adb-vault-layout', JSON.stringify({ version: 1, state: { leftSidebar: 'icons', rightSidebar: 'expanded' } }))
+  })
+  await page.goto(pathToFileURL(path.resolve('dist/index.html')).href)
+  const nav = page.getByRole('navigation', { name: 'Main navigation' }), toolbar = page.getByLabel('Workspace toolbar')
+  const tooltips = page.getByRole('tooltip'), virtual = toolbar.getByRole('button', { name: 'Virtual display', exact: true }).locator('..'), camera = toolbar.getByRole('button', { name: 'Camera', exact: true }).locator('..')
+  await virtual.focus(); await expect(tooltips).toHaveCount(1)
+  await camera.hover(); await expect(tooltips).toHaveCount(1); await expect(tooltips).toContainText('phone camera')
+  await page.mouse.move(1, 1); await expect(tooltips).toHaveCount(0)
+  for (const target of [camera, virtual, camera, virtual]) { await target.hover(); await expect(tooltips).toHaveCount(1) }
+  await toolbar.getByRole('button', { name: 'More toolbar actions', exact: true }).click(); await expect(tooltips).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await nav.getByRole('button', { name: 'Apps', exact: true }).click()
+  const selection = page.getByRole('group', { name: 'Application selection', exact: true })
+  await expect(selection.getByRole('button', { name: 'Install', exact: true })).toBeDisabled()
+  await expect(selection.getByRole('button', { name: 'Local APKs', exact: true })).toBeEnabled()
+  await selection.getByRole('button', { name: 'Local APKs', exact: true }).click()
+  await page.getByRole('button', { name: 'Back to installed applications', exact: true }).click()
+  const phone = { id: 'phone', serial: 'fixture', transportId: '7', name: 'Fixture phone', method: 'USB', status: 'connected', android: '16', endpoint: 'fixture', lastSeen: '', known: true, canDetach: false, root: { status: 'not-detected', message: 'Fixture', checkedAt: new Date().toISOString() }, info: { status: 'ready', collectedAt: new Date().toISOString(), fields: { socModel: 'Fixture SoC', socManufacturer: 'Fixture silicon', board: 'test-board', hardware: 'test-hardware', bootloader: 'test-boot', baseband: 'test-radio', buildDate: '2026-10-01T12:00:00Z', buildType: 'user', buildTags: 'release-keys', bootloaderState: 'locked', verifiedBoot: 'green', slot: 'A' } } }
+  const emitPhone = () => connectionEvent(page, { devices: [phone], activeDeviceId: phone.id, selectedDeviceId: phone.id, adbAvailable: true })
+  const emitApps = () => page.evaluate(() => {
+    const base = { versionName: '1', versionCode: 1, uid: 10001, userId: 0, enabled: true, system: false, updatedSystemApp: false, sourceDir: '/data/app/base.apk', firstInstallTime: 1, lastUpdateTime: 1, targetSdk: 35, minSdk: 26, installer: 'com.android.vending', enabledState: 0, suspended: false, stopped: false, debuggable: false, iconPng: null, splitCount: 0 }
+    window.backendTest.emit({ type: 'apps', apps: { ...window.backendTest.snapshot.apps, deviceId: 'phone', userId: 0, currentUserId: 0, status: 'ready', profiles: [{ id: 0, name: 'Owner', managed: false, running: true }], apps: [
+      { ...base, packageName: 'org.example.large', label: 'Large', debuggable: true, storageRequested: true, dataBytes: 2048, cacheBytes: 1024 },
+      { ...base, packageName: 'org.example.zero', label: 'Zero', targetSdk: 29, installer: null, storageRequested: true, dataBytes: 0, cacheBytes: 0 },
+      { ...base, packageName: 'org.example.unknown', label: 'Unknown', targetSdk: 0, installer: null },
+    ] } })
+  })
+  await emitPhone(); await emitApps()
+  await expect(selection.getByRole('button', { name: 'Install', exact: true })).toBeEnabled()
+  const boxes = await Promise.all(['Install', 'Backup', 'Local APKs'].map(name => selection.getByRole('button', { name, exact: true }).boundingBox()))
+  assert.ok(boxes.every(box => box && Math.abs(box.y - boxes[0].y) < 2)); assert.ok(boxes[2].x > boxes[1].x)
+  const table = page.getByRole('table', { name: 'Installed applications' })
+  await expect(table.getByRole('row')).toHaveCount(4)
+  await page.getByRole('button', { name: 'Visible columns', exact: true }).click()
+  const columns = page.getByRole('dialog', { name: 'Visible columns', exact: true })
+  await expect(columns.getByRole('checkbox')).toHaveCount(18)
+  await columns.getByRole('checkbox', { name: 'Debuggable', exact: true }).check()
+  await columns.getByRole('checkbox', { name: 'Data (excludes cache)', exact: true }).check()
+  await page.keyboard.press('Escape')
+  await expect(table.getByRole('row').filter({ hasText: 'Large' })).toContainText('1 KiB')
+  await expect(table.getByRole('row').filter({ hasText: 'Zero' })).toContainText('0 B')
+  await expect(table.getByRole('row').filter({ hasText: 'Unknown' })).toContainText('Not collected')
+  await page.getByRole('button', { name: 'Filter applications', exact: true }).click()
+  const filter = page.getByRole('dialog', { name: 'Filter applications', exact: true })
+  await filter.getByRole('combobox', { name: 'Filter by installer', exact: true }).selectOption('com.android.vending')
+  await filter.getByRole('spinbutton', { name: 'Minimum target SDK', exact: true }).fill('30')
+  await expect(table.getByRole('row')).toHaveCount(2)
+  await page.screenshot({ path: path.join(root, 'filter.png') })
+  await filter.getByRole('button', { name: 'Clear filters', exact: true }).click(); await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Sort applications', exact: true }).click()
+  const sort = page.getByRole('dialog', { name: 'Sort applications', exact: true })
+  await expect(sort.getByRole('group', { name: 'Sort by', exact: true }).getByRole('radio')).toHaveCount(12)
+  await sort.getByRole('radio', { name: 'Data (excludes cache)', exact: true }).check(); await page.keyboard.press('Escape')
+  await expect(table.getByRole('row').nth(1)).toContainText('Large'); await expect(table.getByRole('row').last()).toContainText('Unknown')
+  await page.screenshot({ path: path.join(root, 'apps-row-columns.png') })
+  await page.getByRole('button', { name: 'Details for Large', exact: true }).click()
+  await page.getByRole('tab', { name: 'Actions', exact: true }).click()
+  const launch = page.getByRole('button', { name: 'Launch application', exact: true })
+  await launch.click()
+  await page.evaluate(() => window.backendTest.emit({ type: 'appAction', state: { operationId: 'launch-test', startedAt: new Date().toISOString(), id: 'phone', userId: 0, packageName: 'org.example.large', action: 'launch', status: 'error', message: 'No launchable screen is available for this application in profile 0.' } }))
+  await expect(page.locator('.apps-launch-result')).toBeVisible()
+  const launchBox = await launch.boundingBox(), resultBox = await page.locator('.apps-launch-result').boundingBox()
+  assert.ok(resultBox.y >= launchBox.y + launchBox.height && resultBox.y - launchBox.y - launchBox.height < 16)
+  await page.screenshot({ path: path.join(root, 'launch-feedback.png') })
+  await page.evaluate(() => window.backendTest.emit({ type: 'appAction', state: null }))
+  await nav.getByRole('button', { name: 'Connection', exact: true }).click()
+  await page.getByRole('tab', { name: 'Details', exact: true }).click()
+  const info = page.getByLabel('Device and firmware', { exact: true })
+  await expect(info.getByText('Fixture SoC', { exact: true })).toBeVisible()
+  assert.equal(await info.locator('dt').count(), 21)
+  await expect(info.getByText('Green · verified', { exact: true })).toBeVisible()
+  await page.screenshot({ path: path.join(root, 'firmware.png') })
+  await nav.getByRole('button', { name: 'Settings', exact: true }).click()
+  const settings = page.getByRole('group', { name: 'Status bar', exact: true })
+  const additions = ['Restart', 'Power off', 'Clipboard', 'Export contacts', 'Export call log', 'Export SMS', 'Check root access', 'Refresh device information', 'Reconnect device', 'Disconnect device', 'Find devices', 'Find Fastboot devices', 'Local APKs', 'Install', 'Backup', 'Restore application']
+  for (const name of additions) await settings.getByRole('button', { name: `Pin ${name}`, exact: true }).click()
+  await page.keyboard.press('Escape')
+  await expect(settings.getByRole('list', { name: 'Toolbar action order', exact: true }).locator('li')).toHaveCount(19)
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('adb-vault-toolbar')).state.pinned)
+  const requestsBeforeReload = await page.evaluate(() => window.backendTest.requests)
+  await page.reload(); await emitPhone(); await emitApps()
+  assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('adb-vault-toolbar')).state.pinned), stored)
+  await desktop.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1000, 820))
+  const openMenu = () => toolbar.getByRole('button', { name: 'More toolbar actions', exact: true }).click()
+  const menu = page.getByRole('dialog', { name: 'Toolbar actions', exact: true })
+  await openMenu()
+  const shown = await toolbar.locator('[data-toolbar-action]').evaluateAll(nodes => nodes.map(node => node.dataset.toolbarAction))
+  const overflow = await menu.locator('[aria-label="Pinned actions"] [data-overflow-action]').evaluateAll(nodes => nodes.map(node => node.dataset.overflowAction))
+  assert.deepEqual([...shown, ...overflow], stored)
+  await expect(menu.getByRole('button', { name: 'Disconnect device', exact: true })).toBeDisabled()
+  const restart = toolbar.locator('[data-toolbar-action="restart"]')
+  if (await restart.count()) await restart.click()
+  else await menu.getByRole('button', { name: 'Restart', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: /Restart/ })).toBeVisible()
+  await page.getByRole('dialog', { name: /Restart/ }).getByRole('button', { name: 'Cancel', exact: true }).click()
+  await page.keyboard.press('Escape'); await openMenu()
+  await menu.getByRole('button', { name: 'Local APKs', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Back to installed applications', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Back to installed applications', exact: true }).click()
+  const requests = [...requestsBeforeReload, ...await page.evaluate(() => window.backendTest.requests)]
+  assert.equal(requests.filter(r => r.type === 'apps.action' && r.action === 'launch').length, 1)
+  assert.ok(!requests.some(r => ['connection.power', 'connection.disconnect', 'connection.screen'].includes(r.type)))
+  assert.deepEqual(errors, [])
+  await writeFile(path.join(root, 'result.json'), JSON.stringify({ passed: true, exclusiveTooltips: true, localApksRow: true, firmwareFields: 21, columns: 18, sortFields: 12, newToolbarActions: 16, launchFeedback: true }, null, 2))
+  console.log(`Apps polish checks passed: ${root}`)
+} catch (error) {
+  if (page) { await page.screenshot({ path: path.join(root, 'failure.png') }); await writeFile(path.join(root, 'failure.txt'), (await page.locator('body').innerText()).slice(0, 24000)) }
+  console.error(`Evidence: ${root}`); throw error
+} finally { if (desktop) await desktop.close() }

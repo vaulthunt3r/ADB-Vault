@@ -1,0 +1,52 @@
+.personal-database,.removed-apps { display:flex; flex-direction:column; min-height:0; overflow:hidden; gap:16px; }
+.personal-database-scroll,.removed-apps-scroll { overflow:auto; min-height:0; padding-right:12px; }
+.personal-database h1,.removed-apps h1 { margin:0 0 8px; font-size:22px; }
+.personal-dialog { width:min(800px,90vw); }
+.personal-panel { min-width:0; }
+.personal-toolbar,.app-personal-summary,.personal-record-heading { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.personal-toolbar { margin:14px 0; }
+.app-personal-summary { margin-top:12px; }
+.personal-open { background:transparent; padding:4px 0; color:var(--accent); display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+.personal-badge-button { background:transparent; padding:0; max-width:100%; text-align:left; }
+.personal-badge { display:inline-block; border:1px solid color-mix(in srgb,var(--note-color) 55%,var(--line)); border-left:4px solid var(--note-color); border-radius:var(--ui-radius-small); padding:3px 8px; color:var(--text); background:color-mix(in srgb,var(--note-color) 10%,var(--surface)); font-size:12px; overflow-wrap:anywhere; }
+.personal-record { border:1px solid var(--line); border-radius:var(--ui-radius); padding:16px; margin:12px 0; background:var(--surface); }
+.personal-record-heading code { font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+.personal-record-actions { display:flex; gap:4px; margin-left:auto; }
+.personal-record-text { white-space:pre-wrap; overflow-wrap:anywhere; margin:12px 0; }
+.personal-provenance { font-size:12px; color:var(--muted); margin:8px 0; }
+.personal-origin { font-size:12px; color:var(--muted); }
+.personal-origin summary { cursor:pointer; }
+.personal-origin dl { display:grid; grid-template-columns:110px minmax(0,1fr); gap:6px 12px; }
+.personal-origin dd { margin:0; overflow-wrap:anywhere; }
+.personal-editor { margin:16px 0; padding:18px; border:1px solid var(--accent); border-radius:var(--ui-radius); background:var(--surface-alt); }
+.personal-editor h3 { margin:0 0 14px; }
+.personal-editor label,.personal-search { display:flex; flex-direction:column; gap:6px; margin:10px 0; font-size:12px; color:var(--muted); }
+.personal-editor input,.personal-editor textarea,.personal-search input,.removed-search { width:100%; padding:10px 12px; border:1px solid var(--line); background:var(--surface); color:var(--text); font:inherit; }
+.personal-editor textarea { resize:vertical; min-height:100px; max-height:300px; }
+.personal-label-fields { display:flex; gap:12px; align-items:end; }
+.personal-label-fields label:first-child { flex:1; }
+.personal-label-fields input[type=color] { width:60px; height:40px; padding:4px; }
+.personal-empty { padding:30px 0; color:var(--muted); }
+.app-name-content { flex:1; min-width:0; }
+.app-name-line { display:flex; align-items:center; gap:7px; min-width:0; }
+.app-select .app-name-line strong { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.app-select .personal-table-badges { display:inline-flex; align-items:center; gap:3px; flex:0 1 auto; max-width:45%; min-width:22px; height:16px; overflow:hidden; }
+.app-select .personal-badge,.personal-compact .personal-badge { display:block; min-width:0; max-width:100px; height:16px; line-height:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:10px; padding:0 5px; border:1px solid color-mix(in srgb,var(--note-color) 25%,var(--line)); background:color-mix(in srgb,var(--note-color) 8%,var(--surface)); }
+.personal-more { flex-shrink:0; padding:0; border:0; background:transparent; color:var(--muted); font-size:10px; line-height:16px; white-space:nowrap; }
+.app-title-line { display:flex; align-items:center; gap:8px; min-width:0; }
+.app-title-line h1,.app-title-line h2 { flex:0 1 auto; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.app-full-heading .app-title-line { margin-bottom:8px; }
+.app-full-heading .app-title-line h1 { margin:0; }
+.app-inspector-summary > div { flex:1; }
+.app-personal-summary.personal-compact { display:inline-flex; flex:0 0 auto; flex-wrap:nowrap; align-items:center; gap:4px; margin:0; max-width:45%; }
+.personal-compact .personal-open { flex-shrink:0; justify-content:center; width:24px; height:24px; padding:0; border-radius:var(--ui-radius-small); }
+.personal-compact .personal-open:hover { background:var(--surface-alt); }
+.personal-compact .personal-badge-button { min-width:0; overflow:hidden; }
+.personal-compact .personal-badge { max-width:90px; }
+.apps-selection-controls .apps-collection-shortcut { flex:0 0 32px; width:32px; min-height:var(--control-height); padding:0; justify-content:center; }
+.removed-app-row { display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:12px 8px; }
+.removed-app-row>div { flex:1; min-width:0; }
+.removed-app-row code { display:block; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+.removed-app-row.selected { background:var(--surface-alt); }
+.removed-app-select { text-align:left; background:transparent; padding:0; display:block; width:100%; }
+.removed-app-count { font-size:12px; color:var(--muted); }

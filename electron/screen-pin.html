@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Window pin</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}
+button{width:100%;height:100%;box-sizing:border-box;display:grid;place-items:center;padding:3px;border:1px solid #8c969f;border-radius:5px;background:#252b31;color:#f0f4f6;cursor:pointer}
+button:hover{background:#3b454e}button[aria-pressed=true]{background:#b9e9d6;color:#124b38;border-color:#39866b}button[aria-pressed=true] svg{fill:currentColor}button:disabled{opacity:.6;cursor:wait}button[data-error=true]{border:2px solid #ff887f}svg{width:18px;height:18px;pointer-events:none}
+</style></head><body><button type="button" aria-label="Always on top" aria-pressed="false" title="Keep this window above other windows" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 9V4l1-1V2H7v1l1 1v5l-3 3v3h14v-3zM12 15v7"/></svg></button></body></html>

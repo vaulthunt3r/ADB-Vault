@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.jar binary
+*.zip binary
+*.gz binary
+# Preserve byte-for-byte hashes of upstream snapshots and helper sources.
+electron/data/** -text
+android-helper/src/** -text
+android-helper/stubs/** -text

@@ -1,0 +1,78 @@
+import { test, expect } from '@playwright/test'
+import { installBackendFixture } from './backend-fixture'
+
+test.beforeEach(async ({ page }) => { await installBackendFixture(page) })
+
+test('introduction is optional, dismissal persists, and help replays a skippable tour', async ({ page }) => {
+  await page.goto('/')
+  const welcome = page.getByRole('complementary', { name: 'Welcome to ADB Vault' })
+  await expect(welcome).toBeVisible()
+  await expect(page.locator('dialog.interface-tour')).toHaveCount(0)
+  await welcome.getByRole('button', { name: 'Not now', exact: true }).click()
+  await page.reload()
+  await expect(welcome).toHaveCount(0)
+  await page.getByRole('button', { name: 'Quick tour', exact: true }).click()
+  const tour = page.locator('dialog.interface-tour')
+  await expect(tour).toBeVisible()
+  await tour.getByRole('button', { name: 'Next', exact: true }).click()
+  await tour.getByRole('button', { name: 'Skip tour', exact: true }).click()
+  await expect(tour).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Quick tour', exact: true })).toBeFocused()
+  await page.reload()
+  await expect(welcome).toHaveCount(0)
+  await expect(tour).toHaveCount(0)
+  await page.getByRole('button', { name: 'Quick tour', exact: true }).click()
+  await expect(tour.getByRole('heading', { name: 'Your workspace', exact: true })).toBeVisible()
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab')
+    expect(await tour.evaluate(el => el.contains(document.activeElement))).toBe(true)
+  }
+  await page.keyboard.press('Escape')
+  await expect(tour).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Quick tour', exact: true })).toBeFocused()
+})
+
+test('every topic stays in the viewport without running commands or changing the workspace', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 680 })
+  await page.goto('/')
+  await expect(page.locator('.component-row').first()).toBeVisible()
+  await page.screenshot({ path: 'test-results/tour-welcome.png' })
+  const requests = await page.evaluate(() => window.backendTest.requests)
+  const preferences = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage).filter(([key]) => key !== 'adb-vault-tour-v1')))
+  await page.getByRole('button', { name: 'Start tour', exact: true }).click()
+  const tour = page.locator('dialog.interface-tour')
+  for (let index = 0; index < 11; index++) {
+    const bounds = await tour.locator('.tour-card').boundingBox()
+    expect(bounds!.x).toBeGreaterThanOrEqual(0)
+    expect(bounds!.y).toBeGreaterThanOrEqual(0)
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(1000)
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(680)
+    await expect(tour.locator('.tour-spotlight')).toHaveCount(1)
+    await expect(tour.getByRole('button', { name: index === 10 ? 'Done' : 'Next', exact: true })).toBeInViewport()
+    if ([0, 4, 10].includes(index)) await page.screenshot({ path: `test-results/tour-step-${index}.png` })
+    await tour.getByRole('button', { name: index === 10 ? 'Done' : 'Next', exact: true }).click()
+  }
+  await expect(tour).toHaveCount(0)
+  expect(await page.evaluate(() => window.backendTest.requests)).toEqual(requests)
+  expect(await page.evaluate(() => Object.fromEntries(Object.entries(localStorage).filter(([key]) => key !== 'adb-vault-tour-v1')))).toEqual(preferences)
+  await expect(page.locator('[data-tour="components"]')).toHaveAttribute('aria-current', 'page')
+  await page.reload()
+  await expect(page.getByRole('complementary', { name: 'Welcome to ADB Vault' })).toHaveCount(0)
+})
+
+test('existing profiles get no prompt; hidden areas and Zero Cool still allow skipping', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('adb-vault-appearance', JSON.stringify({ state: { terminalPinned: true, terminalColor: 'amber' }, version: 1 }))
+    localStorage.setItem('adb-vault-layout', JSON.stringify({ state: { rightSidebar: 'collapsed', hiddenWorkspaces: ['monitor'] }, version: 1 }))
+  })
+  await page.goto('/')
+  await expect(page.getByRole('complementary', { name: 'Welcome to ADB Vault' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Quick tour', exact: true }).click()
+  const tour = page.locator('dialog.interface-tour')
+  await tour.getByLabel('Jump to a topic').selectOption('7')
+  await expect(tour.getByText(/This area is hidden/)).toBeVisible()
+  await page.screenshot({ path: 'test-results/tour-zero-cool-hidden.png' })
+  await tour.getByRole('button', { name: 'Skip tour', exact: true }).click()
+  await expect(tour).toHaveCount(0)
+  await expect(page.locator('[data-tour="monitor"]')).toHaveCount(0)
+})

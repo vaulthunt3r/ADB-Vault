@@ -1,0 +1,49 @@
+.appearance-zen { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--surface); cursor: pointer; }
+.appearance-zen input { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; }
+.appearance-zen strong { display: block; font-size: 12px; font-weight: 550; }
+.appearance-zen small { display: block; margin-top: 4px; color: var(--muted); line-height: 1.6; }
+.density-compact .appearance-zen { padding: 10px 12px; margin-bottom: 12px; }
+
+/* Transparent borders keep sizing unchanged. Do not flatten inputs, focus rings,
+   selected-row markers, status notices, floating surfaces or panel dividers. */
+html[data-zen-mode="true"] :is(
+  .component-table, .data-table-wrap, .connection-methods, .known-devices,
+  .component-icon, .data-icon, .section-inspector-icon,
+  .appearance-current, .appearance-zen, .workspace-density-settings,
+  .theme-option, .apps-loading-settings label, .settings-categories button.active,
+  .monitor-metric, .monitor-chart, .monitor-table-wrap, .activity-table-scroll,
+  .activity-section > .activity-detail, .fm-pane, .file-task,
+  .fm-network-results section, .file-permissions-help, .file-viewer-content,
+  .nav-item.active, .component-filters button.active,
+  .dialog-icon, .status-badge, .type-chip,
+  .location-field code, .app-full-path code, .metadata,
+  .component-group,
+  .bloatware-assessment, .monitor-addresses, .badge-color-list,
+  .backup-progress-card, .restore-components, .apps-clear-options,
+  .device-power-options
+) { border-color: transparent; }
+
+html[data-zen-mode="true"] :is(
+  .component-row, .known-device, .data-table td, .fm-table td,
+  .monitor-table-wrap td, .activity-table td, .activity-items td,
+  .app-manifest-row, .app-split-list > div, .apk-size-legend > div,
+  .file-task-result, .android-log-line, .battery-usage-table td
+) { border-bottom-color: transparent; }
+
+/* File navigation is already separated by spacing and surface colors.
+   Retain the active tab underline, table header and pane footer separators. */
+html[data-zen-mode="true"] :is(.fm-pane-heading, .fm-tabs, .fm-path, .fm-filter) {
+  border-bottom-color: transparent;
+}
+
+html[data-zen-mode="true"] :is(.button, .toolbar-button, .row-action),
+html[data-zen-mode="true"] :is(.button, .toolbar-button, .row-action):hover:not(:disabled) {
+  border-color: transparent;
+  box-shadow: none;
+}
+html[data-zen-mode="true"] :is(.button.secondary, .toolbar-button, .row-action) {
+  background: var(--surface-alt);
+}
+html[data-zen-mode="true"] :is(.button.secondary, .toolbar-button, .row-action):hover:not(:disabled) {
+  background: var(--selected);
+}

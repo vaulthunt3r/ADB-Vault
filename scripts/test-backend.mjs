@@ -1,0 +1,12 @@
+import { spawn } from 'node:child_process'
+const compile = spawn(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.electron.json'], { stdio: 'inherit', windowsHide: true })
+if (await new Promise(resolve => compile.on('exit', resolve)) !== 0) process.exit(1)
+await import('./preload.mjs')
+const packageTests = spawn(process.execPath, ['--test', 'scripts/portable-profile.test.mjs', 'scripts/app-notes.test.mjs', 'scripts/confirmations.test.mjs', 'scripts/package-actions.test.mjs', 'scripts/app-batch-actions.test.mjs'], { stdio: 'inherit', windowsHide: true })
+if (await new Promise(resolve => packageTests.on('exit', resolve)) !== 0) process.exit(1)
+const exitTests = spawn(process.execPath, ['--test', 'scripts/notifications.test.mjs', 'scripts/exit-operations.test.mjs', 'scripts/operation-history.test.mjs', 'scripts/phone-tools.test.mjs'], { stdio: 'inherit', windowsHide: true })
+if (await new Promise(resolve => exitTests.on('exit', resolve)) !== 0) process.exit(1)
+const fastbootTests = spawn(process.execPath, ['--test', 'scripts/fastboot.test.mjs'], { stdio: 'inherit', windowsHide: true })
+if (await new Promise(resolve => fastbootTests.on('exit', resolve)) !== 0) process.exit(1)
+const tests = spawn(process.execPath, ['--test', 'scripts/touch-input.test.mjs', 'scripts/touch-controls.test.mjs', 'scripts/adb-console.test.mjs', 'scripts/backend.test.mjs', 'scripts/english-only.test.mjs', 'scripts/connection-review.test.mjs', 'scripts/android-diagnostics.test.mjs', 'scripts/files.test.mjs', 'scripts/file-clipboard.test.mjs', 'scripts/file-clipboard-worker.test.mjs', 'scripts/viewer-permissions.test.mjs', 'scripts/file-thumbnail.test.mjs', 'scripts/file-preview.test.mjs', 'scripts/file-search.test.mjs', 'scripts/file-network.test.mjs', 'scripts/file-places.test.mjs', 'scripts/file-network-discovery.test.mjs', 'scripts/file-storage.test.mjs', 'scripts/device-power.test.mjs', 'scripts/device-screen.test.mjs', 'scripts/apps.test.mjs', 'scripts/diagnostics.test.mjs', 'scripts/failure-diagnostics.test.mjs', 'scripts/app-details.test.mjs', 'scripts/databases.test.mjs', 'scripts/root-reconnect.test.mjs', 'scripts/wifi-reconnect.test.mjs', 'scripts/adb-lifecycle.test.mjs', 'scripts/app-actions.test.mjs', 'scripts/app-backup.test.mjs', 'scripts/badge-filters.test.mjs', 'scripts/monitor.test.mjs', 'scripts/phone-network.test.mjs', 'scripts/web-services.test.mjs'], { stdio: 'inherit', windowsHide: true })
+process.exit(await new Promise(resolve => tests.on('exit', resolve)) ?? 1)

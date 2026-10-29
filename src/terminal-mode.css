@@ -1,0 +1,46 @@
+.app-mark { padding: 0; flex-shrink: 0; cursor: default; -webkit-app-region: no-drag; }
+.app-mark-wrap { display: inline-flex; position: relative; flex-shrink: 0; z-index: 40; -webkit-app-region: no-drag; }
+.terminal-quote { position: absolute; top: calc(100% + 10px); left: 0; width: max-content; max-width: min(320px, calc(100vw - 90px)); padding: 10px 12px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font-size: 12px; font-weight: 400; line-height: 1.6; white-space: normal; cursor: default; }
+.terminal-quote::before { content: ''; position: absolute; left: 0; right: 0; top: -11px; height: 11px; }
+.terminal-quote small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
+
+.terminal-mode-status { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-size: 10px; letter-spacing: .12em; cursor: default; -webkit-app-region: no-drag; }
+/* Keep the original character widths while the title is scrambled. */
+.zero-cool-title { flex: 0 0 auto; cursor: default; -webkit-app-region: no-drag; }
+.zero-cool-title-settings .zero-cool-title-preset { flex: 1 1 100%; flex-direction: column; gap: 7px; font-size: 12px; }
+.zero-cool-title-preset select { width: min(100%, 320px); padding: 8px 10px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); }
+.zero-cool-title-settings .zero-cool-text-speed { flex: 1 1 100%; flex-direction: column; gap: 6px; font-size: 12px; }
+.zero-cool-text-speed > span { display: flex; justify-content: space-between; width: min(100%, 320px); }
+.zero-cool-text-speed input { width: min(100%, 320px); margin: 0; }
+.zero-cool-text-speed output { color: var(--accent); font-variant-numeric: tabular-nums; }
+.terminal-activation { position: fixed; z-index: 100; inset: 56px auto auto 50%; margin: 0; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; max-width: calc(100vw - 24px); padding: 16px 22px; border: 1px solid var(--line); background: #000; color: var(--text); box-shadow: 0 8px 24px #0006; font: 600 clamp(13px, 2vw, 20px)/1.4 'Cascadia Mono', 'Consolas', monospace; letter-spacing: .04em; white-space: nowrap; pointer-events: none; -webkit-app-region: no-drag; }
+.terminal-activation::backdrop { background: transparent; pointer-events: none; }
+.terminal-activation__prompt { color: var(--terminal-scramble, #2bb673); }
+.terminal-decrypted { display: inline-flex; pointer-events: auto; cursor: default; }
+.terminal-decrypted > span { display: inline-block; width: 1ch; text-align: center; transition: color .5s ease; }
+.terminal-decrypted > .scrambled { color: var(--terminal-scramble, #2bb673); }
+.terminal-activation__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) { .terminal-decrypted > span { transition: none; } }
+
+html[data-terminal-mode="true"] { font-family: 'Cascadia Mono', 'Consolas', 'Liberation Mono', monospace; accent-color: var(--accent); }
+html[data-theme="terminal-easter-egg-amber"] { --terminal-scramble: #ce7f2b; }
+html[data-theme="terminal-easter-egg-amber"] :is(.terminal-mode-status, .terminal-activation, h1) { text-shadow: 0 0 8px #ffa12d33; }
+html[data-terminal-mode="true"] textarea { font-family: inherit; }
+html[data-terminal-mode="true"] :is(input, textarea)::placeholder { color: var(--muted); opacity: 1; }
+html[data-terminal-mode="true"] ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; }
+html[data-terminal-mode="true"] ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+html[data-terminal-mode="true"] :is(.button, .app-mark, .nav-item, .component-icon, .section-inspector-icon, .status-badge, .type-chip) { border-radius: 0; }
+html[data-terminal-mode="true"] :is(.button.primary, .app-mark) { background: var(--accent); color: var(--on-accent); }
+
+/* Separate rows and keyboard focus remain visible, even with Zen enabled. */
+html[data-terminal-mode="true"] :is(.fm-list, .component-row):focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+html[data-terminal-mode="true"] .component-filters button.active { background: var(--selected); }
+
+/* App badges may have saved inline colors. Override only their presentation;
+   their user-defined palette returns when the easter egg is switched off. */
+html[data-terminal-mode="true"] .app-info-badge { background: #000000 !important; color: var(--text) !important; border-color: var(--line-strong) !important; }
+html[data-terminal-mode="true"] .app-info-badge.red { color: var(--error) !important; }
+html[data-terminal-mode="true"] .app-info-badge.green { color: #83dfad !important; }
+html[data-terminal-mode="true"] .app-info-badge.blue { color: #9acbff !important; }
+html[data-terminal-mode="true"] .app-info-badge.orange,
+html[data-terminal-mode="true"] .apk-tracker-label { color: var(--warning) !important; }

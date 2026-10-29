@@ -1,0 +1,75 @@
+/* React Bits Call Chip / Lattice Loader adaptation; see third-party-notices/react-bits.txt. */
+.operation-chip {
+  --chip-color: var(--accent);
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 38px;
+  border-radius: var(--ui-radius);
+  background: color-mix(in srgb, var(--chip-color) 4%, var(--surface));
+  color: var(--text);
+  overflow: hidden;
+  display: flex;
+}
+.call-chip__fill {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--chip-color) 12%, transparent);
+  transform: scaleX(var(--chip-fraction, 0));
+  transform-origin: left center;
+  transition: transform 240ms ease-out;
+  pointer-events: none;
+}
+.operation-chip__progress { position: absolute; inset: 0; pointer-events: none; }
+.call-chip__fill::after { content: ''; position: absolute; inset: 0 0 0 auto; width: 1px; background: color-mix(in srgb, var(--chip-color) 25%, transparent); }
+.operation-chip .operation-chip__open {
+  position: relative;
+  width: 100%; height: 100%; flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 10px;
+  border: 0; border-radius: inherit; padding: 4px 10px;
+  background: transparent; color: inherit; font: inherit;
+  text-align: left; cursor: pointer;
+}
+.operation-chip[data-interactive='true'] .operation-chip__open:hover { background: color-mix(in srgb, var(--chip-color) 4%, transparent); }
+.operation-chip[data-interactive='false'] .operation-chip__open { cursor: default; }
+.operation-chip[data-layout='panel'] { flex: none; width: 100%; max-width: 440px; height: auto; min-height: 44px; }
+.operation-chip[data-layout='panel'] .operation-chip__open { min-height: 44px; padding: 8px 10px; }
+.operation-chip[data-layout='panel'] .operation-chip__heading { flex-wrap: wrap; gap: 4px 12px; }
+.operation-chip[data-layout='panel'] .workspace-progress-measure { flex-shrink: 1; }
+.operation-chip .operation-chip__open:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.operation-chip__glyph { display: grid; place-items: center; flex: 0 0 18px; width: 18px; height: 18px; color: var(--chip-color); }
+.operation-chip__glyph > svg { width: 16px; height: 16px; stroke-width: 1.8; }
+.operation-chip__content { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.operation-chip__heading { min-width: 0; display: flex; align-items: baseline; gap: 12px; white-space: nowrap; }
+.operation-chip__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 600; line-height: 14px; }
+.operation-chip .workspace-progress-measure { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-size: 11px; line-height: 14px; font-variant-numeric: tabular-nums; }
+.operation-chip__phase { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 10px; }
+.operation-chip__message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 11px; line-height: 12px; }
+.operation-chip__timer { flex: 0 0 6ch; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; }
+.operation-chip[data-status='paused'], .operation-chip[data-status='queued'], .operation-chip[data-status='cancelled'] { --chip-color: var(--muted); }
+.operation-chip[data-status='attention'], .operation-chip[data-status='partial'], .operation-chip[data-status='stopping'] { --chip-color: var(--warning); }
+.operation-chip[data-status='error'], .operation-chip[data-status='interrupted'] { --chip-color: var(--error); }
+.operation-chip[data-status='success'] { --chip-color: var(--success); }
+.operation-chip:is([data-status='attention'], [data-status='paused'], [data-status='stopping']) .operation-chip__phase { color: var(--chip-color); }
+.operation-chip:is([data-status='success'], [data-status='partial'], [data-status='error'], [data-status='cancelled'], [data-status='interrupted']) { background: color-mix(in srgb, var(--chip-color) 9%, var(--surface)); }
+.operation-chip__sr { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; pointer-events: none; }
+.operation-chip__actions { position: relative; display: flex; align-items: center; flex-shrink: 0; gap: 2px; padding-right: 4px; }
+.operation-chip__actions button { display: inline-flex; align-items: center; justify-content: center; height: 30px; min-width: 26px; padding: 0 5px; border: 0; border-radius: var(--ui-radius); background: transparent; color: var(--muted); font-size: 11px; }
+.operation-chip__actions button:hover:not(:disabled) { background: var(--selected); color: var(--accent); }
+.operation-chip__actions button:focus-visible { outline-offset: -2px; }
+.lattice-loader { display: inline-grid; grid-template-columns: repeat(3, 4px); gap: 2px; flex: 0 0 16px; width: 16px; height: 16px; vertical-align: middle; color: var(--chip-color, currentColor); }
+.lattice-loader__cell { width: 4px; height: 4px; border-radius: calc(var(--ui-radius-detail) / 2); background: currentColor; opacity: .18; animation: workspace-lattice 864ms cubic-bezier(.77, 0, .175, 1) infinite; }
+@keyframes workspace-lattice { 0%, 100%, 62% { opacity: .18; } 18%, 42% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .lattice-loader__cell { animation: none; opacity: .65; }
+  .call-chip__fill { transition: none; }
+}
+@media (max-width: 1100px) {
+  .operation-chip .operation-chip__open { gap: 7px; padding-inline: 8px; }
+  .operation-chip__heading { gap: 8px; }
+  .operation-chip__label { flex-shrink: 1; }
+  .operation-chip .workspace-progress-measure { flex-shrink: 0; }
+  .operation-chip__timer { display: none; }
+}
+html[data-terminal-mode='true'] .operation-chip { border-radius: 0; }

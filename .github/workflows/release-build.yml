@@ -1,0 +1,41 @@
+name: Prepare release artifacts
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run desktop:setup
+      - run: npm run check:source
+      - run: npm run notices:generate -- --check
+      - run: npm run helper:setup
+      - run: npm run inspector:setup
+      - run: npm run build:distribution
+      - run: npm run test:backend
+      - run: npx playwright install chromium
+      - run: npm test -- tests/interface-tour.spec.ts tests/english-only.spec.ts tests/confirmation.spec.ts
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+      - run: node scripts/prepare-java-source.mjs
+      - run: npm run source:export
+      - run: node scripts/prepare-release-assets.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ADB-Vault-0.1.0-release-assets
+          path: |
+            release/*-Setup.exe
+            release/*-Portable.zip
+            release/*-Source.zip
+            release/OpenJDK*-sources_*.tar.gz
+            release/third-party-sources.json
+            release/SHA256SUMS.txt
+          retention-days: 14

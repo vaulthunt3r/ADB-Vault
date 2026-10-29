@@ -1,0 +1,26 @@
+{
+  "revision": "2d9223a7a541ad40ec927e429d7a9ab58d27a90d",
+  "files": {
+    "suggestions.json": {
+      "path": "app/src/main/assets/suggestions.json",
+      "sha256": "d285a4ce6ea29e3efa47d79e4ef5a929fc1f8d02e54701382b6397cc96f5c96b"
+    },
+    "trackers.xml": {
+      "path": "app/src/main/res/values/trackers.xml",
+      "sha256": "30dc977eb65bbd948055dd55d945b0e10e7d74a74982867e688d926f5d55e10a"
+    },
+    "libs.xml": {
+      "path": "app/src/main/res/values/libs.xml",
+      "sha256": "7ecff369780214dcd8744e01f03454aa36561278133fa14b1a0532b03dc59fe5"
+    },
+    "debloat.json": {
+      "path": "app/src/main/assets/debloat.json",
+      "sha256": "2006caa15d77d0c5b9c04e4cf5f57631f0e8f56b09edf6105abbc66e8b12194a"
+    },
+    "native_libs.xml": {
+      "path": "app/src/main/res/values/native_libs.xml",
+      "sha256": "0b68ad5fd97f67565f25b71332c03c80c7145853e98121b5538933c7d111b3e7"
+    }
+  },
+  "source": "https://github.com/MuntashirAkon/AppManager"
+}

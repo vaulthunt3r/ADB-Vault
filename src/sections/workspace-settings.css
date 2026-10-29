@@ -1,0 +1,26 @@
+.workspace-settings { max-width: 940px; }
+.workspace-settings-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+.workspace-settings-list { display: flex; flex-direction: column; gap: 7px; padding: 0; margin: 0; list-style: none; }
+.workspace-settings-list > li { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--surface); }
+.workspace-settings-list > li.workspace-hidden { background: var(--bg); }
+.workspace-settings-list > li.workspace-drop-target { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.workspace-settings-list button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex-shrink: 0; border: 1px solid var(--line); border-radius: var(--ui-radius); background: transparent; color: var(--text); cursor: pointer; }
+.workspace-settings-list button:hover:not(:disabled) { background: var(--hover); border-color: var(--line-strong); }
+.workspace-settings-list button:disabled { opacity: .3; cursor: default; }
+.workspace-settings-list .workspace-drag { border-color: transparent; color: var(--muted); cursor: grab; }
+.workspace-order-number { min-width: 14px; color: var(--muted); font-size: 11px; text-align: center; }
+.workspace-settings-icon { flex-shrink: 0; color: var(--accent); }
+.workspace-settings-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 550; }
+.workspace-settings-name small, .workspace-settings-fixed small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 400; }
+.workspace-move-buttons { display: flex; gap: 4px; }
+.workspace-visible { display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer; }
+.workspace-visible input { accent-color: var(--accent); }
+.workspace-settings-fixed { display: flex; align-items: center; gap: 12px; padding: 16px 12px; color: var(--muted); font-size: 13px; }
+.workspace-settings-fixed > span { flex: 1; }
+.workspace-settings-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; padding-top: 16px; border-top: 1px solid var(--line); }
+.workspace-settings-footer > p { flex: 1 1 260px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.workspace-settings-footer > button { white-space: nowrap; }
+@media (max-width: 1000px) {
+  .workspace-settings-list > li { gap: 7px; padding: 9px; }
+  .workspace-order-number { display: none; }
+}

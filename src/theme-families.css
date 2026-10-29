@@ -1,0 +1,20 @@
+/* Optional theme families. Leaving the theme removes the entire treatment. */
+.theme-search { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--muted); font-size: 12px; }
+.theme-search input { min-width: 0; flex: 1; padding: 9px 12px; border: 1px solid var(--line-strong); background: var(--surface); }
+
+/* Editor palettes: restrained chrome lets the full palette carry the identity. */
+:where(html[data-theme-family='palette']) :is(.button, .toolbar-button, .row-action) { box-shadow: none; }
+:where(html[data-theme-family='palette']) :is(.table-heading, .data-table th, .component-group, .package-name) { font-family: Consolas, 'Cascadia Mono', monospace; }
+:where(html[data-theme-family='palette']) .nav-item.active { border-color: transparent; }
+:where(html[data-theme='github-dimmed']) .button.primary { background: #347d39; border-color: #46954a; color: #ffffff; }
+:where(html[data-theme='github-dimmed']) .button.primary:hover:not(:disabled) { background: #286c30; }
+
+/* Chat-inspired, independently designed colors, no third-party assets. */
+:where(html[data-theme-family='chat']) .nav-item.active { background: #555bc0; color: #ffffff; border-color: transparent; }
+:where(html[data-theme-family='chat']) .nav-item.active::before { background: #ffffff; }
+:where(html[data-theme-family='chat']) .button.primary { background: #555bc0; border-color: #777edb; color: #ffffff; }
+:where(html[data-theme-family='chat']) .button.primary:hover:not(:disabled) { background: #454ca9; }
+:where(html[data-theme-family='chat']) :is(.titlebar, .right-sidebar) { background: var(--sidebar); }
+:where(html[data-theme-family='chat']) .topbar { --toolbar-fill: var(--surface); }
+
+.theme-preview[data-preview-family='chat'] .preview-sidebar i.selected { background: #777edb; }

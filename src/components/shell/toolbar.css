@@ -1,0 +1,60 @@
+/* The shell keeps its original 46px row. Every control shares a 38px surface. */
+.topbar.unified-toolbar {
+  --toolbar-control-height: var(--control-height);
+  --toolbar-fill: color-mix(in srgb, var(--accent) 4%, var(--surface));
+  container-type: inline-size;
+  height: 46px; flex: 0 0 46px; gap: 8px; padding-inline: 12px;
+  flex-wrap: nowrap; min-width: 0; position: relative;
+}
+.unified-toolbar .toolbar-card {
+  height: var(--toolbar-control-height); min-height: var(--toolbar-control-height);
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; border: 0; border-radius: var(--ui-radius); padding: 0 10px;
+  color: var(--text); background: var(--toolbar-fill); box-shadow: none;
+  font-size: 12px; line-height: 14px; white-space: nowrap;
+}
+.unified-toolbar .toolbar-card svg { width: 16px; height: 16px; flex-shrink: 0; }
+.unified-toolbar button.toolbar-card:hover:not(:disabled) { background: var(--selected); color: var(--accent); }
+.unified-toolbar .toolbar-device { flex: 0 0 clamp(130px, 14cqw, 190px); min-width: 0; justify-content: flex-start; text-align: left; }
+.toolbar-device-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.toolbar-device-copy strong, .toolbar-device-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.toolbar-device-copy strong { font-size: 12px; font-weight: 600; line-height: 14px; }
+.toolbar-device-copy small { color: var(--muted); font-size: 11px; line-height: 12px; }
+.toolbar-device-copy i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); margin-right: 5px; vertical-align: middle; }
+.toolbar-device-copy i.connected { background: var(--success); }
+.toolbar-profile-slot { flex: 0 0 clamp(140px, 17cqw, 220px); min-width: 0; }
+.unified-toolbar .apps-profile-picker { width: 100%; max-width: none; margin: 0; padding: 0; height: var(--toolbar-control-height); border-radius: var(--ui-radius); background: var(--toolbar-fill); }
+.unified-toolbar .apps-profile-picker select { width: 100%; min-width: 0; max-width: none; height: var(--toolbar-control-height); border: 0; border-radius: inherit; background: transparent; color: inherit; box-shadow: none; font-size: 12px; }
+.unified-toolbar .apps-profile-picker:has(select:not(:disabled):is(:hover, :focus-visible)) { background: var(--selected); color: var(--accent); }
+.unified-toolbar .toolbar-action-lane { display: flex; align-items: center; gap: 8px; flex: 1 1 0; min-width: 0; }
+.unified-toolbar .toolbar-action:not(.with-label), .unified-toolbar .toolbar-more { width: 38px; padding: 0; }
+.unified-toolbar > .toolbar-more { flex: 0 0 var(--toolbar-control-height); }
+.unified-toolbar .toolbar-measurements { position: fixed; left: -10000px; top: 0; width: max-content; display: flex; gap: 8px; visibility: hidden; pointer-events: none; }
+.unified-toolbar > .workspace-progress { flex: 0 0 clamp(280px, 26cqw, 300px); min-width: 0; max-width: 300px; height: var(--toolbar-control-height); gap: 0; margin-left: 0; }
+.unified-toolbar[data-operation-position='start'] > .workspace-progress { order: -1; }
+.unified-toolbar .operation-chip[data-layout='toolbar'] { height: var(--toolbar-control-height); border-radius: var(--ui-radius); background: var(--toolbar-fill); }
+.operation-chip[data-layout='toolbar'] .operation-chip__label { flex: 1; }
+.operation-chip[data-layout='toolbar'] .operation-chip__heading { gap: 6px; }
+.operation-chip[data-layout='toolbar'] .workspace-progress-measure { line-height: 12px; }
+.operation-chip[data-layout='toolbar'] .operation-chip__timer { flex-basis: 4ch; }
+.unified-toolbar .toolbar-hint-text { left: auto; right: 0; }
+.toolbar-popover { position: fixed; inset: auto; margin: 0; width: 304px; max-height: calc(100vh - 110px); overflow-y: auto; padding: 8px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--surface); color: var(--text); box-shadow: 0 8px 28px #0002; font-size: 12px; }
+.toolbar-popover > strong { display: block; padding: 7px 9px; font-size: 11px; color: var(--muted); font-weight: 500; }
+.toolbar-popover p { padding: 4px 9px; }
+.toolbar-menu-action { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 38px; padding: 8px 9px; text-align: left; border-radius: var(--ui-radius); background: transparent; color: var(--text); font-size: 12px; }
+.toolbar-menu-action svg { width: 16px; height: 16px; flex-shrink: 0; }
+.toolbar-menu-action span { min-width: 0; overflow-wrap: anywhere; }
+.toolbar-menu-action small { display: block; color: var(--muted); margin-top: 3px; font-size: 11px; }
+.toolbar-menu-action:hover:not(:disabled), .toolbar-menu-action[aria-pressed='true'] { background: var(--selected); color: var(--accent); }
+.toolbar-menu-group + .toolbar-menu-group, .toolbar-customize { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 5px; border-radius: 0; }
+.toolbar-profile-overflow { display: none; }
+@container (max-width: 850px) {
+  .operation-chip[data-layout='toolbar'] .operation-chip__timer { display: none; }
+}
+@container (max-width: 650px) {
+  .toolbar-profile-slot { display: none; }
+  .toolbar-profile-overflow { display: block; margin: 0 0 8px; }
+  .unified-toolbar > .workspace-progress { flex-basis: 260px; }
+  .unified-toolbar .toolbar-device { flex-basis: 130px; }
+}
+html[data-zen-mode='true'] .toolbar-settings { border-color: transparent; }

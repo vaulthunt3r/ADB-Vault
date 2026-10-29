@@ -1,0 +1,50 @@
+.phone-tools-dialog.app-badge-dialog { width: min(1000px, calc(100vw - 48px)); }
+.phone-tools-dialog[open] { display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 48px); }
+.phone-tools-dialog > h2 { margin: 0; }
+.phone-tools-dialog > .app-badge-dialog-content { min-height: 0; max-height: none; overflow: auto; padding-right: 4px; }
+.phone-tools-dialog > .dialog-footer { margin: 0; }
+.phone-tools-target { margin: 0 0 12px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.phone-tools-target code { font-size: 11px; }
+.phone-tools-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.phone-tools-error { margin: 8px 0; color: var(--error); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.phone-tools-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px; margin-top: 14px; border: 1px solid var(--line); border-radius: var(--ui-radius); font-size: 12px; }
+.phone-tools-status p { flex: 1 1 100%; margin: 0; overflow-wrap: anywhere; }
+.phone-tools-status.error { color: var(--error); }
+.phone-tools-status.success { color: var(--success); }
+.phone-tools-buttons { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.phone-tools-buttons .button { white-space: nowrap; }
+.phone-clipboard-dialog.app-badge-dialog { width: min(720px, calc(100vw - 48px)); }
+.phone-clipboard-content, .phone-export-content { display: flex; flex-direction: column; gap: 12px; }
+.phone-tools-dialog .phone-clipboard-content > label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; margin: 0; }
+.phone-clipboard-content > label > span { color: var(--muted); }
+.phone-clipboard-content > textarea { width: 100%; min-height: 130px; max-height: 320px; resize: vertical; padding: 12px; border: 1px solid var(--line-strong); border-radius: var(--ui-radius); background: var(--bg); color: var(--text); font: 13px/1.6 Consolas, 'Cascadia Mono', monospace; }
+.phone-clipboard-android { border-top: 1px solid var(--line); padding-top: 12px; }
+.phone-clipboard-android > p { flex-basis: 100%; }
+.phone-clipboard-qr { display: flex; align-items: center; flex-direction: column; gap: 8px; padding-top: 8px; }
+.phone-clipboard-qr img { width: min(360px, 100%); height: auto; background: white; image-rendering: pixelated; }
+.phone-clipboard-qr p { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.phone-export-load, .phone-export-save, .phone-export-search, .phone-export-pagination { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; }
+.phone-tools-dialog .phone-export-load label, .phone-tools-dialog .phone-export-save label { display: flex; flex-direction: column; gap: 5px; margin: 0; }
+.phone-export-load input, .phone-export-save select, .phone-export-search input { height: 34px; border: 1px solid var(--line); border-radius: var(--ui-radius); padding: 0 10px; color: var(--text); background: var(--bg); font-size: 12px; }
+.phone-export-load > span { flex: 1 1 180px; padding-bottom: 6px; }
+.phone-export-search input { flex: 1 1 240px; min-width: 0; }
+.phone-export-table-wrap { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: var(--ui-radius); }
+.phone-export-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12px; text-align: left; }
+.phone-export-table th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-weight: 600; }
+.phone-export-table th, .phone-export-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.phone-export-table th:first-child, .phone-export-table td:first-child { width: 36px; padding: 9px; }
+.phone-export-table input { accent-color: var(--accent); }
+.phone-export-table strong { font-weight: 500; }
+.phone-export-table small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.phone-export-table pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.phone-export-table summary { cursor: pointer; }
+.phone-export-table details[open] pre { margin-top: 8px; }
+.phone-export-pagination { align-items: center; font-size: 11px; color: var(--muted); }
+.phone-export-pagination > span:first-child { margin-right: auto; }
+.phone-export-pagination .button { font-size: 11px; padding: 5px 8px; }
+.phone-export-save { border-top: 1px solid var(--line); padding-top: 12px; }
+.phone-export-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 130px; margin: 0; padding: 20px; color: var(--muted); text-align: center; font-size: 12px; }
+.phone-export-empty > strong { color: var(--text); font-size: 14px; }
+.phone-export-empty > p { margin: 0; }
+.phone-tools-clear { align-self: flex-start; padding: 0; border: 0; background: none; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; }
+.phone-tools-clear:disabled { cursor: default; opacity: .5; }

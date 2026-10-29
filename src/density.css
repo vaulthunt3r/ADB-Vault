@@ -1,0 +1,27 @@
+/* Workspace density does not change the title bar or either inspector/sidebar. */
+.workspace.density-compact .section-content { padding: 6px; }
+.density-compact .section-heading { justify-content: flex-end; margin-bottom: 8px; }
+.density-compact .section-heading > div:first-child { display: none; }
+.density-compact .section-heading:not(:has(> button)) { display: none; }
+.density-compact .install-all { margin-top: 0; }
+.density-compact .component-tools { margin-bottom: 8px; }
+.density-compact .component-row { min-height: 48px; padding-top: 6px; padding-bottom: 6px; }
+.density-compact .component-icon { width: 30px; height: 30px; }
+.density-compact .component-table-footer { margin-top: 6px; }
+.density-compact .workspace-footnote { margin-top: 12px; }
+.density-compact .connection-method { padding: 10px 12px; gap: 12px; }
+.density-compact .method-heading { margin-bottom: 5px; }
+.density-compact .connection-field-hint { margin: 6px 0 0; }
+.density-compact .subsection-heading { margin: 14px 0 8px; }
+.density-compact .known-device { padding: 8px 12px; }
+.density-compact .data-table td { padding-top: 6px; padding-bottom: 6px; }
+.density-compact .settings-categories { padding: 6px; }
+.density-compact .apps-loading-settings label { padding: 10px 12px; margin-bottom: 8px; }
+.density-compact .apps-loading-settings legend { margin-bottom: 8px; }
+.density-compact .apps-loading-settings small { margin-top: 4px; }
+.density-compact .apps-settings-note { margin-top: 10px; }
+.density-compact .workspace-density-settings { padding: 8px 12px; gap: 10px 20px; margin-bottom: 12px; }
+.density-compact .appearance-current, .density-compact .appearance-semantics { padding: 12px; margin-bottom: 12px; }
+@container (max-width: 550px) {
+  .density-compact .component-row { min-height: 64px; }
+}

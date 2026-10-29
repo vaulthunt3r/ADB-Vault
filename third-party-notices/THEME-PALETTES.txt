@@ -1,0 +1,56 @@
+ADB Vault optional theme palettes
+================================
+
+The application uses adapted color values, not the upstream theme engines.
+Some foregrounds, selections and status backgrounds are adjusted for readable
+desktop controls. No additional runtime packages, fonts or brand assets are used.
+
+Gruvbox (Dark / Light)
+Author: morhetz. Upstream declares MIT/X11 in its README.
+https://github.com/morhetz/gruvbox
+https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
+
+Catppuccin (Mocha / Latte)
+Copyright (c) 2021 Catppuccin. MIT License.
+https://catppuccin.com/palette/
+https://github.com/catppuccin/palette/blob/main/LICENSE
+
+Everforest (Dark / Light)
+Copyright (c) 2019 sainnhe. MIT License.
+https://github.com/sainnhe/everforest
+https://github.com/sainnhe/everforest/blob/master/autoload/everforest.vim
+
+Nord Polar
+Copyright (c) 2016-present Sven Greb <development@svengreb.de>
+(https://www.svengreb.de). MIT License.
+https://www.nordtheme.com/docs/colors-and-palettes/
+https://github.com/nordtheme/nord/blob/develop/license
+
+GitHub Dimmed / Primer color inspiration
+Copyright (c) 2018 GitHub Inc. MIT License.
+https://github.com/primer/primitives
+https://github.com/primer/primitives/blob/main/LICENSE
+
+MIT permission notice applicable to the palettes listed above
+-----------------------------------------------------------
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Blurple is an independently drawn charcoal/violet chat-inspired theme.
+It includes no Discord assets, source code or copied interface layout.
+Theme names identify inspiration and do not imply endorsement or affiliation.

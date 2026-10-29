@@ -1,0 +1,3 @@
+.window-pin { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.button.window-pin.window-pinned, .touch-ui button.window-pinned { color: var(--accent, #8ab4ff); border-color: currentColor; background: color-mix(in srgb, var(--accent, #8ab4ff) 14%, transparent); }
+.window-pin.window-pinned svg { fill: currentColor; }

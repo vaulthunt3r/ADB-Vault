@@ -1,0 +1,48 @@
+html.touch-overlay, html.touch-overlay body, html.touch-overlay #root { background: transparent !important; width: 100%; height: 100%; min-width: 0 !important; overflow: hidden; }
+.touch-root { position: fixed; inset: 0; color: #f0f5f6; font: 13px/1.4 system-ui,sans-serif; user-select: none; }
+.touch-stage { position: absolute; overflow: hidden; touch-action: none; }
+.touch-text-input { position: fixed; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; padding: 0; border: 0; pointer-events: none; }
+.touch-ui { color-scheme: dark; color: #edf4f6; background: #142026f2; border: 1px solid #59717d88; border-radius: 12px; box-shadow: 0 6px 24px #0005; }
+.touch-toolbar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; padding: 6px 8px; width: max-content; max-width: calc(100% - 16px); flex-wrap: wrap; z-index: 4; }
+.touch-toolbar strong { margin: 0 8px; font-size: 12px; }
+.touch-toolbar .touch-shortcut { font-size: 11px; opacity: .72; margin: 0 8px; }
+.touch-ui button { border: 1px solid #60778280; border-radius: 6px; background: #25343c; color: #ecf6f8; cursor: pointer; padding: 5px 8px; font: inherit; white-space: nowrap; }
+.touch-ui button:hover { background: #3c515d; }
+.touch-ui button:focus-visible, .touch-ui input:focus-visible, .touch-ui select:focus-visible { outline: 2px solid #67e0c1; outline-offset: 1px; }
+.touch-ui button.primary, .touch-ui button.active { background: #17694e; border-color: #69e0b1; }
+.touch-ui button:disabled { opacity: .35; cursor: default; }
+.touch-ui .danger { color: #ffb5ad; }
+.touch-inspector { position: absolute; top: 64px; right: 10px; width: 286px; max-width: calc(100% - 20px); max-height: calc(100% - 78px); overflow: auto; padding: 14px; z-index: 3; scrollbar-width: thin; }
+.touch-heading { display: flex; justify-content: space-between; gap: 8px; }
+.touch-heading > div { min-width: 0; }
+.touch-heading small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.touch-ui h2 { font-size: 16px; margin: 0 0 4px; }
+.touch-ui h3 { font-size: 13px; margin: 0 0 10px; }
+.touch-inspector p, .touch-inspector small { font-size: 11px; color: #b9cbd4; }
+.touch-inspector p { margin: 10px 0; }
+.touch-inspector fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.touch-inspector label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; margin: 10px 0; }
+.touch-inspector input:not([type=checkbox]):not([type=range]), .touch-inspector select { min-width: 0; width: 100%; padding: 6px; background: #0e171d; color: #f1f7f8; border: 1px solid #58717e; border-radius: 6px; font: inherit; }
+.touch-row { display: flex; gap: 6px; }
+.touch-row > * { flex: 1; min-width: 0; }
+.touch-binding { display: flex; align-items: center; gap: 6px; margin: 7px 0; font-size: 11px; }
+.touch-binding > span { width: 60px; }
+.touch-binding > button:nth-child(2) { flex: 1; }
+.touch-selection { border-top: 1px solid #526874; padding-top: 12px; margin-top: 12px; }
+.touch-hotkeys { border-block: 1px solid #526874; margin: 12px 0; padding: 10px 0; }
+.touch-hotkeys summary { cursor: pointer; font-weight: 600; }
+.touch-hotkey { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; margin: 10px 0; }
+.touch-hotkey > span { grid-column: 1 / -1; font-size: 12px; }
+.touch-hotkey > button { white-space: normal; overflow-wrap: anywhere; }
+.touch-inspector .touch-check { flex-direction: row; align-items: center; gap: 6px; }
+.touch-inspector footer { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #526874; padding-top: 10px; margin-top: 12px; font-size: 11px; }
+.touch-alert { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 10px 14px; z-index: 6; background: #3b2525f5; }
+.touch-capture { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 6px; display: flex; gap: 8px; align-items: center; z-index: 5; }
+.touch-mark { position: absolute; transform: translate(-50%,-50%); border: 2px solid #89e8d6; border-radius: 50%; color: white; background: #1f74663d; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: move; padding: 0; touch-action: none; text-shadow: 0 1px 3px black; }
+.touch-mark span { font: 700 11px system-ui; white-space: nowrap; }
+.touch-mark small { font-size: 9px; }
+.touch-mark.kind-look { border-style: dashed; border-color: #ffcf87; background: #e9a14d15; }
+.touch-mark.selected { outline: 2px solid white; outline-offset: 3px; }
+.touch-root.mode-play .touch-toolbar { opacity: .55; }
+.touch-root.mode-play .touch-toolbar:hover { opacity: 1; }
+@media (max-width: 700px) { .touch-shortcut { display: none; } .touch-inspector { width: 252px; padding: 10px; } }

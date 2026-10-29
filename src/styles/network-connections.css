@@ -1,0 +1,30 @@
+.network-tools, .network-app-filter, .network-geoip { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.network-tools > input { flex: 1 1 220px; min-width: 160px; }
+.network-tools > select { min-width: 0; max-width: min(100%, 360px); }
+.network-tools > label { display: flex; align-items: center; gap: 6px; }
+.network-tools > label > input { width: auto; }
+.network-app-filter { margin-top: 10px; overflow-wrap: anywhere; }
+.monitor-table-wrap.network-sockets { max-height: none; overflow-y: visible; }
+.monitor-table-wrap.network-sockets table { table-layout: fixed; width: 100%; min-width: 820px; }
+.monitor-table-wrap.network-sockets th:first-child { width: 26%; }
+.monitor-table-wrap.network-sockets th:nth-child(2) { width: 16%; }
+.monitor-table-wrap.network-sockets th:nth-child(3) { width: 13%; }
+.monitor-table-wrap.network-sockets th:nth-child(4) { width: 16%; }
+.monitor-table-wrap.network-sockets th:nth-child(5) { width: 15%; }
+.monitor-table-wrap.network-sockets th:nth-child(6) { width: 14%; }
+.monitor-table-wrap.network-sockets td { overflow-wrap: anywhere; white-space: normal; vertical-align: top; }
+.monitor-table-wrap.network-sockets td:first-child { white-space: normal; text-overflow: clip; }
+.network-tools[aria-label="Network view"] { margin-bottom: 12px; }
+.network-tools button[aria-pressed="true"] { border-color: var(--accent); background: var(--surface-alt); }
+.network-sockets small { display: block; margin-top: 4px; color: var(--muted); }
+.network-country { display: inline-flex; align-items: center; gap: 7px; vertical-align: middle; }
+.country-flag { display: block; flex: 0 0 24px; width: 24px; height: 18px; object-fit: contain; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); }
+.network-copy-value { color: inherit; cursor: pointer; text-align: left; background: none; border: 0; padding: 0; font: inherit; overflow-wrap: anywhere; max-width: 100%; }
+.network-copy-value:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--ui-radius-detail); }
+.network-app-owner { display: flex; align-items: center; gap: 7px; }
+.network-app-owner + .network-app-owner { margin-top: 7px; }
+.network-app-owner > div { min-width: 0; }
+.network-app-owner .android-app-icon, .network-app-placeholder { width: 28px; height: 28px; flex: 0 0 28px; }
+.network-app-placeholder { display: grid; place-items: center; color: var(--muted); }
+.network-geoip { margin: 16px 0; }
+.network-geoip span { flex: 1 1 240px; }

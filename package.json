@@ -1,0 +1,126 @@
+{
+  "name": "adb-vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ADB Vault — Android device manager for Windows",
+  "author": "ADB Vault",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "build": "npm run helper:check && npm run inspector:check && npm run typecheck && vite build && tsc -p tsconfig.electron.json && node scripts/preload.mjs",
+    "build:win": "npm run build && node scripts/prepare-installer.mjs && electron-builder --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist",
+    "build:distribution": "npm run build:win && node scripts/package-portable.mjs release",
+    "test": "playwright test",
+    "test:desktop": "node scripts/smoke-electron.mjs",
+    "test:backend": "node scripts/test-backend.mjs",
+    "helper:setup": "node scripts/setup-helper-tools.mjs",
+    "helper:build": "node scripts/build-helper.mjs",
+    "helper:check": "node scripts/check-helper.mjs",
+    "inspector:setup": "node scripts/build-inspector-tools.mjs",
+    "inspector:check": "node scripts/check-inspector-tools.mjs",
+    "test:inspector": "node --test scripts/apk-inspector.test.mjs",
+    "test:dex": "node scripts/test-dex-reader.mjs",
+    "test:play-signing": "node scripts/test-play-signing.mjs",
+    "test:badges": "node scripts/test-badge-collectors.mjs",
+    "check:source": "node scripts/check-source.mjs",
+    "notices:generate": "node scripts/generate-notices.mjs",
+    "source:export": "node scripts/export-source.mjs",
+    "desktop:setup": "node node_modules/electron/install.js"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^9.2.4",
+    "fast-xml-parser": "^5.11.1",
+    "lucide-react": "^0.468.0",
+    "maxmind": "^5.0.7",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "yauzl": "^3.4.0",
+    "yazl": "^3.3.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^24.0.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/yazl": "^3.3.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "flag-icons": "7.5.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
+  },
+  "build": {
+    "appId": "dev.adbvault.desktop",
+    "productName": "ADB Vault",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "third-party-notices/**/*",
+      "!dist-electron/data/app-manager/**/*",
+      "LICENSE",
+      "NOTICE.md"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": "nsis",
+      "artifactName": "ADB-Vault-${version}-Windows-${arch}-Setup.${ext}"
+    },
+    "nsis": {
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "en_US"
+      ],
+      "displayLanguageSelector": false,
+      "script": "build/generated/installer.nsi"
+    },
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "app-icon.ico"
+      },
+      {
+        "from": "inspector-tools",
+        "to": "inspector-tools"
+      },
+      {
+        "from": "android-helper/dist",
+        "to": "android-helper",
+        "filter": [
+          "manager-server.jar",
+          "helper-manifest.json"
+        ]
+      },
+      {
+        "from": "electron/data/app-manager",
+        "to": "detection-databases"
+      }
+    ]
+  },
+  "allowScripts": {
+    "electron@45.0.0": true,
+    "esbuild@0.25.12": true,
+    "electron-winstaller@5.4.0": true
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

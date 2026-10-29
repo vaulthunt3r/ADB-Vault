@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem in ADB Vault.
+body:
+  - type: markdown
+    attributes:
+      value: "Please remove personal data, serial numbers, connection addresses and private paths from screenshots/logs. Report security vulnerabilities privately using SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: ADB Vault version and distribution
+      placeholder: 0.1.0, Setup or Portable
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows version, phone model, Android version and connection method
+      description: Phone information is optional for problems unrelated to a phone. Do not include the serial number.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted screenshots or relevant error text

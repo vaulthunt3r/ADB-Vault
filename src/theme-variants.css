@@ -1,0 +1,108 @@
+/* Optional gallery themes. Every rule is scoped to an active theme ID or to
+   its own gallery preview. No layout, density, radius or persistence overrides.
+   :where keeps specificity low so Zen mode and component states retain priority. */
+
+/* Air: continuous surfaces and restrained chrome. Transparent borders preserve
+   the original geometry; controls, focus and selection remain distinguishable. */
+:where(html[data-theme='air']) :is(.titlebar, .left-sidebar) { border-color: transparent; }
+:where(html[data-theme='air']) :is(
+  .component-table, .data-table-wrap, .connection-methods, .known-devices,
+  .appearance-current, .workspace-density-settings, .appearance-zen, .toolbar-settings,
+  .monitor-metric, .monitor-chart, .monitor-table-wrap, .activity-table-scroll
+) { border-color: transparent; box-shadow: none; }
+:where(html[data-theme='air']) :is(.button, .toolbar-button, .row-action) { box-shadow: none; }
+:where(html[data-theme='air']) .left-sidebar .nav-item.active { background: transparent; border-color: transparent; }
+:where(html[data-theme='air']) :is(.table-heading, .data-table th, .component-group) { background: var(--surface); }
+:where(html[data-theme='air']) .unified-toolbar { --toolbar-fill: var(--surface); }
+:where(html[data-theme='air']) .component-filters button.active { border-color: transparent; }
+
+/* Soft Layers: elevation is decorative and is disabled by Zen mode. */
+:where(html[data-theme='soft-layers']:not([data-zen-mode='true'])) :is(
+  .component-table, .data-table-wrap, .connection-methods, .known-devices,
+  .appearance-current, .workspace-density-settings, .appearance-zen, .toolbar-settings,
+  .monitor-metric, .monitor-chart, .monitor-table-wrap, .activity-table-scroll,
+  .fm-pane, .file-task, .theme-option
+) {
+  border-color: color-mix(in srgb, var(--line) 65%, var(--surface));
+  box-shadow: 0 3px 6px #263c6310, 0 10px 24px #263c630d;
+}
+:where(html[data-theme='soft-layers']:not([data-zen-mode='true'])) .right-sidebar {
+  box-shadow: -5px 0 18px #263c630a;
+}
+:where(html[data-theme='soft-layers']:not([data-zen-mode='true'])) .left-sidebar .nav-item.active {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: 0 3px 8px #263c631a;
+}
+:where(html[data-theme='soft-layers']:not([data-zen-mode='true'])) .button.secondary {
+  background-image: linear-gradient(var(--surface), var(--surface-alt));
+  box-shadow: 0 2px 3px #263c631a;
+}
+:where(html[data-theme='soft-layers']:not([data-zen-mode='true'])) .button.secondary:hover:not(:disabled) {
+  background-image: none;
+}
+:where(html[data-theme='soft-layers']) .unified-toolbar { --toolbar-fill: var(--surface-alt); }
+
+/* Technical: table structure and alignment remain unchanged. Hover and selected
+   states take precedence over striping; no status or badge colors are replaced. */
+:where(html[data-theme='technical']) :is(.titlebar, .inspector-tabs) { background: var(--surface-alt); }
+:where(html[data-theme='technical']) :is(.component-table, .data-table-wrap, .connection-methods, .known-devices, .fm-pane) { border-color: var(--line-strong); }
+:where(html[data-theme='technical']) :is(.button, .toolbar-button, .row-action) { box-shadow: none; }
+:where(html[data-theme='technical']) .component-row:nth-child(even):not(.selected):not(:hover),
+:where(html[data-theme='technical']) :is(.data-table, .fm-table, .monitor-table-wrap, .activity-table) tbody tr:nth-child(even):not(.selected):not(:hover) {
+  background: color-mix(in srgb, var(--surface-alt) 60%, var(--surface));
+}
+:where(html[data-theme='technical']:not([data-zen-mode='true'])) :is(.data-table, .fm-table) th:not(:last-child) {
+  box-shadow: inset -1px 0 var(--line);
+}
+:where(html[data-theme='technical']) .inspector-tabs button.active { background: var(--surface); }
+:where(html[data-theme='technical']) .unified-toolbar { --toolbar-fill: var(--surface-alt); }
+:where(html[data-theme='technical']) :is(.component-group, .table-heading, .data-table th) { color: var(--text); }
+
+/* Accent Rail: the navigation palette is local to the sidebar. The title bar,
+   popovers and floating tooltips keep the normal light palette. Switching themes
+   removes these inherited values automatically, without touching root tokens. */
+:where(html[data-theme='accent-rail']) .left-sidebar {
+  --sidebar: #273b73;
+  --surface: #31477e;
+  --surface-alt: #3b5188;
+  --text: #f3f5ff;
+  --muted: #c8d3f0;
+  --accent: #ffffff;
+  --selected: #435c98;
+  --hover: #354d86;
+  --line: #53699e;
+  --line-strong: #7184b3;
+  --success: #8ae0b5;
+  --warning: #ffd287;
+  --error: #ffb6b0;
+  color: var(--text);
+  background: var(--sidebar);
+  border-right-color: var(--sidebar);
+}
+:where(html[data-theme='accent-rail']) .left-sidebar .nav-item.active { color: var(--text); border-color: var(--line); }
+:where(html[data-theme='accent-rail']) .left-sidebar .nav-item.active::before { background: var(--accent); }
+:where(html[data-theme='accent-rail']) .left-sidebar .nav-item > .nav-status-mark { box-shadow: 0 0 0 2px var(--sidebar); }
+:where(html[data-theme='accent-rail']:not([data-zen-mode='true'])) .topbar { box-shadow: inset 0 -2px var(--accent); }
+:where(html[data-theme='accent-rail']) .component-filters button.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+:where(html[data-theme='accent-rail']) .component-filters button.active span { background: var(--surface); color: var(--accent); }
+:where(html[data-theme='accent-rail']) .inspector-tabs button.active { background: var(--selected); }
+
+/* Each miniature shows its own treatment, independent of the selected theme. */
+.theme-preview[data-preview-theme='air'] :is(.preview-titlebar, .preview-sidebar, .preview-table) { border-color: transparent; }
+.theme-preview[data-preview-theme='air'] .preview-sidebar i { background: var(--preview-line); }
+.theme-preview[data-preview-theme='air'] .preview-sidebar i.selected { background: var(--preview-accent); }
+.theme-preview[data-preview-theme='soft-layers'] .preview-table {
+  border-color: transparent;
+  border-radius: var(--ui-radius-small);
+  box-shadow: 0 3px 8px #263c6326;
+}
+.theme-preview[data-preview-theme='soft-layers'] .preview-inspector { box-shadow: -2px 0 7px #263c6314; }
+.theme-preview[data-preview-theme='soft-layers'] .preview-sidebar i.selected { box-shadow: 0 2px 4px #263c6330; }
+.theme-preview[data-preview-theme='technical'] .preview-titlebar { background: var(--preview-surface-alt); }
+.theme-preview[data-preview-theme='technical'] .preview-table { border-color: var(--preview-line-strong); }
+.theme-preview[data-preview-theme='technical'] .preview-table > div:not(.preview-selected):nth-child(odd) { background: var(--preview-surface-alt); }
+.theme-preview[data-preview-theme='accent-rail'] .preview-sidebar { background: #273b73; border-color: #273b73; }
+.theme-preview[data-preview-theme='accent-rail'] .preview-sidebar i { background: #7184b3; }
+.theme-preview[data-preview-theme='accent-rail'] .preview-sidebar i.selected { background: #ffffff; }
+.theme-preview[data-preview-theme='accent-rail'] .preview-titlebar { box-shadow: inset 0 -1px var(--preview-accent); }

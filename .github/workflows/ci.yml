@@ -1,0 +1,38 @@
+name: Windows checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run desktop:setup
+      - run: npm run check:source
+      - run: node scripts/generate-notices.mjs --check
+      - run: npm run helper:setup
+      - run: npm run inspector:setup
+      - run: npm run build
+      - run: npm run test:backend
+      - run: npx playwright install chromium
+      - run: npm test -- tests/interface-tour.spec.ts tests/english-only.spec.ts tests/confirmation.spec.ts
+        env:
+          PLAYWRIGHT_CHANNEL: chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: fixture-test-results
+          path: test-results/
+          retention-days: 7

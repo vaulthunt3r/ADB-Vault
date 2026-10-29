@@ -1,0 +1,10 @@
+{
+  "javaVersion": "17.0.20.1+1",
+  "jdk": {
+    "url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.20.1_1.zip",
+    "checksum": "e53a79c3c3d86865bd7e787903884331068e71321714ffd44f145785affc7cb0",
+    "algorithm": "sha256"
+  },
+  "platform": { "id": "platforms;android-35", "checksum": "0bb560a90a7a2cbd0dd8348224d518b638fe7949", "algorithm": "sha1" },
+  "buildTools": { "id": "build-tools;35.0.0", "checksum": "af059bb67cf7786f45ee0db85e2d24985df1b4b6", "algorithm": "sha1" }
+}

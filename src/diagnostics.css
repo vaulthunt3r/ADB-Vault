@@ -1,0 +1,92 @@
+.diagnostics-panel { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.diagnostics-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.diagnostics-panel h3 { font-size: 12px; font-weight: 600; }
+.diagnostics-heading .button { font-size: 11px; padding: 5px 8px; }
+.diagnostics-timestamp { font-size: 10px; color: var(--muted); margin: 8px 0; }
+.diagnostics-fields { margin: 12px 0 20px; }
+.diagnostics-fields > div { margin: 10px 0; }
+.diagnostics-fields dt { color: var(--muted); font-size: 10px; }
+.diagnostics-fields dd { margin: 3px 0 0; font-size: 11px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.device-info-group > h4 { margin: 18px 0 8px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--text); font-size: 11px; font-weight: 600; }
+.diagnostics-issue { font-size: 11px; color: var(--warning); overflow-wrap: anywhere; margin: 10px 0; }
+.discovery-services { list-style: none; padding: 0; margin: 10px 0; }
+.discovery-services li { padding: 8px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; font-size: 11px; }
+.discovery-services strong, .discovery-services span { display: block; }
+.discovery-services span { color: var(--muted); margin-top: 4px; }
+.workspace:has(> .activity-section) { overflow: hidden; }
+.activity-section { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.activity-section > * { flex-shrink: 0; }
+.activity-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 11px; }
+.activity-toolbar label { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.activity-toolbar select { padding: 6px; border: 1px solid var(--line); border-radius: var(--ui-radius); background: var(--surface); color: var(--text); }
+.activity-toolbar .component-search { flex: 1; min-width: 150px; }
+.history-session-bar { padding: 8px 0; display: flex; flex-direction: column; gap: 5px; font-size: 12px; min-width: 0; }
+.history-session-bar > div { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.activity-id { white-space: nowrap; }
+.history-session-bar label { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.history-session-bar select { min-width: 0; max-width: 100%; padding: 7px; border: 1px solid var(--line); border-radius: var(--ui-radius); color: var(--text); background: var(--surface); }
+.history-session-bar small { color: var(--muted); }
+.history-session-bar p { margin: 2px 0; }
+.file-tasks > .history-session-bar { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.history-recovery { position: fixed; bottom: 68px; right: 20px; z-index: 65; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 40px); padding: 14px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--ui-radius); box-shadow: 0 5px 20px #0002; font-size: 13px; }
+.history-recovery small { display: block; color: var(--muted); margin-top: 4px; }
+.activity-result.interrupted { color: var(--warning, #a36312); }
+.activity-node.interrupted { background: var(--warning, #a36312); }
+.activity-table-scroll { flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--line); border-radius: var(--ui-radius); }
+.activity-table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: 11px; }
+.activity-table th { position: sticky; top: 0; z-index: 1; background: var(--surface-alt); color: var(--muted); text-align: left; font-weight: 500; }
+.activity-table th, .activity-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.activity-table th:nth-child(3) { width: 45%; }
+.activity-table td:not(:last-child) { max-width: 180px; overflow-wrap: anywhere; }
+.activity-table tr.selected { background: var(--selected); }
+.event-select { color: var(--text); background: none; padding: 0; text-align: left; width: 100%; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.event-select:hover { text-decoration: underline; }
+.activity-event-app { display: flex; align-items: center; gap: 8px; margin-top: 5px; color: var(--muted); }
+.activity-application { display: flex; align-items: center; gap: 9px; min-width: 0; white-space: normal; }
+.activity-application-icon { flex: 0 0 28px; width: 28px; height: 28px; display: grid; place-items: center; color: var(--muted); }
+.activity-application-icon img { object-fit: contain; border-radius: 5px; }
+.activity-application-name { min-width: 0; overflow-wrap: anywhere; }
+.activity-application-name strong { font-size: 12px; }
+.activity-application-name code { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+.activity-application.compact .activity-application-icon, .activity-application.compact img { width: 20px; height: 20px; flex-basis: 20px; }
+.activity-application.compact strong { font-weight: 500; font-size: 11px; }
+.activity-failed-apps { display: grid; gap: 12px; margin-block: 16px; }
+.event-message { font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
+.density-compact .activity-table td { padding: 6px 8px; }
+.activity-heading { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.activity-heading h1 { margin: 0; font-size: 20px; }
+.activity-heading > span, .activity-id, .activity-time { color: var(--muted); font-size: 11px; }
+.activity-table .activity-rail { position: relative; width: 28px; padding: 15px 8px; text-align: center; }
+.activity-rail::before { content: ''; position: absolute; width: 1px; background: var(--line); inset: 0 auto 0 50%; }
+.activity-node { display: inline-block; position: relative; width: 9px; height: 9px; border: 2px solid currentColor; border-radius: 50%; background: var(--surface); color: var(--muted); }
+.activity-node.success, .activity-result.success { color: var(--success); }
+.activity-node.running, .activity-result.running { color: var(--accent); }
+.activity-node.warning, .activity-result.warning { color: var(--warning); }
+.activity-node.error, .activity-node.partial, .activity-result.error, .activity-result.partial { color: var(--error); }
+.activity-table .result-failure-row:not(.selected), .activity-items .result-failure-row { background: color-mix(in srgb, var(--error) 5%, transparent); }
+.activity-items .result-failure-row td:first-child { box-shadow: inset 3px 0 var(--error); }
+.activity-failure-link { display: inline-flex; align-items: center; gap: 5px; text-align: left; white-space: normal; }
+.activity-failure-link:hover { text-decoration: underline; }
+.activity-heading .activity-issues-toggle { margin-left: auto; color: var(--error); }
+.activity-issues-toggle[aria-pressed="true"] { background: var(--error-bg); border-color: var(--error-line); }
+.activity-result.cancelled, .activity-result.skipped, .activity-result.pending { color: var(--muted); }
+.activity-result { white-space: nowrap; font-size: 11px; }
+.activity-workspace { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.activity-workspace svg { flex-shrink: 0; color: var(--muted); }
+.activity-device { min-width: 90px; }
+.activity-time { white-space: nowrap; }
+.activity-section > .activity-detail { display: flex; flex-direction: column; flex: 0 1 45%; min-height: 120px; margin-top: 12px; border: 1px solid var(--line); border-radius: var(--ui-radius); overflow: hidden; }
+.activity-detail-heading { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface-alt); border-bottom: 1px solid var(--line); font-size: 12px; }
+.activity-detail-heading strong { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.activity-detail-heading button { display: flex; padding: 3px; }
+.activity-detail-body { min-height: 0; overflow: auto; padding: 0 12px 12px; }
+.activity-detail-context { color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+.activity-items { width: 100%; border-collapse: collapse; font-size: 11px; }
+.activity-items th { text-align: left; color: var(--muted); font-weight: 500; }
+.activity-items th, .activity-items td { border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; white-space: pre-wrap; overflow-wrap: anywhere; }
+.activity-items td:first-child { width: 32%; }
+.activity-items code { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+.activity-detail-controls:not(:empty) { display: flex; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--line); }
+
+.connection-statuses { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.root-access-note { margin: 10px 0; }

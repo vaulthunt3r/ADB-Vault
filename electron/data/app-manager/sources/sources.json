@@ -1,0 +1,36 @@
+[
+  {
+    "files": [
+      "libs.json",
+      "README.md",
+      "COPYING"
+    ],
+    "repo": "MuntashirAkon/android-libraries",
+    "dir": "android-libraries",
+    "ref": "8fb3919828e9c9f6e75faaaa322c5af59c6d05fa"
+  },
+  {
+    "files": [
+      "aosp.json",
+      "carrier.json",
+      "google.json",
+      "misc.json",
+      "oem.json",
+      "README.md",
+      "COPYING"
+    ],
+    "repo": "MuntashirAkon/android-debloat-list",
+    "dir": "android-debloat-list",
+    "ref": "c9a1db2935b89c342066a4de8179173542c05510"
+  },
+  {
+    "files": [
+      "scripts/update_libraries.php",
+      "scripts/make_debloat_list.php",
+      "scripts/utils.php"
+    ],
+    "repo": "MuntashirAkon/AppManager",
+    "dir": "app-manager",
+    "ref": "2d9223a7a541ad40ec927e429d7a9ab58d27a90d"
+  }
+]

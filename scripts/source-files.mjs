@@ -3,7 +3,7 @@ import path from 'node:path'
 
 // Explicit publication boundary: personal work directories are never traversed.
 const roots = ['.github', 'android-helper', 'build', 'docs', 'electron', 'public', 'scripts', 'src', 'tests', 'third-party-notices']
-const rootFiles = ['.editorconfig', '.gitattributes', '.gitignore', 'LICENSE', 'NOTICE.md', 'README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'VERIFICATION.md', 'BADGES.md', 'DETECTION.md', 'index.html', 'package.json', 'package-lock.json', 'playwright.config.ts', 'tsconfig.json', 'tsconfig.electron.json', 'vite.config.ts']
+const rootFiles = ['.editorconfig', '.gitattributes', '.gitignore', 'LICENSE', 'NOTICE.md', 'README.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md', 'VERIFICATION.md', 'BADGES.md', 'DETECTION.md', 'index.html', 'package.json', 'package-lock.json', 'playwright.config.ts', 'tsconfig.json', 'tsconfig.electron.json', 'vite.config.ts']
 const excluded = /^(?:build\/generated|android-helper\/build|scripts\/research)(?:\/|$)/
 export async function sourceFiles(root = process.cwd()) {
   const result = [...rootFiles]

@@ -1,5 +1,8 @@
 # Contributing
 
+Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) when participating in
+the project.
+
 Read [the development guide](docs/DEVELOPMENT.md) before changing the code.
 Use a small, focused change and explain its purpose and validation. Keep the UI
 in English. Never commit phone exports, device identifiers, logs from a real

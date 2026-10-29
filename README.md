@@ -70,7 +70,7 @@ protected operations; ADB Vault does not root a phone.
 - [Build from source and run tests](docs/DEVELOPMENT.md)
 - [Detection database scope](DETECTION.md) and [badge details](BADGES.md)
 - [Validation and compatibility coverage](VERIFICATION.md)
-- [Contributing](CONTRIBUTING.md) and [security reports](SECURITY.md)
+- [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md) and [security reports](SECURITY.md)
 - [Release notes](docs/releases/v0.1.0.md)
 
 ## Licence

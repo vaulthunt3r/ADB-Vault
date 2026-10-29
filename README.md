@@ -4,6 +4,16 @@ An Android device workspace for **Windows 10/11 x64**. Manage applications,
 transfer files, inspect APKs and open phone, virtual-display and camera windows
 from one desktop application.
 
+> [!IMPORTANT]
+> **Public preview — testing on more devices is still needed.**
+> Bugs are possible, and some features may fail or be unavailable. Testing has
+> covered only a limited number of devices, not all Android versions, phone
+> models or manufacturer firmware. Compatibility is not guaranteed.
+>
+> Keep backups before operations that modify apps or files. Please
+> [report reproducible problems](https://github.com/vaulthunt3r/ADB-Vault/issues)
+> with the app, Android and Windows versions and phone model, without personal data.
+
 [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
 ![Applications — search, inspect and keep personal notes](docs/images/showcase-apps.png)

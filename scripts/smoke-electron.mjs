@@ -14,21 +14,36 @@ const server = await createServer({ server: { port: 5174, strictPort: true } });
 const env = { ...process.env, VITE_DEV_SERVER_URL: 'http://127.0.0.1:5174', ADB_VAULT_SMOKE_TEST: '1' }; delete env.ELECTRON_RUN_AS_NODE
 const launchOptions = { args: ['.', `--user-data-dir=${profile}`], env, ...(process.env.ADB_VAULT_TEST_EXECUTABLE ? { executablePath: path.resolve(process.env.ADB_VAULT_TEST_EXECUTABLE) } : {}) }
 let app
+async function closeTestWindow(instance) {
+  // The hidden test window may still be checking components after a restart.
+  await instance.evaluate(({ dialog }) => {
+    const original = dialog.showMessageBox.bind(dialog)
+    dialog.showMessageBox = (...args) => {
+      const index = args.at(-1)?.buttons?.indexOf('Close safely') ?? -1
+      return index >= 0 ? Promise.resolve({ response: index, checkboxChecked: false }) : original(...args)
+    }
+  })
+  await instance.close()
+}
 try {
   app = await electron.launch(launchOptions)
   console.log('Electron runtime:', await app.evaluate(() => process.versions.electron))
-  let page = await app.firstWindow(); const errors = []; page.on('pageerror', e => errors.push(e.message))
+  let page = await app.firstWindow({ timeout: 90000 }); const errors = []; page.on('pageerror', e => errors.push(e.message))
   await expect(page.getByRole('heading', { name: 'Component Center.' })).toBeVisible({ timeout: 20000 })
-  assert.deepEqual(await page.evaluate(() => Object.keys(window.desktop).sort()), ['control', 'locate', 'request', 'subscribe', 'writeClipboard'])
+  assert.deepEqual(await page.evaluate(() => Object.keys(window.desktop).sort()), ['apkPath', 'control', 'locate', 'readClipboard', 'request', 'subscribe', 'writeClipboard'])
   assert.equal(await page.evaluate(() => typeof window.require), 'undefined')
   await expect.poll(async () => { const r = await page.evaluate(() => window.desktop.request({ type: 'snapshot' })); return r.snapshot.components.some(c => c.status === 'Checking') }, { timeout: 60000 }).toBe(false)
   const invalid = await page.evaluate(() => window.desktop.request({ type: 'shell', command: 'whoami' })); assert.equal(invalid.ok, false)
   const invalidId = await page.evaluate(() => window.desktop.request({ type: 'components.open', id: '../unknown' })); assert.equal(invalidId.ok, false)
-  await app.evaluate(({ dialog }, folder) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] }) }, profile)
+  await app.evaluate(({ dialog }, folder) => {
+    dialog.showOpenDialog = async (_owner, options) => ({ canceled: false, filePaths: [options.properties.includes('openFile') ? folder + '\\adb.exe' : folder] })
+  }, profile)
   await page.getByRole('button', { name: 'Locate manually', exact: true }).click()
-  await page.getByRole('button', { name: 'Browse…' }).click()
-  await expect(page.getByLabel('Component folder')).toHaveValue(profile)
-  await page.getByRole('button', { name: 'Use this folder' }).click()
+  await page.getByRole('button', { name: 'Choose adb.exe…' }).click()
+  await expect(page.getByLabel('ADB file or folder')).toHaveValue(profile + '\\adb.exe')
+  await page.getByRole('button', { name: 'Choose folder…' }).click()
+  await expect(page.getByLabel('ADB file or folder')).toHaveValue(profile)
+  await page.getByRole('button', { name: 'Use this ADB' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'Cancel', exact: true }).click()
   await page.getByRole('navigation').getByRole('button', { name: 'Connection', exact: true }).click()
@@ -40,8 +55,8 @@ try {
   console.log('Actual ADB devices:', actual.snapshot.connection.devices.length)
   await page.getByRole('navigation').getByRole('button', { name: 'Settings' }).click(); await page.getByRole('button', { name: 'Theme Git Dark', exact: true }).click()
   await page.getByRole('button', { name: 'Left sidebar: expanded; show icons' }).click(); await page.getByRole('button', { name: 'Right sidebar: expanded; collapse' }).click()
-  await app.close(); app = await electron.launch(launchOptions); page = await app.firstWindow()
-  await expect(page.getByRole('button', { name: 'Left sidebar: icons; hide' })).toBeVisible(); await expect(page.locator('html')).toHaveAttribute('data-theme', 'git-dark')
+  await closeTestWindow(app); app = await electron.launch(launchOptions); page = await app.firstWindow({ timeout: 90000 })
+  await expect(page.getByRole('button', { name: 'Left sidebar: icons; expand' })).toBeVisible(); await expect(page.locator('html')).toHaveAttribute('data-theme', 'git-dark')
   assert.deepEqual(errors, [])
   console.log('PASS: real Electron backend initialization, Windows detection, restricted IPC, native folder picker, rejection of invalid component paths, and persistence. No packages were installed by this test.')
 } catch (error) {
@@ -51,4 +66,4 @@ try {
     await page.screenshot({ path: 'desktop-test-results/smoke-failed.png' }).catch(() => {})
   }
   throw error
-} finally { if (app) await app.close(); await server.close() }
+} finally { if (app) await closeTestWindow(app); await server.close() }

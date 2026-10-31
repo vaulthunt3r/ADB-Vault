@@ -86,5 +86,12 @@ function ExportDestinationSettings() {
 export function SettingsSection() {
   const tab = useAppStore(s => s.settingsTab)
   const tabs = [['appearance', t("Appearance")], ['workspaces', t("Workspaces")], ['apps', t("Apps")], ['files', t("Files")], ['badges', t("Badges")], ['connection', t("Connection")], ['screen', t("Screen & audio")], ['web-services', t("Web services")], ['notifications', t("Notifications")]] as const
-  return <><div className="settings-categories" role="group" aria-label={t("Settings categories")}>{tabs.map(([id, label]) => <button key={id} className={tab === id ? 'active' : ''} aria-pressed={tab === id} onClick={() => useAppStore.setState({ settingsTab: id })}>{label}</button>)}</div>{tab === 'workspaces' ? <WorkspaceSettings /> : tab === 'screen' ? <ScreenSettings /> : tab === 'notifications' ? <NotificationSettingsSection /> : tab === 'files' ? <FileCategorySettings /> : tab === 'web-services' ? <WebServicesSettings /> : tab === 'connection' ? <ConnectionSettings /> : tab === 'appearance' ? <AppearanceSection /> : tab === 'badges' ? <BadgeSettingsSection /> : <AppsLoadingSettings />}</>
+  return <>
+    <div className="settings-categories" role="group" aria-label={t("Settings categories")}>
+      {tabs.map(([id, label]) => <button key={id} className={tab === id ? 'active' : ''} aria-pressed={tab === id} onClick={() => useAppStore.setState({ settingsTab: id })}>{label}</button>)}
+    </div>
+    <div className="settings-pane" key={tab}>
+      {tab === 'workspaces' ? <WorkspaceSettings /> : tab === 'screen' ? <ScreenSettings /> : tab === 'notifications' ? <NotificationSettingsSection /> : tab === 'files' ? <FileCategorySettings /> : tab === 'web-services' ? <WebServicesSettings /> : tab === 'connection' ? <ConnectionSettings /> : tab === 'appearance' ? <AppearanceSection /> : tab === 'badges' ? <BadgeSettingsSection /> : <AppsLoadingSettings />}
+    </div>
+  </>
 }

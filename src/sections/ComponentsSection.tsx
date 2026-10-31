@@ -1,4 +1,6 @@
 import { t } from "../lib/i18n"
+import { installationTargets } from '../../electron/catalog'
+import { isDatabaseId } from '../../electron/database-protocol'
 import { CircleHelp, Download, Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { LatticeLoader } from '../components/operation-chip/OperationChip'
@@ -6,6 +8,7 @@ import { isBusy, isNotInstalled, isReady, needsAttention, settledStatus } from '
 import { useAppStore } from '../store/useAppStore'
 import { BadgeDialog } from '../components/BadgeDialog'
 import { ComponentsTable, type ComponentFilter } from '../components/ComponentsTable'
+import { AdbSetupNotice } from '../components/AdbSetupNotice'
 import { IconButton } from '../components/ui'
 
 export function ComponentsSection() {
@@ -20,6 +23,8 @@ export function ComponentsSection() {
   const attention = components.filter(component => needsAttention(settledStatus(component))).length
   const notInstalled = components.filter(component => isNotInstalled(settledStatus(component))).length
   const working = componentPending || components.some(component => isBusy(component.status))
+  const hasBulkTargets = installationTargets(components).length > 0 ||
+    components.some(component => isDatabaseId(component.id) && ['Update available', 'Repair needed', 'Download failed'].includes(component.status))
   const filters: { id: ComponentFilter; label: string; count: number }[] = [
     { id: 'all', label: t("All components"), count: components.length },
     { id: 'attention', label: t("Needs attention"), count: attention },
@@ -29,12 +34,13 @@ export function ComponentsSection() {
   return <section className="components-section section-content" aria-labelledby="component-center-title">
     <div className="section-heading">
       <div><h1 id="component-center-title">{t("Component Center")}<span className="heading-period">.</span></h1></div>
-      {(bulkBusy || ready < components.length) && <button className="button primary install-all" disabled={working || bulkBusy} onClick={() => void installAll()}>
+      {(bulkBusy || hasBulkTargets) && <button className="button primary install-all" disabled={working || bulkBusy} onClick={() => void installAll()}>
         {bulkBusy ? <LatticeLoader /> : <Download size={15} />}
         <span>{bulkBusy ? t("Installing components…") : t("Install / Repair All")}</span>
       </button>}
     </div>
     {!window.desktop && <div className="operation-error" role="alert">{t("Real component operations require the Electron application. Start it with npm run dev.")}</div>}
+    {window.desktop && <AdbSetupNotice />}
     <div className="component-tools">
       <div className="component-filters" role="group" aria-label={t("Filter components")}>
         {filters.map(item => <button key={item.id} className={filter === item.id ? 'active' : ''} aria-pressed={filter === item.id} onClick={() => setFilter(item.id)}>{item.label}<span>{item.count}</span></button>)}
@@ -48,7 +54,7 @@ export function ComponentsSection() {
     {helpOpen && <BadgeDialog title={t("About components")} close={() => setHelpOpen(false)}>
       <div className="component-help-content">
         <p>{t("Check components verifies installed tools on this computer and checks for available updates. It does not install anything.")}</p>
-        <p>{t("ADB and Fastboot share one Platform Tools download. USB drivers and optional tools are not required for every connection.")}</p>
+        <p>{t("ADB and Fastboot share one Platform Tools download. Use the Google USB Driver action only if your device needs it. Bulk installation skips this driver.")}</p>
         <p>{t("A driver marked “Package ready” has been downloaded, but still needs Windows installation. It appears under Not installed.")}</p>
       </div>
     </BadgeDialog>}

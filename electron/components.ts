@@ -7,6 +7,7 @@ import { Storage } from './storage.js'
 import { checked, powershell, run, type Runner } from './process.js'
 import { download, extractZip, officialText, packageVersion, validateMicrosoftInstaller } from './downloads.js'
 import { googleDriverInventory, installGoogleDriver } from './driver.js'
+import { registeredToolEnvironments, toolFolders } from './tool-locations.js'
 
 const ids: ComponentId[] = ['adb', 'fastboot', 'driver', 'runtime', 'scrcpy']
 interface Package { url: string; version: string; size?: number; digest?: string; algorithm?: string }
@@ -37,30 +38,42 @@ export class ComponentsService {
   private publish() { this.emit({ type: 'components', components: this.records.map(r => ({ ...r })) }) }
   private update(id: ComponentId, patch: Partial<ComponentRecord>) { this.records = this.records.map(r => r.id === id ? { ...r, ...patch } : r); this.publish() }
   private log(text: string, tone: 'info' | 'success' | 'warning' = 'info') { this.emit({ type: 'activity', source: 'components', text, tone }) }
+  private availableVersion(id: ComponentId, pkg: Package) {
+    this.packages.set(id, pkg)
+    const record = this.records.find(item => item.id === id)!
+    const ready = ['Installed', 'Detected', 'Update available'].includes(record.status)
+    const status = !ready ? record.status : compareVersions(record.version, pkg.version) < 0
+      ? 'Update available' : record.managed ? 'Installed' : 'Detected'
+    this.update(id, { status, targetVersion: pkg.version, size: formatBytes(pkg.size!) })
+  }
   async refreshPackages() {
     const metadata = async (name: string, url: string, apply: (text: string) => void) => {
       try { apply(await officialText(url)) }
       catch (error) { this.log(`${name}: release metadata unavailable — ${error instanceof Error ? error.message : String(error)}\nSource: ${url}`, 'warning') }
     }
     const tasks = [
-      metadata('Platform Tools (ADB / Fastboot)', 'https://dl.google.com/android/repository/repository2-3.xml', text => { const pkg = platformPackage(text); this.packages.set('adb', pkg); this.packages.set('fastboot', pkg); for (const id of ['adb', 'fastboot'] as ComponentId[]) this.update(id, { targetVersion: pkg.version, size: formatBytes(pkg.size!) }) }),
+      metadata('Platform Tools (ADB / Fastboot)', 'https://dl.google.com/android/repository/repository2-3.xml', text => {
+        const pkg = platformPackage(text)
+        this.availableVersion('adb', pkg)
+        this.availableVersion('fastboot', pkg)
+      }),
       metadata('scrcpy', 'https://api.github.com/repos/Genymobile/scrcpy/releases/latest', text => {
         const release = JSON.parse(text)
         const asset = release.assets?.find((a: { name: string }) => /^scrcpy-win64-v[\d.]+\.zip$/.test(a.name))
         if (!asset || !/^sha256:[a-f\d]{64}$/i.test(asset.digest ?? '')) throw new Error('scrcpy release has no verified Windows x64 archive.')
-        this.packages.set('scrcpy', { url: asset.browser_download_url, version: String(release.tag_name).replace(/^v/, ''), size: asset.size, digest: asset.digest.slice(7), algorithm: 'sha256' })
-        this.update('scrcpy', { targetVersion: String(release.tag_name).replace(/^v/, ''), size: formatBytes(asset.size) })
+        this.availableVersion('scrcpy', { url: asset.browser_download_url, version: String(release.tag_name).replace(/^v/, ''), size: asset.size, digest: asset.digest.slice(7), algorithm: 'sha256' })
       }),
     ]
     this.packages.set('driver', { url: 'https://dl.google.com/android/repository/latest_usb_driver_windows.zip', version: 'Latest official package' })
     this.packages.set('runtime', { url: 'https://aka.ms/vc14/vc_redist.x64.exe', version: 'Latest supported x64' })
     await Promise.all(tasks)
   }
-  async candidates(id: ComponentId) {
-    const directories = [this.storage.data.paths[id]]
-    if (id === 'adb' || id === 'fastboot') directories.push(this.storage.data.paths[id === 'adb' ? 'fastboot' : 'adb'], process.env.ANDROID_SDK_ROOT && path.join(process.env.ANDROID_SDK_ROOT, 'platform-tools'), process.env.ANDROID_HOME && path.join(process.env.ANDROID_HOME, 'platform-tools'), process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Android', 'Sdk', 'platform-tools'))
-    directories.push(...(process.env.PATH || '').split(path.delimiter).map(p => p.replace(/^"|"$/g, '')))
-    return [...new Set(directories.filter((p): p is string => !!p && path.isAbsolute(p)))]
+  private async registeredPaths() {
+    try { return await registeredToolEnvironments(this.runner) }
+    catch {
+      this.log('Windows environment settings could not be read. Checking the current PATH and saved folders.', 'warning')
+      return []
+    }
   }
   async validate(id: ComponentId, folder: string) {
     if (!path.isAbsolute(folder) || !(await stat(folder)).isDirectory()) throw new Error('Choose an existing absolute folder path.')
@@ -78,7 +91,7 @@ export class ComponentsService {
     if (id === 'scrcpy' && !/^scrcpy\s+[\d.]+/im.test(output)) throw new Error('Selected scrcpy.exe did not return its version.')
     return (id !== 'scrcpy' && await packageVersion(folder)) || output.match(/(?:^Version|fastboot version|^scrcpy)\s+([\d.]+)/im)?.[1] || output.match(/version\s+([\d.]+)/i)?.[1] || 'Unknown'
   }
-  async detectOne(id: ComponentId) {
+  async detectOne(id: ComponentId, registered?: ReturnType<ComponentsService['registeredPaths']>) {
     this.update(id, { status: 'Checking', message: undefined, progress: 0 })
     if (id === 'runtime') {
       try {
@@ -97,8 +110,9 @@ export class ComponentsService {
       if (folder) try { const version = await this.validate(id, folder); this.update(id, { version, location: folder, status: 'Package ready', message: `${inventoryError ? inventoryError + ' ' : ''}Files are ready. Choose Install driver to add this package to Windows and apply it to compatible devices. Approve the Windows administrator prompt. The existing download will be reused. This optional Google driver is not needed if your USB connection already works.` }); return } catch { /* Continue with the undetected state. */ }
       this.update(id, { status: inventoryError ? 'Not detected' : 'Not installed', version: '—', location: null, message: inventoryError || 'No Google ADB driver was detected. This optional package is for Google devices. Other devices use their manufacturer’s driver; if USB already works, no driver change is needed.' }); return
     }
+    if (id !== 'adb' && id !== 'fastboot' && id !== 'scrcpy') return
     let failure = ''
-    for (const folder of await this.candidates(id)) {
+    for (const folder of toolFolders(id, this.storage.data.paths, await (registered ?? this.registeredPaths()), this.storage.hasAutomaticAdbCopy)) {
       try { await access(path.join(folder, `${id}.exe`)) } catch { continue }
       try {
         const version = await this.validate(id, folder)
@@ -112,13 +126,33 @@ export class ComponentsService {
   async detect() {
     if (this.busy) throw new Error('A component operation is already running.')
     this.busy = true
-    try { await Promise.all(ids.map(id => this.detectOne(id))) } finally { this.busy = false }
+    try {
+      const registered = this.registeredPaths()
+      await Promise.all(ids.map(id => this.detectOne(id, registered)))
+    } finally { this.busy = false }
   }
   async locate(id: ComponentId, folder: string) {
     if (this.busy) throw new Error('Wait for the current component operation.')
-    const version = await this.validate(id, folder)
+    if (id === 'adb') {
+      folder = folder.trim().replace(/^"([^"]+)"$/, '$1')
+      if (!path.isAbsolute(folder)) throw new Error('Choose the full path to adb.exe or the folder containing it.')
+      if (/\.exe$/i.test(folder)) {
+        if (path.basename(folder).toLowerCase() !== 'adb.exe') throw new Error('Choose adb.exe, or the folder containing it.')
+        folder = path.dirname(folder)
+      }
+    }
+    let version: string
+    try {
+      version = await this.validate(id, folder)
+    } catch (error) {
+      if (id === 'adb' && ['ENOENT', 'ENOTDIR'].includes((error as NodeJS.ErrnoException).code ?? '')) {
+        throw new Error('Could not find adb.exe at this location. Choose adb.exe or its platform-tools folder.')
+      }
+      throw error
+    }
     this.storage.data.paths[id] = path.resolve(folder)
-    if (id === 'adb' || id === 'fastboot') { const other = id === 'adb' ? 'fastboot' : 'adb'; try { await this.validate(other, folder); this.storage.data.paths[other] = path.resolve(folder) } catch {} }
+    if (id === 'adb') this.storage.data.manualAdb = true
+    if (id === 'adb' || (id === 'fastboot' && !this.adbPath())) { const other = id === 'adb' ? 'fastboot' : 'adb'; try { await this.validate(other, folder); this.storage.data.paths[other] = path.resolve(folder) } catch {} }
     await this.storage.save(); await this.detect(); this.log(`${id}: verified version ${version} in ${folder}.`, 'success')
   }
   adbPath() { const record = this.records.find(r => r.id === 'adb')!; return record.location && record.version !== '—' ? path.join(record.location, 'adb.exe') : null }
@@ -134,7 +168,11 @@ export class ComponentsService {
   async install(id: ComponentId) {
     if (this.busy) throw new Error('A component operation is already running.')
     this.busy = true
-    const affected: ComponentId[] = id === 'adb' || id === 'fastboot' ? ['adb', 'fastboot'] : [id]
+    const affected: ComponentId[] = [id]
+    if (id === 'adb' || id === 'fastboot') {
+      const sibling = this.records.find(record => record.id === (id === 'adb' ? 'fastboot' : 'adb'))!
+      if (!['Installed', 'Detected'].includes(sibling.status)) affected.push(sibling.id)
+    }
     let phase = 'download'
     try {
       // Continue a prepared installation (or retry after UAC cancellation) without
@@ -173,6 +211,7 @@ export class ComponentsService {
         if (!location) throw new Error('Downloaded package does not contain the expected component.')
         for (const item of affected) await this.validate(item, location)
         for (const item of affected) this.storage.data.paths[item] = location
+        if (affected.includes('adb')) this.storage.data.manualAdb = false
         await this.storage.save()
         if (id === 'driver') await this.installDriverPackage(location)
         else for (const item of affected) await this.detectOne(item)

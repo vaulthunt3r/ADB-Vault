@@ -44,7 +44,9 @@
 .apps-package-states { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .apps-live-table th.apps-status-heading { text-align: center; }
 .app-status-enabled { color: var(--muted); }
-.settings-categories { display: flex; flex-wrap: wrap; gap: 5px; padding: 14px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.workspace:has(> .settings-categories) { display: flex; flex-direction: column; overflow: hidden; }
+.settings-categories { flex: none; display: flex; flex-wrap: wrap; gap: 5px; padding: 14px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.settings-pane { flex: 1; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 .settings-categories button { padding: 7px 13px; border: 1px solid transparent; border-radius: var(--ui-radius); background: transparent; color: var(--muted); cursor: pointer; }
 .settings-categories button.active { color: var(--accent); background: var(--selected); border-color: var(--line); }
 .apps-loading-settings { border: 0; padding: 0; margin: 0; min-width: 0; width: 100%; }

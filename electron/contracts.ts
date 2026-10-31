@@ -108,7 +108,7 @@ export interface DesktopBridge {
   writeClipboard?: (text: string) => Promise<void>
   readClipboard?: () => Promise<string>
   control: (command: 'minimize' | 'maximize' | 'close') => Promise<void>
-  locate: () => Promise<string | null>
+  locate: (kind?: 'folder' | 'adb-file') => Promise<string | null>
   request: (request: BackendRequest) => Promise<BackendReply>
   subscribe: (listener: (event: BackendEvent) => void) => () => void
 }

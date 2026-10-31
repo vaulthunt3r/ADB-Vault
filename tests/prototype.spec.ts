@@ -69,6 +69,7 @@ test('TanStack filters, groups and live statuses follow backend updates', async 
   }
 })
 test('download and bulk installation dispatch to backend; rejected manual paths stay open', async ({ page }) => {
+  await page.getByRole('button', { name: 'Select Google USB Driver' }).click()
   await page.getByRole('button', { name: 'Install driver: Google USB Driver' }).first().click()
   await expect(page.getByTestId('component-driver').locator('.status-badge')).toHaveText('Installed')
   await page.getByRole('button', { name: 'Locate manually', exact: true }).click()
@@ -123,8 +124,9 @@ test('component selection opens the inspector; system installations are clear an
   expect(await page.evaluate(() => window.backendTest.requests.at(-1))).toEqual({ type: 'components.open', id: 'fastboot' })
   await page.screenshot({ path: 'test-results/component-actions-clean.png' })
 })
-test('prepared Google driver offers Windows installation and remains available in bulk install', async ({ page }) => {
-  await page.evaluate(() => window.backendTest.emit({ type: 'components', components: window.backendTest.snapshot.components.map(c => c.id === 'driver' ? { ...c, status: 'Package ready', version: '11.0.0000.00000', location: 'C:\\Test\\usb_driver', message: 'If USB already works, no driver change is needed.' } : c) }))
+test('a prepared Google driver can be installed individually without prompting for bulk installation', async ({ page }) => {
+  await page.getByRole('button', { name: 'Select Google USB Driver' }).click()
+  await page.evaluate(() => window.backendTest.emit({ type: 'components', components: window.backendTest.snapshot.components.map(c => c.id === 'driver' ? { ...c, status: 'Package ready', version: '11.0.0000.00000', location: 'C:\\Test\\usb_driver', message: 'If USB already works, no driver change is needed.' } : { ...c, status: 'Installed' }) }))
   await expect(page.getByTestId('component-driver').locator('.status-badge')).toHaveText('Package ready')
   await expect(page.getByTestId('component-driver').locator('.status-badge')).toHaveClass(/info/)
   expect(await page.getByTestId('component-driver').locator('.version-col').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
@@ -143,8 +145,7 @@ test('prepared Google driver offers Windows installation and remains available i
   await page.getByRole('tab', { name: 'Actions', exact: true }).click()
   await page.getByRole('button', { name: 'Repair component', exact: true }).click()
   expect(await page.evaluate(() => window.backendTest.requests.at(-1))).toEqual({ type: 'components.action', id: 'driver', action: 'repair' })
-  await page.getByRole('button', { name: 'Install / Repair All' }).click()
-  expect(await page.evaluate(() => window.backendTest.requests.at(-1))).toEqual({ type: 'components.installAll' })
+  await expect(page.getByRole('button', { name: 'Install / Repair All' })).toHaveCount(0)
 })
 test('browser without Electron never simulates successful operations', async ({ browser }) => {
   const context = await browser.newContext(); const page = await context.newPage(); await page.goto('http://127.0.0.1:5173')

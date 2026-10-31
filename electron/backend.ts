@@ -322,13 +322,12 @@ export class Backend {
     if (this.closing || this.lifecycle.closing) return
     this.backupTimer = setInterval(() => { if (!this.backups.busy) void this.refreshBackups().catch(() => {}) }, 10000)
     this.backupTimer.unref()
-    await this.geoip.initialize(); await this.databases.initialize()
-    if (this.closing || this.lifecycle.closing) return
     await this.components.detect()
     if (this.closing || this.lifecycle.closing) return
     this.connection.start()
+    await this.geoip.initialize(); await this.databases.initialize()
+    if (this.closing || this.lifecycle.closing) return
     await this.components.refreshPackages()
-    if (!this.closing && !this.lifecycle.closing && !this.components.busy) await this.components.detect()
   }
   shutdown() {
     if (this.shutdownPromise) return this.shutdownPromise
@@ -710,8 +709,8 @@ export class Backend {
           break
         }
         case 'apps.cancel': this.apps.cancel(); break
-        case 'components.detect': await this.geoip.initialize(); await this.databases.initialize(); await this.components.refreshPackages(); await this.components.detect(); break
-        case 'components.action': if (r.id === 'geoip') { await this.geoip.initialize(); break } if (isDatabaseId(r.id)) { await this.databases.action(r.id, r.action); break } if (r.action === 'detect') await this.components.detect(); else await this.install([r.id === 'fastboot' ? 'adb' : r.id]); break
+        case 'components.detect': await this.components.detect(); await this.geoip.initialize(); await this.databases.initialize(); await this.components.refreshPackages(); break
+        case 'components.action': if (r.id === 'geoip') { await this.geoip.initialize(); break } if (isDatabaseId(r.id)) { await this.databases.action(r.id, r.action); break } if (r.action === 'detect') await this.components.detect(); else await this.install([r.id]); break
         case 'components.installAll': { const ids = installationTargets(this.components.records); if (ids.length) await this.install(ids); if (this.databases.records.some(d => ['Update available', 'Repair needed', 'Download failed'].includes(d.status))) await this.databases.action('db-trackers', 'install'); break }
         case 'components.locate': if (r.id === 'geoip') { await this.geoip.locate(r.folder); break } if (isDatabaseId(r.id)) throw new Error('Use Update databases or Restore bundled databases.'); await this.components.locate(r.id, r.folder); break
         case 'components.open': { const folder = [...this.components.records, ...this.databases.records, this.geoip.record].find(c => c.id === r.id)?.location; if (!folder) throw new Error('No verified location is available.'); const error = await shell.openPath(folder); if (error) throw new Error(error); break }

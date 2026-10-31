@@ -8,7 +8,7 @@ import { ComponentsService, platformPackage, compareVersions } from '../dist-ele
 import { ConnectionService, endpoint, parseDevices, parseMdns, mergeWirelessTransports } from '../dist-electron/connections.js'
 import { download, officialResponse } from '../dist-electron/downloads.js'
 import { run, checked } from '../dist-electron/process.js'
-import { parseGoogleDrivers } from '../dist-electron/driver.js'
+import { googleDriverInventory, parseGoogleDrivers } from '../dist-electron/driver.js'
 import { installationTargets, componentCatalog } from '../dist-electron/catalog.js'
 
 await mkdir('desktop-test-results', { recursive: true })
@@ -92,8 +92,59 @@ test('manual component location validates executables before saving; existing pa
   await service.locate('adb', folder)
   assert.equal(storage.data.paths.adb, folder); assert.equal(storage.data.paths.fastboot, folder)
   assert.equal(service.records.find(c => c.id === 'adb').version, '37.0.1')
+  await service.locate('adb', '"' + path.join(folder, 'adb.exe') + '"')
+  const restored = new Storage(storage.root); await restored.load()
+  assert.equal(restored.data.paths.adb, folder)
+  assert.equal(restored.data.manualAdb, true)
+  await assert.rejects(service.locate('adb', path.join(folder, 'fastboot.exe')), /Choose adb.exe/)
+  await assert.rejects(service.locate('adb', path.join(folder, 'missing', 'adb.exe')), /Could not find adb.exe at this location/)
   valid = false; await assert.rejects(service.locate('adb', folder), /identify itself/)
   assert.equal(storage.data.paths.adb, folder)
+})
+test('a fresh profile finds ADB in the saved Windows PATH and honors changes on the next scan', { skip: process.platform !== 'win32' }, async t => {
+  const storage = new Storage(path.join(root, 'registered-tools')); await storage.load()
+  const folder = path.join(root, 'External platform tools')
+  const other = path.join(root, 'Other version')
+  for (const dir of [folder, other]) {
+    await mkdir(dir)
+    await writeFile(path.join(dir, 'adb.exe'), 'fixture')
+  }
+  let registered = [{}, {Path: `  "${folder}"  `}]
+  let environmentReads = 0
+  const runner = async (file, args) => {
+    if (file.toLowerCase().endsWith('powershell.exe')) {
+      const script = Buffer.from(args.at(-1), 'base64').toString('utf16le')
+      if (script.includes('RawValue')) { environmentReads++; return ok(JSON.stringify(registered)) }
+      return ok('')
+    }
+    assert.equal(args[0], 'version')
+    return ok('Android Debug Bridge version 1.0.41\nVersion 37.0.1')
+  }
+  // Only the test process sees these changes. The real Windows configuration is untouched.
+  for (const key of ['Path', 'ADB', 'ADB_PATH']) {
+    const before = process.env[key]
+    process.env[key] = ''
+    t.after(() => { if (before === undefined) delete process.env[key]; else process.env[key] = before })
+  }
+  const service = new ComponentsService(storage, () => {}, runner)
+  await service.detect()
+  assert.equal(service.adbPath(), path.join(folder, 'adb.exe'))
+  assert.equal(environmentReads, 1)
+  registered = [{ADB_PATH: path.join(other, 'adb.exe')}, {}]
+  await service.detect()
+  assert.equal(service.adbPath(), path.join(other, 'adb.exe'))
+  assert.equal(environmentReads, 2)
+  const bundled = path.join(storage.root, 'components', 'platform-tools')
+  await mkdir(bundled, { recursive:true })
+  await writeFile(path.join(bundled, 'adb.exe'), 'old managed copy')
+  storage.data.paths.adb = bundled
+  await service.detect()
+  assert.equal(service.adbPath(), path.join(other, 'adb.exe'), 'Registered ADB wins over an older automatic download')
+  await service.locate('adb', path.join(bundled, 'adb.exe'))
+  const reopened = new Storage(storage.root); await reopened.load()
+  const next = new ComponentsService(reopened, () => {}, runner)
+  await next.detect()
+  assert.equal(next.adbPath(), path.join(bundled, 'adb.exe'), 'An explicit choice survives restart')
 })
 test('scans persist actual connections and clear the active device on cable loss', async () => {
   const storage = new Storage(path.join(root, 'scan')); await storage.load()
@@ -127,9 +178,29 @@ test('Google driver inventory recognizes localized Windows output and ignores ot
   const result = parseGoogleDrivers('Опубликованное имя: oem25.inf\nИсходное имя: android_winusb.inf\nПоставщик: Google, Inc.\nВерсия: 08/28/2014 11.0.0000.00000\n\nPublished Name: oem26.inf\nOriginal Name: other.inf\nProvider Name: Google\nDriver Version: 1.2.3.4')
   assert.deepEqual(result, [{ publishedName: 'oem25.inf', version: '11.0.0000.00000' }])
 })
-test('bulk installation includes a prepared driver and deduplicates Platform Tools', () => {
+test('denied PnPUtil enumeration verifies the published Google INF, including when no phone is attached', async () => {
+  const windows = path.join(root, 'fixture-windows')
+  const store = path.join(windows, 'System32', 'DriverStore', 'FileRepository')
+  const published = path.join(windows, 'INF')
+  await mkdir(published, {recursive:true})
+  const denied = async () => { throw Error('Access denied') }
+  await assert.rejects(googleDriverInventory(denied, windows), /Access denied/)
+  for (const [dir, provider] of [['android_winusb.inf_amd64_1','Google, Inc.'], ['android_winusb.inf_amd64_2','Other vendor']]) {
+    const folder = path.join(store, dir)
+    await mkdir(folder, {recursive:true})
+    const inf = Buffer.from('\uFEFF[Version]\nProvider=%Vendor%\nDriverVer=08/28/2014,11.0.0000.00000\n[Strings]\nVendor="'+provider+'"\n','utf16le')
+    await writeFile(path.join(folder, 'android_winusb.inf'), inf)
+    if (provider !== 'Google, Inc.') await writeFile(path.join(published,'oem2.inf'), inf)
+  }
+  assert.deepEqual(await googleDriverInventory(denied, windows), [])
+  const bytes = await readFile(path.join(store,'android_winusb.inf_amd64_1','android_winusb.inf'))
+  await writeFile(path.join(published,'oem37.inf'), bytes)
+  assert.deepEqual(await googleDriverInventory(denied, windows), [{publishedName:'oem37.inf',version:'11.0.0000.00000'}])
+})
+test('bulk installation skips the optional driver and deduplicates Platform Tools', () => {
   const records = componentCatalog.map(c => ({ ...c, status: c.id === 'driver' ? 'Package ready' : c.id === 'adb' || c.id === 'fastboot' ? 'Not installed' : 'Installed' }))
-  assert.deepEqual(installationTargets(records), ['adb', 'driver'])
+  assert.deepEqual(installationTargets(records), ['adb'])
+  assert.deepEqual(installationTargets(records.map(c => c.id === 'adb' ? {...c, status:'Detected'} : c)), ['fastboot'])
 })
 test('prepared driver installs without downloading; UAC cancellation, failure and unverified success stay recoverable', async () => {
   const storage = new Storage(path.join(root, 'driver-install')); await storage.load()

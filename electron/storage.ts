@@ -5,7 +5,7 @@ import type { ComponentId, DeviceRecord } from './contracts.js'
 import { defaultAppsOptions, type AppsOptions } from './apps-protocol.js'
 import type { ExportDestinationSettings } from './app-backup-protocol.js'
 import { notificationSettings, type NotificationSettings } from './notifications-protocol.js'
-export interface Settings { packageActionEvidence?: PackageActionEvidence[]; notifications?: NotificationSettings; paths: Partial<Record<ComponentId, string>>; known: DeviceRecord[]; appsLoadingMode?: 'selected' | 'preload'; appsOptions?: AppsOptions; stopAdbOnExit?: boolean; apkZstd?: boolean; exportDestination?: ExportDestinationSettings }
+export interface Settings { packageActionEvidence?: PackageActionEvidence[]; notifications?: NotificationSettings; paths: Partial<Record<ComponentId, string>>; manualAdb?: boolean; known: DeviceRecord[]; appsLoadingMode?: 'selected' | 'preload'; appsOptions?: AppsOptions; stopAdbOnExit?: boolean; apkZstd?: boolean; exportDestination?: ExportDestinationSettings }
 export class Storage {
   data: Settings = { paths: {}, known: [] }
   private pending = Promise.resolve()
@@ -18,6 +18,7 @@ export class Storage {
       this.data.notifications = notificationSettings(saved.notifications)
       if (typeof saved.stopAdbOnExit === 'boolean') this.data.stopAdbOnExit = saved.stopAdbOnExit
       this.data.apkZstd = saved.apkZstd === true
+      this.data.manualAdb = saved.manualAdb === true
       const folder = saved.exportDestination?.folder
       const validFolder = typeof folder === 'string' && folder.length <= 4096 && !/[\x00-\x1f]/.test(folder) && path.isAbsolute(folder)
       this.data.exportDestination = { mode: saved.exportDestination?.mode === 'fixed' && validFolder ? 'fixed' : 'ask', folder: validFolder ? folder : null }
@@ -36,6 +37,10 @@ export class Storage {
     } catch { /* Missing or damaged preferences must not prevent startup. */ }
   }
   flush() { return this.pending }
+  get hasAutomaticAdbCopy() {
+    const folder = this.data.paths.adb
+    return !!folder && !this.data.manualAdb && !!this.managedRelativePath(folder)
+  }
   private managedRelativePath(folder: string): string | undefined {
     const relative = path.relative(path.join(this.root, 'components'), folder)
     if (!relative || relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) return undefined

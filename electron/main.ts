@@ -155,12 +155,15 @@ app.whenReady().then(async () => {
     if (command === 'maximize') { if (window?.isMaximized()) window.unmaximize(); else window?.maximize() }
     if (command === 'close') window?.close()
   })
-  ipcMain.handle('component:locate', async event => {
+  ipcMain.handle('component:locate', async (event, kind: unknown = 'folder') => {
     trusted(event)
+    if (kind !== 'folder' && kind !== 'adb-file') throw new Error('Unknown component picker.')
     if (backend!.closing) return null
     locatingComponent++
     try {
-      const result = await dialog.showOpenDialog(window!, { title: 'Locate component folder', properties: ['openDirectory'] })
+      const result = await dialog.showOpenDialog(window!, kind === 'adb-file'
+        ? { title: 'Choose adb.exe', properties: ['openFile'], filters: [{ name: 'Windows executable', extensions: ['exe'] }] }
+        : { title: 'Locate component folder', properties: ['openDirectory'] })
       return result.canceled || backend!.closing ? null : result.filePaths[0]
     } finally { locatingComponent-- }
   })

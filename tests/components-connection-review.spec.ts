@@ -4,6 +4,7 @@ import { installBackendFixture, connectionEvent } from './backend-fixture'
 test.beforeEach(async ({ page }) => { await installBackendFixture(page); await page.goto('/') })
 
 test('component checks disable conflicting actions before release metadata arrives and recover on failure', async ({ page }) => {
+  await page.getByRole('button', { name: 'Select Google USB Driver' }).click()
   await page.evaluate(() => {
     const original = window.desktop!.request
     window.desktop!.request = async r => {
@@ -32,6 +33,7 @@ test('component checks disable conflicting actions before release metadata arriv
 })
 
 test('manual component location prevents duplicate submit and displays backend failures in the dialog', async ({ page }) => {
+  await page.getByRole('button', { name: 'Select Google USB Driver' }).click()
   await page.getByRole('button', { name: 'Locate manually', exact: true }).click()
   const dialog = page.getByRole('dialog')
   await dialog.getByRole('textbox', { name: 'Component folder', exact: true }).fill('C:\\Missing tools')
@@ -54,9 +56,38 @@ test('manual component location prevents duplicate submit and displays backend f
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(dialog).not.toBeVisible()
 })
+test('missing ADB can be located from Components and Connection without opening the inspector', async ({ page }) => {
+  const choose = page.getByRole('button', { name: 'Use existing ADB', exact: true })
+  await expect(choose).toHaveCount(0)
+  await page.evaluate(() => {
+    const fixture = window.backendTest
+    fixture.emit({ type: 'components', components: fixture.snapshot.components.map(c => c.id === 'adb' ? { ...c, status: 'Not installed', location: null } : c) })
+    fixture.emit({ type: 'connection', connection: { ...fixture.snapshot.connection, adbAvailable: false } })
+    window.desktop!.locate = async kind => kind === 'adb-file' ? 'C:\\SDK tools\\adb.exe' : 'C:\\SDK tools'
+  })
+  await choose.click()
+  const dialog = page.getByRole('dialog', { name: 'Use existing ADB' })
+  const input = dialog.getByLabel('ADB file or folder')
+  await dialog.getByRole('button', { name: 'Choose folder…' }).click()
+  await expect(input).toHaveValue('C:\\SDK tools')
+  await dialog.getByRole('button', { name: 'Choose adb.exe…' }).click()
+  await expect(input).toHaveValue('C:\\SDK tools\\adb.exe')
+  await input.fill('"C:\\SDK tools\\adb.exe"')
+  await dialog.getByRole('button', { name: 'Use this ADB' }).click()
+  expect(await page.evaluate(() => window.backendTest.requests.at(-1))).toEqual({ type: 'components.locate', id: 'adb', folder: 'C:\\SDK tools\\adb.exe' })
+  await dialog.press('Escape')
+  await page.getByRole('navigation').getByRole('button', { name: 'Connection', exact:true }).click()
+  await choose.click()
+  await expect(dialog).toBeVisible()
+})
 
 test('ADB diagnostics waits for component work and a failed automatic check does not loop', async ({ page }) => {
+  // Move away from the initially selected ADB before simulating a different installation.
+  await page.getByRole('button', { name: 'Select Google USB Driver' }).click()
   await page.evaluate(() => {
+    const fixture = window.backendTest
+    fixture.requests.length = 0
+    fixture.emit({ type: 'components', components: fixture.snapshot.components.map(c => c.id === 'adb' ? { ...c, location: 'C:\\New SDK\\platform-tools' } : c) })
     const original = window.desktop!.request
     window.desktop!.request = async r => {
       if (r.type === 'components.detect') await new Promise<void>(resolve => window.addEventListener('release-components', () => resolve(), { once: true }))

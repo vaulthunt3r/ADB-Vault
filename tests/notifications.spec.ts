@@ -4,6 +4,26 @@ import { notificationEvents } from '../electron/notifications-protocol'
 
 test.beforeEach(async ({ page }) => { await installBackendFixture(page) })
 
+test('Settings categories stay visible at the bottom of Notifications', async ({ page }) => {
+  for (const width of [1000, 1440]) {
+    await page.setViewportSize({ width, height: 680 })
+    await page.goto('/')
+    await page.getByRole('navigation').getByRole('button', { name: 'Settings', exact: true }).click()
+    const categories = page.getByRole('group', { name: 'Settings categories' })
+    await categories.getByRole('button', { name: 'Notifications' }).click()
+    const pane = page.locator('.settings-pane')
+    const before = await categories.boundingBox()
+    await pane.evaluate(element => { element.scrollTop = element.scrollHeight })
+    expect(await pane.evaluate(element => element.scrollTop)).toBeGreaterThan(100)
+    expect(await categories.boundingBox()).toEqual(before)
+    const appearance = categories.getByRole('button', { name: 'Appearance' })
+    await expect(appearance).toBeInViewport()
+    await appearance.click()
+    await expect(appearance).toHaveAttribute('aria-pressed', 'true')
+    expect(await pane.evaluate(element => element.scrollTop)).toBe(0)
+  }
+})
+
 test('notification delivery toggles are independent and test respects saved settings', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('navigation').getByRole('button', { name: 'Settings', exact: true }).click()
@@ -42,12 +62,12 @@ test('event matrix configures sound and desktop separately and retains choices b
   await page.getByRole('group', { name: 'Settings categories' }).getByRole('button', { name: 'Notifications', exact: true }).click()
   const events = page.getByRole('table', { name: 'Notification events' })
   await expect(events.getByRole('checkbox')).toHaveCount(notificationEvents.length * 2)
-  const readingSound = events.getByRole('checkbox', { name: 'Reading apps finished: sound', exact: true })
-  const readingDesktop = events.getByRole('checkbox', { name: 'Reading apps finished: desktop', exact: true })
+  const readingSound = events.getByRole('checkbox', { name: 'Reading apps finished: Sound', exact: true })
+  const readingDesktop = events.getByRole('checkbox', { name: 'Reading apps finished: Desktop', exact: true })
   await readingSound.uncheck(); await expect(readingDesktop).toBeChecked()
-  await expect(events.getByRole('checkbox', { name: 'Backup finished: sound', exact: true })).toBeChecked()
-  await events.getByRole('checkbox', { name: 'Reading apps started: sound', exact: true }).check()
-  await expect(events.getByRole('checkbox', { name: 'Reading apps started: desktop', exact: true })).not.toBeChecked()
+  await expect(events.getByRole('checkbox', { name: 'Backup finished: Sound', exact: true })).toBeChecked()
+  await events.getByRole('checkbox', { name: 'Reading apps started: Sound', exact: true }).check()
+  await expect(events.getByRole('checkbox', { name: 'Reading apps started: Desktop', exact: true })).not.toBeChecked()
   const globalSound = page.getByRole('checkbox', { name: /^Sound alerts/ })
   await globalSound.uncheck(); await expect(readingSound).toBeDisabled()
   await globalSound.check(); await expect(readingSound).not.toBeChecked()
@@ -56,7 +76,7 @@ test('event matrix configures sound and desktop separately and retains choices b
   await page.evaluate(() => window.backendTest.emit({ type: 'notificationOpen', destination: 'settings' }))
   await expect(readingSound).not.toBeChecked()
   await page.setViewportSize({ width: 1000, height: 680 })
-  await events.getByRole('checkbox', { name: 'Reading apps finished: sound', exact: true }).scrollIntoViewIfNeeded()
+  await events.getByRole('checkbox', { name: 'Reading apps finished: Sound', exact: true }).scrollIntoViewIfNeeded()
   expect(await page.locator('main').evaluate(e => e.scrollWidth <= e.clientWidth)).toBe(true)
   await page.screenshot({ path: 'test-results/notification-events.png' })
 })

@@ -1,4 +1,5 @@
 import { mkdir, open, readdir, rename, rm, writeFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import os from 'node:os'
 import { randomUUID } from 'node:crypto'
@@ -48,7 +49,7 @@ export class FailureDiagnosticsService {
   private closing = false
   constructor(root: string, private connection: () => ConnectionSnapshot, private profile: (id: number) => string,
     private zstd: () => boolean, private publish: (summary: FailureDiagnostic) => void,
-    private sampleProcesses = processObservation, private adbLogPath = path.join(os.tmpdir(), 'adb.log'), private appVersion = '0.1.0') {
+    private sampleProcesses = processObservation, private adbLogPath = path.join(os.tmpdir(), 'adb.log'), private appVersion = createRequire(import.meta.url)('../package.json').version as string) {
     this.directory = path.join(root, 'failure-diagnostics')
   }
   async load() {

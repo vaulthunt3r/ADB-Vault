@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { readdir, readFile, stat } from 'node:fs/promises'
 import { powershell, run, type Runner } from './process.js'
 
 export interface StoredDriver { publishedName: string; version: string }
@@ -11,11 +12,57 @@ export function parseGoogleDrivers(output: string): StoredDriver[] {
     return publishedName && version ? [{ publishedName, version }] : []
   })
 }
-export async function googleDriverInventory(runner: Runner = run) {
-  const output = await powershell(`$output=& "$env:SystemRoot\\System32\\pnputil.exe" /enum-drivers
+function infField(text: string, name: string) {
+  for (const line of text.split(/\r?\n/)) {
+    const separator = line.indexOf('=')
+    if (separator < 0 || line.slice(0, separator).trim().toLowerCase() !== name.toLowerCase()) continue
+    return line.slice(separator + 1).split(';')[0].trim().replace(/^"|"$/g, '')
+  }
+}
+// Windows publishes a second copy of each staged INF as %SystemRoot%\INF\oemNN.inf.
+// Matching the two copies also works when PnPUtil cannot enumerate the store.
+export async function publishedGoogleDrivers(windows: string): Promise<StoredDriver[]> {
+  const store = path.join(windows, 'System32', 'DriverStore', 'FileRepository')
+  const candidates = (await readdir(store, { withFileTypes: true })).filter(dir => dir.isDirectory() && /^android_winusb\.inf_/i.test(dir.name))
+  if (!candidates.length) return []
+  const infDirectory = path.join(windows, 'INF')
+  const published = (await readdir(infDirectory)).filter(name => /^oem\d+\.inf$/i.test(name))
+  const packages = new Map<number, { bytes: Buffer; version: string }[]>()
+  for (const dir of candidates) {
+    const bytes = await readFile(path.join(store, dir.name, 'android_winusb.inf'))
+    const inf = bytes.toString(bytes[0] === 0xff && bytes[1] === 0xfe ? 'utf16le' : 'utf8').replace(/^\uFEFF/, '')
+    const provider = infField(inf, 'Provider')
+    const name = provider?.startsWith('%') && provider.endsWith('%')
+      ? infField(inf, provider.slice(1, -1))
+      : provider
+    const version = inf.match(/^\s*DriverVer\s*=\s*[^,\r\n]+,\s*(\d+(?:\.\d+){3})/im)?.[1]
+    if (!/^Google(?:[ ,.]|$)/i.test(name ?? '') || !version) continue
+    const sameSize = packages.get(bytes.length) ?? []
+    sameSize.push({ bytes, version })
+    packages.set(bytes.length, sameSize)
+  }
+  if (!packages.size) return []
+  const result: StoredDriver[] = []
+  for (const publishedName of published) {
+    const file = path.join(infDirectory, publishedName)
+    const sameSize = packages.get((await stat(file)).size)
+    if (!sameSize) continue
+    const contents = await readFile(file)
+    const match = sameSize.find(pkg => contents.equals(pkg.bytes))
+    if (match) result.push({ publishedName, version: match.version })
+  }
+  return result
+}
+export async function googleDriverInventory(runner: Runner = run, windows = process.env.SystemRoot || 'C:\\Windows') {
+  try {
+    const output = await powershell(`$output=& "$env:SystemRoot\\System32\\pnputil.exe" /enum-drivers
 if($LASTEXITCODE -ne 0) { throw "Windows driver inventory failed (code $LASTEXITCODE)." }
 $output`, undefined, 30000, runner)
-  return parseGoogleDrivers(output)
+    return parseGoogleDrivers(output)
+  } catch (error) {
+    try { return await publishedGoogleDrivers(windows) }
+    catch { throw error }
+  }
 }
 export async function installGoogleDriver(folder: string, runner: Runner = run): Promise<{ rebootRequired: boolean; noDeviceChange: boolean }> {
   const inf = path.join(folder, 'android_winusb.inf')

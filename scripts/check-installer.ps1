@@ -4,7 +4,8 @@ $workspace = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $qaBuild = [IO.Path]::GetFullPath((Join-Path $workspace $Build))
 if (-not $qaBuild.StartsWith((Join-Path $workspace 'desktop-test-results\'), [StringComparison]::OrdinalIgnoreCase)) { throw 'Only an isolated QA build is allowed.' }
 $qaName = 'ADB Vault Installer QA'
-$setup = Join-Path $qaBuild 'ADB-Vault-0.1.0-Windows-x64-Setup.exe'
+$version = (Get-Content -LiteralPath (Join-Path $workspace 'package.json') -Raw | ConvertFrom-Json).version
+$setup = Join-Path $qaBuild "ADB-Vault-$version-Windows-x64-Setup.exe"
 $metadata = (Get-Item -LiteralPath $setup).VersionInfo
 if ($metadata.ProductName -ne $qaName) { throw 'Refusing to test a production installer.' }
 $root = Join-Path $workspace ('desktop-test-results\installer-run-' + [Guid]::NewGuid().ToString('N'))
@@ -22,7 +23,7 @@ $realHash = if (Test-Path -LiteralPath $realBackend) { (Get-FileHash -LiteralPat
 $checks = [Collections.Generic.List[string]]::new()
 function Assert($condition, [string]$label) { if (-not $condition) { throw $label }; $checks.Add($label); Write-Output "PASS: $label" }
 function Registrations {
-  @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall' | ForEach-Object { Get-ItemProperty $_.PSPath } | Where-Object { $_.DisplayName -eq "$qaName 0.1.0" })
+  @(Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall','HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall' | ForEach-Object { Get-ItemProperty $_.PSPath } | Where-Object { $_.DisplayName -eq "$qaName $version" })
 }
 function Run([string]$exe, [string]$arguments, [int]$expected = 0) {
   $process = Start-Process -FilePath $exe -ArgumentList $arguments -WindowStyle Hidden -PassThru

@@ -14,7 +14,7 @@ export function retainCheckingStatus(next: ManagedComponent[], previous: Managed
   })
 }
 // A check starts only when the desktop backend reports it, including database loading.
-export const initialComponents = [...[...componentCatalog, ...databaseCatalog].map(component => ({ ...component, status: 'Not detected' as const })), geoipComponent]
+export const initialComponents = [...componentCatalog, ...databaseCatalog.map(component => ({ ...component, status: 'Not detected' as const })), geoipComponent]
 
 export const isReady = (status: ComponentStatus) => status === 'Installed' || status === 'Detected'
 export const isNotInstalled = (status: ComponentStatus) => status === 'Not installed' || status === 'Package ready'

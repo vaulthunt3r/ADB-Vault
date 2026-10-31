@@ -6,12 +6,12 @@ import { useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import { Cable, Check, History, QrCode, RefreshCw, Smartphone, Trash2, Unplug, Usb, Wifi, X } from 'lucide-react'
 import { useConnectionStore } from '../store/useConnectionStore'
-import { useAppStore } from '../store/useAppStore'
 import { ConnectionStatus } from '../components/ConnectionInspector'
 import { ForgetDeviceDialog } from '../components/ForgetDeviceDialog'
 import { ReconnectDeviceDialog } from '../components/ReconnectDeviceDialog'
 import type { DeviceRecord } from '../../electron/contracts'
 import { FastbootDevices } from '../components/FastbootDevices'
+import { AdbSetupNotice } from '../components/AdbSetupNotice'
 import { orderedKnownDevices } from '../lib/knownDevices'
 
 export function ConnectionSection() {
@@ -38,7 +38,7 @@ export function ConnectionSection() {
   return <section className="section-content connection-section">
     <div className="section-heading"><div><div className="eyebrow section-eyebrow">{t("CONNECT YOUR DEVICE")}</div><h1>{t("Connection")}<span className="heading-period">.</span></h1><p>{t("USB and Android Wireless debugging. Device states come from ADB.")}</p></div></div>
     {!window.desktop && <div className="operation-error" role="alert">{t("Real connections require the Electron desktop application. Start it with npm run dev.")}</div>}
-    {!adbAvailable && <div className="connection-recovery"><span>{t("ADB is not available. Install or locate Platform Tools first.")}</span> <button className="text-button" onClick={() => useAppStore.getState().setSection('components')}>{t("Open Components")}</button></div>}
+    {window.desktop && !adbAvailable && <AdbSetupNotice />}
     <div className="connection-overview"><Smartphone size={16} /><span>{active ? <>{localeText("Active device: ")}<strong>{active.name}</strong> · {active.method}</> : t("No active device")}</span><span className="connection-count">{devices.filter(d => d.status === 'connected').length}{t(" connected")}</span></div>
     {state.errorNotice && <div className="operation-error dismissible-error" role="alert"><span>{state.errorNotice.text}</span><button className="icon-button" aria-label={t("Dismiss connection error")} onClick={state.dismissError}><X size={15} /></button></div>}
     {state.message && <p className="connection-message" role="status">{message(state.message)}</p>}

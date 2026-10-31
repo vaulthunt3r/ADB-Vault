@@ -4,9 +4,9 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { auditRelease } from './audit-release.mjs'
 const output = path.resolve(process.argv[2] || 'release')
-const source = path.resolve(process.argv[3] || 'github-ready/ADB-Vault-0.1.0-Source.zip')
-const javaRoot = path.resolve(process.argv[4] || '.tools/publication')
 const { version } = JSON.parse(await fs.readFile('package.json', 'utf8'))
+const source = path.resolve(process.argv[3] || `github-ready/ADB-Vault-${version}-Source.zip`)
+const javaRoot = path.resolve(process.argv[4] || '.tools/publication')
 const java = JSON.parse(await fs.readFile(path.join(javaRoot, 'java-source.json'), 'utf8'))
 if (java.name !== 'OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz' || java.version !== '17.0.20.1+1' || java.sha256 !== '21e2a065d244ab048e737f21af5d1fc74daaeb6707de36477ead8db1dca71214') throw new Error('Unexpected Java source metadata')
 async function sha256(file) { const h = createHash('sha256'); for await (const chunk of createReadStream(file)) h.update(chunk); return h.digest('hex') }

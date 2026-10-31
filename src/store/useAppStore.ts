@@ -96,7 +96,7 @@ function retainActivity(activity: ActivityItem[], dismissed: Set<string>, diagno
 
 export const useAppStore = create<AppState>()(persist((set, get) => ({
   settingsTab: 'appearance', stopAdbOnExit: true,
-  section: 'components', appsView: 'installed', openLocalApks: () => { get().setSection('apps'); set({ appsView: 'apk' }) }, leftSidebar: 'expanded', rightSidebar: 'expanded', inspectorTab: 'details', selectedId: 'driver',
+  section: 'components', appsView: 'installed', openLocalApks: () => { get().setSection('apps'); set({ appsView: 'apk' }) }, leftSidebar: 'expanded', rightSidebar: 'expanded', inspectorTab: 'details', selectedId: 'adb',
   workspaceOrder: [...defaultWorkspaceOrder], hiddenWorkspaces: [],
   setWorkspaceOrder: order => set(state => workspacePreferences(order, state.hiddenWorkspaces)),
   setWorkspaceVisible: (id, visible) => set(state => {

@@ -7,6 +7,18 @@ Fastboot are provided together. scrcpy enables phone screen, virtual display,
 camera and audio sessions. Driver/runtime installation is separate from the
 application installer and is needed only on some computers.
 
+Existing tools are checked at startup. **Check components** also reads the
+current Windows user and system `Path`, `ANDROID_HOME`, `ANDROID_SDK_ROOT`,
+and an explicit `ADB` or `ADB_PATH` pointing to the executable or its folder.
+When ADB cannot be found, choose **Use existing ADB** in **Components** or
+**Connection**, then select `adb.exe`, select its folder, or paste either path.
+ADB Vault verifies the executable and remembers your choice. To switch copies
+later, use **Components → Android Debug Bridge → Locate manually**.
+
+The Google USB Driver is optional and installed only from its own component
+action. If your USB connection already works with the phone manufacturer's
+driver, you can skip it. Wi-Fi connections do not need a USB driver.
+
 Connect a phone in **Connection**, authorize USB debugging on the phone, and
 select it. Wi-Fi access depends on the device and network. The selected phone is
 shared across workspaces; app operations also use the selected Android profile.

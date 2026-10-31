@@ -37,3 +37,17 @@ function markCurrentTopic() {
 }
 markCurrentTopic();
 window.addEventListener('hashchange', markCurrentTopic);
+
+// Fetch the small previews when the gallery approaches the viewport.
+// Full-size PNGs are requested only when a visitor opens or saves one.
+if ('IntersectionObserver' in window && !navigator.connection?.saveData) {
+  const gallery = document.querySelector('.gallery');
+  const observer = new IntersectionObserver(entries => {
+    if (!entries.some(entry => entry.isIntersecting)) return;
+    observer.disconnect();
+    for (const preview of gallery.querySelectorAll('.card-original img')) {
+      preview.loading = 'eager';
+    }
+  }, {rootMargin: '400px 0px'});
+  observer.observe(gallery);
+}

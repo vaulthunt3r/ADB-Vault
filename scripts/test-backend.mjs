@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process'
+import { mkdir } from 'node:fs/promises'
+await mkdir('desktop-test-results', { recursive: true })
 const compile = spawn(process.execPath, ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.electron.json'], { stdio: 'inherit', windowsHide: true })
 if (await new Promise(resolve => compile.on('exit', resolve)) !== 0) process.exit(1)
 await import('./preload.mjs')

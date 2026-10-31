@@ -4,9 +4,10 @@ import path from 'node:path'
 import { run, checked } from '../dist-electron/process.js'
 import { actionOutput } from '../dist-electron/app-actions.js'
 import { runPackageAction } from '../dist-electron/package-actions.js'
-// The previously user-approved Mi Video/profile 0 only. No data clearing in this validation.
+// Only the explicitly selected test device and Mi Video/profile 0. No data clearing in this validation.
 assert.ok(process.argv.includes('--approved-mi-video-user-0'), 'Explicit hardware-test opt-in required')
-const serial = 'adb-qkwcvcbaj7p7pbyx-OH7cRr._adb-tls-connect._tcp'
+const serial = process.env.ADB_VAULT_TEST_DEVICE?.trim()
+assert.ok(serial, 'Set ADB_VAULT_TEST_DEVICE to the explicitly selected test device.')
 const config = JSON.parse(await readFile(path.join(process.env.APPDATA, 'adb-vault/backend.json'), 'utf8'))
 const adb = path.join(config.paths.adb, 'adb.exe'), folder = 'desktop-test-results/package-methods-production'
 await mkdir(folder, { recursive: true })

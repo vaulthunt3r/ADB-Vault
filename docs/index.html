@@ -7,8 +7,8 @@
   <meta name="description" content="ADB Vault is an open-source Android workspace for Windows. Read app names and icons over ADB, inspect APKs, transfer files and control your phone.">
   <title>ADB Vault · Android device workspace for Windows</title>
   <link rel="icon" href="images/app-icon.png">
-  <link rel="stylesheet" href="site.css">
-  <script src="site.js" defer></script>
+  <link rel="stylesheet" href="site.css?gallery=2">
+  <script src="site.js?gallery=2" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -49,20 +49,76 @@
       <a href="https://github.com/vaulthunt3r/ADB-Vault/blob/main/android-helper/README.md#session-and-protocol-1">How the collector works ↗</a></div>
     </aside></div>
     <section id="cards" class="gallery-section"><div class="wrap"><p class="eyebrow">02 / Illustrated guide</p>
-      <div class="section-head"><div><h2>Explore the nine cards</h2><p>Choose a topic, then open the image to read it at full size.</p></div></div>
+      <div class="section-head"><div><h2>Explore the nine cards</h2><p>Choose a topic or click the card to turn the page. Use “Open full size” to read the original.</p></div></div>
       <div class="gallery">
         <nav class="topics" aria-label="Feature card topics">
-          <a href="feature-guide/01-overview.png" aria-current="true"><span>01</span>Overview</a>
-          <a href="feature-guide/02-apps.png"><span>02</span>Apps and Android profiles</a>
-          <a href="feature-guide/03-backups.png"><span>03</span>Backups and recovery</a>
-          <a href="feature-guide/04-apk-analysis.png"><span>04</span>APK inspection</a>
-          <a href="feature-guide/05-screens-controls.png"><span>05</span>Screen, camera and input</a>
-          <a href="feature-guide/06-files.png"><span>06</span>Files and transfers</a>
-          <a href="feature-guide/07-connection-tools.png"><span>07</span>Connection and phone tools</a>
-          <a href="feature-guide/08-monitor-diagnostics.png"><span>08</span>Monitoring and diagnostics</a>
-          <a href="feature-guide/09-personal.png"><span>09</span>Personal records and setup</a>
+          <a href="#card-01"><span>01</span>Overview</a>
+          <a href="#card-02"><span>02</span>Apps and Android profiles</a>
+          <a href="#card-03"><span>03</span>Backups and recovery</a>
+          <a href="#card-04"><span>04</span>APK inspection</a>
+          <a href="#card-05"><span>05</span>Screen, camera and input</a>
+          <a href="#card-06"><span>06</span>Files and transfers</a>
+          <a href="#card-07"><span>07</span>Connection and phone tools</a>
+          <a href="#card-08"><span>08</span>Monitoring and diagnostics</a>
+          <a href="#card-09"><span>09</span>Personal records and setup</a>
         </nav>
-        <figure class="card-view"><a id="card-full" href="feature-guide/01-overview.png"><img id="card-image" loading="lazy" width="1600" height="2000" src="feature-guide/01-overview.png" alt="Feature card 1: Overview. Open the full-size PNG."></a><figcaption><span id="card-caption" aria-live="polite">01 / Overview</span><a id="card-download" href="feature-guide/01-overview.png" download>Save PNG ↓</a></figcaption></figure>
+        <div class="card-stack">
+          <!-- The default card follows the other targets so the CSS works without scripting. -->
+          <figure id="card-02" class="card-view" tabindex="-1" aria-label="02 · Apps and Android profiles">
+            <figcaption><strong>Apps and Android profiles</strong><span>02 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-01">← Previous</a><a href="#card-03">Next →</a></div>
+            <a class="turn-card" href="#card-03" aria-label="Next card: Backups and recovery"><img loading="lazy" width="1600" height="2000" src="feature-guide/02-apps.png" alt="Apps and Android profiles feature card"></a>
+            <div class="card-files"><a href="feature-guide/02-apps.png">Open full size ↗</a><a href="feature-guide/02-apps.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-03" class="card-view" tabindex="-1" aria-label="03 · Backups and recovery">
+            <figcaption><strong>Backups and recovery</strong><span>03 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-02">← Previous</a><a href="#card-04">Next →</a></div>
+            <a class="turn-card" href="#card-04" aria-label="Next card: APK inspection"><img loading="lazy" width="1600" height="2000" src="feature-guide/03-backups.png" alt="Backups and recovery feature card"></a>
+            <div class="card-files"><a href="feature-guide/03-backups.png">Open full size ↗</a><a href="feature-guide/03-backups.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-04" class="card-view" tabindex="-1" aria-label="04 · APK inspection">
+            <figcaption><strong>APK inspection</strong><span>04 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-03">← Previous</a><a href="#card-05">Next →</a></div>
+            <a class="turn-card" href="#card-05" aria-label="Next card: Screen, camera and input"><img loading="lazy" width="1600" height="2000" src="feature-guide/04-apk-analysis.png" alt="APK inspection feature card"></a>
+            <div class="card-files"><a href="feature-guide/04-apk-analysis.png">Open full size ↗</a><a href="feature-guide/04-apk-analysis.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-05" class="card-view" tabindex="-1" aria-label="05 · Screen, camera and input">
+            <figcaption><strong>Screen, camera and input</strong><span>05 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-04">← Previous</a><a href="#card-06">Next →</a></div>
+            <a class="turn-card" href="#card-06" aria-label="Next card: Files and transfers"><img loading="lazy" width="1600" height="2000" src="feature-guide/05-screens-controls.png" alt="Screen, camera and input feature card"></a>
+            <div class="card-files"><a href="feature-guide/05-screens-controls.png">Open full size ↗</a><a href="feature-guide/05-screens-controls.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-06" class="card-view" tabindex="-1" aria-label="06 · Files and transfers">
+            <figcaption><strong>Files and transfers</strong><span>06 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-05">← Previous</a><a href="#card-07">Next →</a></div>
+            <a class="turn-card" href="#card-07" aria-label="Next card: Connection and phone tools"><img loading="lazy" width="1600" height="2000" src="feature-guide/06-files.png" alt="Files and transfers feature card"></a>
+            <div class="card-files"><a href="feature-guide/06-files.png">Open full size ↗</a><a href="feature-guide/06-files.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-07" class="card-view" tabindex="-1" aria-label="07 · Connection and phone tools">
+            <figcaption><strong>Connection and phone tools</strong><span>07 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-06">← Previous</a><a href="#card-08">Next →</a></div>
+            <a class="turn-card" href="#card-08" aria-label="Next card: Monitoring and diagnostics"><img loading="lazy" width="1600" height="2000" src="feature-guide/07-connection-tools.png" alt="Connection and phone tools feature card"></a>
+            <div class="card-files"><a href="feature-guide/07-connection-tools.png">Open full size ↗</a><a href="feature-guide/07-connection-tools.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-08" class="card-view" tabindex="-1" aria-label="08 · Monitoring and diagnostics">
+            <figcaption><strong>Monitoring and diagnostics</strong><span>08 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-07">← Previous</a><a href="#card-09">Next →</a></div>
+            <a class="turn-card" href="#card-09" aria-label="Next card: Personal records and setup"><img loading="lazy" width="1600" height="2000" src="feature-guide/08-monitor-diagnostics.png" alt="Monitoring and diagnostics feature card"></a>
+            <div class="card-files"><a href="feature-guide/08-monitor-diagnostics.png">Open full size ↗</a><a href="feature-guide/08-monitor-diagnostics.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-09" class="card-view" tabindex="-1" aria-label="09 · Personal records and setup">
+            <figcaption><strong>Personal records and setup</strong><span>09 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-08">← Previous</a><a href="#card-01">Next →</a></div>
+            <a class="turn-card" href="#card-01" aria-label="Next card: Overview"><img loading="lazy" width="1600" height="2000" src="feature-guide/09-personal.png" alt="Personal records and setup feature card"></a>
+            <div class="card-files"><a href="feature-guide/09-personal.png">Open full size ↗</a><a href="feature-guide/09-personal.png" download>Save PNG ↓</a></div>
+          </figure>
+          <figure id="card-01" class="card-view" data-default tabindex="-1" aria-label="01 · Overview">
+            <figcaption><strong>Overview</strong><span>01 / 09</span></figcaption>
+            <div class="card-pager"><a href="#card-09">← Previous</a><a href="#card-02">Next →</a></div>
+            <a class="turn-card" href="#card-02" aria-label="Next card: Apps and Android profiles"><img loading="lazy" width="1600" height="2000" src="feature-guide/01-overview.png" alt="Overview feature card"></a>
+            <div class="card-files"><a href="feature-guide/01-overview.png">Open full size ↗</a><a href="feature-guide/01-overview.png" download>Save PNG ↓</a></div>
+          </figure>
+        </div>
       </div><p class="resources"><a href="https://github.com/vaulthunt3r/ADB-Vault/tree/main/docs/feature-guide">View gallery on GitHub ↗</a> · <a href="https://github.com/vaulthunt3r/ADB-Vault/blob/main/docs/USER-GUIDE.md">Read the user guide ↗</a></p>
     </div></section>
     <section class="wrap preview"><p class="eyebrow">03 / Compatibility</p><h2>First public preview</h2>

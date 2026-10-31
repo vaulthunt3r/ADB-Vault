@@ -38,3 +38,32 @@
   .hero-film .player-foot {flex-direction:row;align-items:center;gap:8px}
   .player-foot a {margin-left:auto}
 }
+.card-stack {min-width:0}
+.card-view {display:none;scroll-margin-block-start:16px}
+.card-view[data-default], .card-view:target {display:block}
+.card-view:target ~ .card-view[data-default] {display:none}
+.card-view figcaption {align-items:baseline;margin:0 0 8px}
+.card-view figcaption strong {font-size:1.1rem;color:#193a32}
+.card-view figcaption span {white-space:nowrap;font:600 .85rem ui-monospace,Consolas,monospace}
+.card-pager,.card-files {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-pager {margin-bottom:12px}
+.card-pager a {display:inline-flex;align-items:center;min-height:44px;text-decoration:none;font-weight:650;padding:6px 12px;border:1px solid #99b4a5;border-radius:6px}
+.card-pager a:hover,.card-pager a:focus-visible {background:#cbdccf}
+.turn-card {display:block;width:fit-content;max-width:100%;margin:auto}
+.turn-card img {height:auto;aspect-ratio:4/5}
+.card-files {margin-top:12px;color:#38534a;font-size:.9rem}
+.gallery:not(:has(.card-view:target)) .topics a[href="#card-01"],
+.gallery:has(#card-01:target) .topics a[href="#card-01"],
+.gallery:has(#card-02:target) .topics a[href="#card-02"],
+.gallery:has(#card-03:target) .topics a[href="#card-03"],
+.gallery:has(#card-04:target) .topics a[href="#card-04"],
+.gallery:has(#card-05:target) .topics a[href="#card-05"],
+.gallery:has(#card-06:target) .topics a[href="#card-06"],
+.gallery:has(#card-07:target) .topics a[href="#card-07"],
+.gallery:has(#card-08:target) .topics a[href="#card-08"],
+.gallery:has(#card-09:target) .topics a[href="#card-09"] {background:#dce8dc;border-left:4px solid #376a55;padding-left:8px}
+@media(max-width:760px) {
+  .gallery {grid-template-columns:minmax(0,1fr);grid-template-areas:"card" "topics"}
+  .card-stack {grid-area:card}
+  .topics {grid-area:topics;grid-template-columns:1fr 1fr;gap:0 8px}
+}

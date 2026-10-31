@@ -26,20 +26,14 @@ film.addEventListener('timeupdate', () => {
   if (active && document.activeElement !== chapter) chapter.value = active.value;
 });
 
-const topics = Array.from(document.querySelectorAll('.topics a'));
-const image = document.querySelector('#card-image');
-for (const topic of topics) {
-  topic.addEventListener('click', event => {
-    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    const number = topic.querySelector('span').textContent;
-    const title = topic.textContent.slice(number.length).trim();
-    for (const link of topics) link.removeAttribute('aria-current');
-    topic.setAttribute('aria-current', 'true');
-    image.src = topic.href;
-    image.alt = 'Feature card ' + number + ': ' + title + '. Open the full-size PNG.';
-    document.querySelector('#card-full').href = topic.href;
-    document.querySelector('#card-download').href = topic.href;
-    document.querySelector('#card-caption').textContent = number + ' / ' + title;
-  });
+// Fragment links select the card even when JS is unavailable; this only marks the topic.
+const topics = [...document.querySelectorAll('.topics a')];
+function markCurrentTopic() {
+  const current = topics.find(link => link.hash === location.hash) || topics[0];
+  for (const link of topics) {
+    if (link === current) link.setAttribute('aria-current', 'true');
+    else link.removeAttribute('aria-current');
+  }
 }
+markCurrentTopic();
+window.addEventListener('hashchange', markCurrentTopic);

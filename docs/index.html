@@ -17,35 +17,38 @@
     <nav aria-label="Main navigation"><a href="#video">Video</a><a href="#cards">Feature cards</a><a href="https://github.com/vaulthunt3r/ADB-Vault">GitHub ↗</a></nav>
   </div></header>
   <main id="main">
-    <section class="hero"><div class="wrap hero-inner">
+    <section class="hero" aria-labelledby="hero-title"><div class="wrap hero-inner">
       <div class="intro">
         <p class="eyebrow"><span class="status"></span> Windows 10/11 x64 <span class="sep">/</span> Public preview</p>
-        <h1>Your Android phone,<br>from Windows.</h1>
-        <p class="lede">Inspect apps and APKs, back up packages, move files and open a phone app in its own desktop window.</p>
+        <h1 id="hero-title">Manage Android<br>from Windows.</h1>
+        <p class="lede">Inspect an APK, back up an app or open it in its own desktop window. See how in the two-minute tour.</p>
+      </div>
+      <section id="video" class="hero-film" aria-label="Feature video">
+        <div class="film-frame">
+          <video id="guide-film" controls playsinline preload="none" poster="images/guide-cover.svg" width="1920" height="1080" aria-label="ADB Vault illustrated feature guide">
+            <source src="media/feature-guide.mp4" type="video/mp4"><track kind="captions" src="media/feature-guide.en.vtt" srclang="en" label="English">
+            <a href="media/feature-guide.mp4">Download the feature guide</a>
+          </video>
+          <button id="play-guide" type="button" hidden aria-label="Play the feature guide, 2 minutes 9 seconds"><span class="play-pill"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 14.5 8 3 14.5Z" fill="currentColor"/></svg>Watch the guide <span class="runtime">2:09</span></span></button>
+        </div>
+        <div class="player-foot"><div id="chapter-controls" hidden><label for="chapter">Jump to chapter</label> <select id="chapter">
+          <option value="0">00:00 · Overview</option><option value="6.4">00:06 · Apps and profiles</option><option value="21">00:21 · Backups and recovery</option><option value="36">00:36 · APK inspection</option><option value="50.8">00:51 · Screens and input</option><option value="65.6">01:06 · Files and transfers</option><option value="79">01:19 · Connection and phone tools</option><option value="93.4">01:33 · Monitoring and diagnostics</option><option value="108.4">01:48 · Personal records and setup</option><option value="122">02:02 · Public preview</option>
+        </select></div><a href="media/feature-guide.mp4" download>Download MP4 ↓</a></div>
+      </section>
+      <div class="downloads">
         <div class="actions">
           <a class="button primary" href="https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe">Download Setup <span aria-hidden="true">↓</span></a>
           <a class="button secondary" href="https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip">Portable ZIP <span aria-hidden="true">↓</span></a>
         </div>
         <p class="release">v0.1.0 · English interface · <a href="https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0">Release notes &amp; checksums</a></p>
       </div>
-      <figure class="ui-figure"><span class="figure-label">01 / Apps workspace</span><a href="images/screens/apps.png" aria-label="Open the full-size Apps workspace screenshot"><img width="1440" height="900" src="images/screens/apps.png" alt="ADB Vault Apps workspace with a demo Android profile, a list of packages and the selected app’s details"></a><figcaption>Actual interface · Sample device data</figcaption></figure>
     </div></section>
     <div class="wrap"><aside class="inventory" aria-labelledby="inventory-title">
       <span class="inventory-mark" aria-hidden="true">▤</span><div><h2 id="inventory-title">Built-in app inventory</h2>
       <p><strong>See app names and icons without installing a companion APK.</strong> After you authorize ADB, our collector reads package IDs, versions and icons for the selected Android profile in one pass. Reading this list works without root.</p>
       <a href="https://github.com/vaulthunt3r/ADB-Vault/blob/main/android-helper/README.md#session-and-protocol-1">How the collector works ↗</a></div>
     </aside></div>
-    <section id="video" class="wrap section"><p class="eyebrow">02 / Video</p>
-      <div class="section-head"><div><h2>Watch the feature guide</h2><p>From a package list to a verified backup, a touch binding or an APK comparison.</p></div><span class="meta">2:09 · Full HD · English captions</span></div>
-      <video id="guide-film" controls playsinline preload="none" poster="media/feature-guide-poster.jpg" width="1920" height="1080" aria-label="ADB Vault illustrated feature guide">
-        <source src="media/feature-guide.mp4" type="video/mp4"><track kind="captions" src="media/feature-guide.en.vtt" srclang="en" label="English">
-        <a href="media/feature-guide.mp4">Download the feature guide</a>
-      </video>
-      <div class="player-foot"><div id="chapter-controls" hidden><label for="chapter">Jump to chapter</label> <select id="chapter">
-        <option value="0">00:00 · Overview</option><option value="6.4">00:06 · Apps and profiles</option><option value="21">00:21 · Backups and recovery</option><option value="36">00:36 · APK inspection</option><option value="50.8">00:51 · Screens and input</option><option value="65.6">01:06 · Files and transfers</option><option value="79">01:19 · Connection and phone tools</option><option value="93.4">01:33 · Monitoring and diagnostics</option><option value="108.4">01:48 · Personal records and setup</option><option value="122">02:02 · Public preview</option>
-      </select></div><a href="media/feature-guide.mp4" download>Download MP4 ↓</a></div>
-    </section>
-    <section id="cards" class="gallery-section"><div class="wrap"><p class="eyebrow">03 / Illustrated guide</p>
+    <section id="cards" class="gallery-section"><div class="wrap"><p class="eyebrow">02 / Illustrated guide</p>
       <div class="section-head"><div><h2>Explore the nine cards</h2><p>Choose a topic, then open the image to read it at full size.</p></div></div>
       <div class="gallery">
         <nav class="topics" aria-label="Feature card topics">
@@ -62,7 +65,7 @@
         <figure class="card-view"><a id="card-full" href="feature-guide/01-overview.png"><img id="card-image" loading="lazy" width="1600" height="2000" src="feature-guide/01-overview.png" alt="Feature card 1: Overview. Open the full-size PNG."></a><figcaption><span id="card-caption" aria-live="polite">01 / Overview</span><a id="card-download" href="feature-guide/01-overview.png" download>Save PNG ↓</a></figcaption></figure>
       </div><p class="resources"><a href="https://github.com/vaulthunt3r/ADB-Vault/tree/main/docs/feature-guide">View gallery on GitHub ↗</a> · <a href="https://github.com/vaulthunt3r/ADB-Vault/blob/main/docs/USER-GUIDE.md">Read the user guide ↗</a></p>
     </div></section>
-    <section class="wrap preview"><p class="eyebrow">04 / Compatibility</p><h2>First public preview</h2>
+    <section class="wrap preview"><p class="eyebrow">03 / Compatibility</p><h2>First public preview</h2>
       <p>Testing has covered a limited set of phones. Android version, firmware and permissions affect what each feature can do. Back up important apps and files before making changes.</p>
       <p>If something fails, include the steps, phone model, Android version and Windows version in your report.</p>
       <a class="button secondary" href="https://github.com/vaulthunt3r/ADB-Vault/issues">Report an issue ↗</a>

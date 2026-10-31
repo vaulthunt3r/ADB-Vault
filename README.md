@@ -4,6 +4,12 @@ An Android device workspace for **Windows 10/11 x64**. Manage applications,
 transfer files, inspect APKs and open phone, virtual-display and camera windows
 from one desktop application.
 
+## Watch the feature guide · 2:09
+
+https://github.com/user-attachments/assets/0f83e051-c844-4317-9b75-3b938bc3ce63
+
+[Watch with chapters and English captions](https://vaulthunt3r.github.io/ADB-Vault/#video) · [Download MP4 (6.3 MB)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4) · [Explore the feature cards](#illustrated-feature-cards)
+
 <picture>
   <source media="(max-width: 600px)" srcset="docs/images/app-inventory-compact.svg">
   <img src="docs/images/app-inventory.svg" alt="Built-in app inventory: browse app names, icons, package IDs and versions over authorized ADB without installing a companion APK or requiring root.">
@@ -23,19 +29,27 @@ ADB Vault runs its own collector on the device and streams the selected profile�
 
 [Project website](https://vaulthunt3r.github.io/ADB-Vault/) · [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
-## Video and illustrated guide
+## Illustrated feature cards
 
-[![Open the 2:09 illustrated feature video](docs/media/feature-guide-poster.jpg)](https://vaulthunt3r.github.io/ADB-Vault/#video)
-
-[Watch with captions](https://vaulthunt3r.github.io/ADB-Vault/#video) · [Download the video (MP4, 6.3 MB)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4) · [English captions](docs/media/feature-guide.en.vtt) · [Browse all nine cards](docs/feature-guide/README.md)
+Select a card for the full-size image.
 
 <p>
-  <a href="docs/feature-guide/02-apps.png"><img src="docs/feature-guide/02-apps.png" width="31%" alt="App management and debloat assessments"></a>
-  <a href="docs/feature-guide/03-backups.png"><img src="docs/feature-guide/03-backups.png" width="31%" alt="Back up and restore selected apps"></a>
-  <a href="docs/feature-guide/05-screens-controls.png"><img src="docs/feature-guide/05-screens-controls.png" width="31%" alt="Screen windows, camera and touch controls"></a>
+  <a href="docs/feature-guide/01-overview.png"><img src="docs/feature-guide/01-overview.png" width="31%" alt="01 · Overview"></a>
+  <a href="docs/feature-guide/02-apps.png"><img src="docs/feature-guide/02-apps.png" width="31%" alt="02 · Apps and Android profiles"></a>
+  <a href="docs/feature-guide/03-backups.png"><img src="docs/feature-guide/03-backups.png" width="31%" alt="03 · Backups and recovery"></a>
+</p>
+<p>
+  <a href="docs/feature-guide/04-apk-analysis.png"><img src="docs/feature-guide/04-apk-analysis.png" width="31%" alt="04 · APK inspection"></a>
+  <a href="docs/feature-guide/05-screens-controls.png"><img src="docs/feature-guide/05-screens-controls.png" width="31%" alt="05 · Screen, camera and input"></a>
+  <a href="docs/feature-guide/06-files.png"><img src="docs/feature-guide/06-files.png" width="31%" alt="06 · Files and transfers"></a>
+</p>
+<p>
+  <a href="docs/feature-guide/07-connection-tools.png"><img src="docs/feature-guide/07-connection-tools.png" width="31%" alt="07 · Connection and phone tools"></a>
+  <a href="docs/feature-guide/08-monitor-diagnostics.png"><img src="docs/feature-guide/08-monitor-diagnostics.png" width="31%" alt="08 · Monitoring and diagnostics"></a>
+  <a href="docs/feature-guide/09-personal.png"><img src="docs/feature-guide/09-personal.png" width="31%" alt="09 · Personal records and setup"></a>
 </p>
 
-![Applications — search, inspect and keep personal notes](docs/images/showcase-apps.png)
+[Browse cards by topic](https://vaulthunt3r.github.io/ADB-Vault/#cards) · [Read the illustrated guide on GitHub](docs/feature-guide/README.md)
 
 ## Download and install
 
@@ -76,10 +90,6 @@ The interface is **English only**. The optional **Quick tour** can be skipped an
 replayed from the question-mark button in the title bar.
 
 There’s a little Easter egg, too. Happy hunting 😉
-
-![Files — browse your computer and phone side by side](docs/images/showcase-files.png)
-
-![Screen and camera — desktop sessions powered by scrcpy](docs/images/showcase-display.png)
 
 ## Connect a phone
 

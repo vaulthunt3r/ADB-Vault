@@ -4,6 +4,13 @@ An Android device workspace for **Windows 10/11 x64**. Manage applications,
 transfer files, inspect APKs and open phone, virtual-display and camera windows
 from one desktop application.
 
+**Browse installed apps without installing a companion APK on your phone.**
+After you authorize ADB, ADB Vault runs its own collector on the device. It
+reads app names, icons, package IDs and versions for the selected Android
+profile in a single pass and streams the list to Windows. Reading the list
+requires no root access or copies of the installed APKs on your PC.
+[How the collector works](android-helper/README.md#session-and-protocol-1)
+
 > [!IMPORTANT]
 > **Public preview — testing on more devices is still needed.**
 > Bugs are possible, and some features may fail or be unavailable. Testing has

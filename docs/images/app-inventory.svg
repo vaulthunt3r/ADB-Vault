@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="112" viewBox="0 0 880 112" role="img" aria-labelledby="title description">
+  <title id="title">Built-in app inventory</title>
+  <desc id="description">ADB Vault reads app names, icons and versions for the selected profile over authorized ADB without installing a companion APK or requiring root.</desc>
+  <rect width="100%" height="100%" fill="#12171b"/>
+  <rect width="4" height="100%" fill="#e4a244"/>
+  <g fill="none" stroke="#edb257" stroke-width="1.6" transform="translate(19 15)"><rect x="1" y="1" width="12" height="17" rx="2"/><path d="M5 15h4"/></g>
+  <g font-family="system-ui, Segoe UI, Arial, sans-serif">
+    <text x="44" y="30" font-size="17" font-weight="600" fill="#f0b966">Built-in app inventory</text>
+    <text x="20" y="62" font-size="18" fill="#eef2f4">Browse names, icons, package IDs and versions for the selected Android profile over ADB.</text>
+    <text x="20" y="89" font-size="18" fill="#eef2f4">No companion APK or root required to read the app list.</text>
+  </g>
+</svg>

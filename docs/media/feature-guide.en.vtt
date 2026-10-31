@@ -1,0 +1,181 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.200
+Seven workspaces
+Manage apps and files, open screen sessions and diagnose your phone.
+
+2
+00:00:03.200 --> 00:00:06.400
+Have only an APK?
+Open and inspect a local APK without connecting a device.
+
+3
+00:00:06.400 --> 00:00:09.920
+Paste a list into Apps
+The search field narrows the table to matching packages.
+
+4
+00:00:09.920 --> 00:00:13.400
+Work in the right profile
+Inspect permissions and components, or select several apps for a batch action.
+
+5
+00:00:13.400 --> 00:00:17.200
+Read the debloat evidence
+The list explains its classification, dependencies and available alternatives.
+
+6
+00:00:17.200 --> 00:00:21.000
+Freeze or disable
+Freeze suspends the app. Background services may continue. You can unfreeze or re-enable it later.
+
+7
+00:00:21.000 --> 00:00:24.800
+Save the whole APK set
+A split app needs its base APK and installed splits. Include app folders separately.
+
+8
+00:00:24.800 --> 00:00:28.600
+Back up a group
+Save a package-selection preset and review the result for each app. Protected data and cache require root.
+
+9
+00:00:28.600 --> 00:00:32.320
+From a backup
+Check the recorded contents, version and location, then restore supported parts to the selected profile.
+
+10
+00:00:32.320 --> 00:00:36.000
+From the phone
+Restore a removed system package if its APK still exists. This brings back the app only.
+
+11
+00:00:36.000 --> 00:00:39.600
+Compare before installing
+Inspect changes to versions, permissions, signing details and files.
+
+12
+00:00:39.600 --> 00:00:43.200
+Example
+The newer Notes APK requests notification permission. The inspector reads the package without launching it.
+
+13
+00:00:43.200 --> 00:00:47.000
+Find matches and evidence
+Check tracker and library signatures, native architectures and the APK size breakdown.
+
+14
+00:00:47.000 --> 00:00:50.800
+Trace a domain to its source
+Search extracted URLs and see which file contains each string. Actual device connections appear in Monitor.
+
+15
+00:00:50.800 --> 00:00:54.520
+Mirror or launch
+Control the phone screen, or open a selected Android app in its own virtual display. Pin a window on top.
+
+16
+00:00:54.520 --> 00:00:58.200
+Camera and recording
+Choose supported lenses, resolutions, frame rates and audio. Record supported sessions as MP4 or MKV.
+
+17
+00:00:58.200 --> 00:01:01.920
+For a touch-only game
+Place the target over Jump in the touch editor, bind Space and save the game preset.
+
+18
+00:01:01.920 --> 00:01:05.600
+For native input
+Use keyboard and mouse, PC-layout typing or a supported gamepad. Edit bindings and hotkeys as needed.
+
+19
+00:01:05.600 --> 00:01:09.000
+Choose either panel’s source
+Open local folders, phone storage or Windows-accessible SMB shares. Keep frequent locations in tabs and bookmarks.
+
+20
+00:01:09.000 --> 00:01:12.400
+Find the file first
+Search names or categories and preview supported images, video and audio.
+
+21
+00:01:12.400 --> 00:01:15.720
+Copy or move
+Choose the source and destination, then follow progress in the task queue.
+
+22
+00:01:15.720 --> 00:01:19.000
+Resolve interruptions
+Review conflicts, pause or resume work, and retry a failed transfer.
+
+23
+00:01:19.000 --> 00:01:22.720
+Set up Components
+Locate or download ADB, Fastboot and optional scrcpy. Maintain the detection databases here.
+
+24
+00:01:22.720 --> 00:01:26.400
+Select the device
+Authorize USB or pair over Wi-Fi. Check device details, existing root access and supported Fastboot restart modes.
+
+25
+00:01:26.400 --> 00:01:29.920
+Export the records you choose
+Preview contacts, SMS and call history. Save call records as CSV or JSON where Android permits access.
+
+26
+00:01:29.920 --> 00:01:33.400
+Share a piece of text
+Transfer clipboard text between the PC and phone, or create a local text QR code.
+
+27
+00:01:33.400 --> 00:01:37.200
+Read device statistics
+View reported CPU, memory, battery and interface traffic. Pause sampling or choose an interval.
+
+28
+00:01:37.200 --> 00:01:41.000
+Inspect a connection
+See an app owner when Android exposes it. Optional local GeoIP data adds country and network information.
+
+29
+00:01:41.000 --> 00:01:44.720
+Gather diagnostics
+Filter a Logcat snapshot, save logs or collect an Android bug report. Activity keeps operation results.
+
+30
+00:01:44.720 --> 00:01:48.400
+Use the console
+Run an ADB or Android shell command on the selected device and read its output.
+
+31
+00:01:48.400 --> 00:01:51.800
+Write it once
+Attach a personal label or note to a package. Its record appears when you see that package on another phone.
+
+32
+00:01:51.800 --> 00:01:55.200
+Keep the original context
+See the source phone, profile, app version and record date. Notes stay on your computer.
+
+33
+00:01:55.200 --> 00:01:58.600
+Choose your layout
+Adjust theme, density, corners, badge colors, toolbar and workspace order. Configure search and scanner links.
+
+34
+00:01:58.600 --> 00:02:02.000
+Start at your own pace
+Install or extract a portable copy. Take the optional English tour, skip it or replay it later.
+
+35
+00:02:02.000 --> 00:02:05.400
+Get the Windows build
+Find Setup, Portable and the illustrated guide in the project repository.
+
+36
+00:02:05.400 --> 00:02:08.800
+Tell us what worked
+Device coverage is limited. For a bug report, include the steps, phone model, Android version and Windows version.

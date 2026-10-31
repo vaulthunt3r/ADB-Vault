@@ -4,12 +4,12 @@ An Android device workspace for **Windows 10/11 x64**. Manage applications,
 transfer files, inspect APKs and open phone, virtual-display and camera windows
 from one desktop application.
 
-**Browse installed apps without installing a companion APK on your phone.**
-After you authorize ADB, ADB Vault runs its own collector on the device. It
-reads app names, icons, package IDs and versions for the selected Android
-profile in a single pass and streams the list to Windows. Reading the list
-requires no root access or copies of the installed APKs on your PC.
-[How the collector works](android-helper/README.md#session-and-protocol-1)
+<picture>
+  <source media="(max-width: 600px)" srcset="docs/images/app-inventory-compact.svg">
+  <img src="docs/images/app-inventory.svg" alt="Built-in app inventory: browse app names, icons, package IDs and versions over authorized ADB without installing a companion APK or requiring root.">
+</picture>
+
+ADB Vault runs its own collector on the device and streams the selected profile’s inventory to Windows in one pass. [How the collector works](android-helper/README.md#session-and-protocol-1)
 
 > [!IMPORTANT]
 > **Public preview — testing on more devices is still needed.**
@@ -23,7 +23,17 @@ requires no root access or copies of the installed APKs on your PC.
 
 [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
-[Explore ADB Vault in nine illustrated cards](docs/feature-guide/README.md)
+## Video and illustrated guide
+
+[![Open the 2:09 illustrated feature video](docs/media/feature-guide-poster.jpg)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4)
+
+[Download the video (MP4, 6.3 MB)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4) · [English captions](docs/media/feature-guide.en.vtt) · [Browse all nine cards](docs/feature-guide/README.md)
+
+<p>
+  <a href="docs/feature-guide/02-apps.png"><img src="docs/feature-guide/02-apps.png" width="31%" alt="App management and debloat assessments"></a>
+  <a href="docs/feature-guide/03-backups.png"><img src="docs/feature-guide/03-backups.png" width="31%" alt="Back up and restore selected apps"></a>
+  <a href="docs/feature-guide/05-screens-controls.png"><img src="docs/feature-guide/05-screens-controls.png" width="31%" alt="Screen windows, camera and touch controls"></a>
+</p>
 
 ![Applications — search, inspect and keep personal notes](docs/images/showcase-apps.png)
 

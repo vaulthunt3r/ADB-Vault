@@ -21,13 +21,13 @@ ADB Vault runs its own collector on the device and streams the selected profile�
 > [report reproducible problems](https://github.com/vaulthunt3r/ADB-Vault/issues)
 > with the app, Android and Windows versions and phone model, without personal data.
 
-[Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
+[Project website](https://vaulthunt3r.github.io/ADB-Vault/) · [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
 ## Video and illustrated guide
 
-[![Open the 2:09 illustrated feature video](docs/media/feature-guide-poster.jpg)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4)
+[![Open the 2:09 illustrated feature video](docs/media/feature-guide-poster.jpg)](https://vaulthunt3r.github.io/ADB-Vault/#video)
 
-[Download the video (MP4, 6.3 MB)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4) · [English captions](docs/media/feature-guide.en.vtt) · [Browse all nine cards](docs/feature-guide/README.md)
+[Watch with captions](https://vaulthunt3r.github.io/ADB-Vault/#video) · [Download the video (MP4, 6.3 MB)](https://github.com/vaulthunt3r/ADB-Vault/raw/refs/heads/main/docs/media/feature-guide.mp4) · [English captions](docs/media/feature-guide.en.vtt) · [Browse all nine cards](docs/feature-guide/README.md)
 
 <p>
   <a href="docs/feature-guide/02-apps.png"><img src="docs/feature-guide/02-apps.png" width="31%" alt="App management and debloat assessments"></a>

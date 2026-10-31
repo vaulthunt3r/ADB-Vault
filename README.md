@@ -16,6 +16,8 @@ from one desktop application.
 
 [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.0/ADB-Vault-0.1.0-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.0)
 
+[Explore ADB Vault in nine illustrated cards](docs/feature-guide/README.md)
+
 ![Applications — search, inspect and keep personal notes](docs/images/showcase-apps.png)
 
 ## Download and install

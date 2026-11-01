@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useAppsStore } from '../store/useAppsStore'
 import { requestBackend } from '../lib/backend'
 import { useEffect, useState } from 'react'
@@ -29,22 +27,22 @@ export function ApplicationBadges({ identity, checks, badges, onSelect, local = 
   useEffect(() => { setRevealError('') }, [identity, selected])
   const { colors, textColors } = useBadgeAppearanceStore()
   const badge = selected && selected !== 'legend' ? checks[selected] : null
-  const title = selected === 'openLinks' ? t("Supported domains") : selected === 'trackers' ? local ? t("Tracker signatures · DEX") : t("Tracker components") : t(badgeCatalog.find(([key]) => key === selected)?.[1] || '')
+  const title = selected === 'openLinks' ? "Supported domains" : selected === 'trackers' ? local ? "Tracker signatures · DEX" : "Tracker components" : badgeCatalog.find(([key]) => key === selected)?.[1] || ''
   return <>
-    <div className="app-badges" aria-label={t("Application badges")}>{badges.map(b => b.interactive
-      ? <button key={b.key} type="button" className={`app-info-badge ${b.tone}`} style={customBadgeStyle(colors[badgeAppearanceId(b.key, b.label, b.tone)], textColors[badgeAppearanceId(b.key, b.label, b.tone)])} title={b.key === 'bloatware' ? t("{0} · Android Debloat List\n{1}", [t(bloatwareAssessment(b.check).label), message(b.check.reason)]) : message(b.check.reason)} aria-haspopup="dialog" onClick={() => { setSelected(b.key); onSelect?.(b.key) }}>{message(b.label)}</button>
-      : <span key={b.key} className={`app-info-badge ${b.tone}`} style={customBadgeStyle(colors[badgeAppearanceId(b.key, b.label, b.tone)], textColors[badgeAppearanceId(b.key, b.label, b.tone)])} title={message(b.check.reason)}>{message(b.label)}</span>)}</div>
-    <button className="app-badge-checks-link" onClick={() => setSelected('legend')}>{t("Badge legend")}</button>
+    <div className="app-badges" aria-label="Application badges">{badges.map(b => b.interactive
+      ? <button key={b.key} type="button" className={`app-info-badge ${b.tone}`} style={customBadgeStyle(colors[badgeAppearanceId(b.key, b.label, b.tone)], textColors[badgeAppearanceId(b.key, b.label, b.tone)])} title={b.key === 'bloatware' ? `${bloatwareAssessment(b.check).label} · Android Debloat List\n${b.check.reason}` : b.check.reason} aria-haspopup="dialog" onClick={() => { setSelected(b.key); onSelect?.(b.key) }}>{b.label}</button>
+      : <span key={b.key} className={`app-info-badge ${b.tone}`} style={customBadgeStyle(colors[badgeAppearanceId(b.key, b.label, b.tone)], textColors[badgeAppearanceId(b.key, b.label, b.tone)])} title={b.check.reason}>{b.label}</span>)}</div>
+    <button className="app-badge-checks-link" onClick={() => setSelected('legend')}>Badge legend</button>
     {selected === 'legend' && <BadgeLegend checks={checks} local={local} close={() => setSelected(null)} />}
     {selected && selected !== 'legend' && <BadgeDialog title={title} close={() => setSelected(null)}>
-        {selected === 'bloatware' && badge ? <BloatwareDetails check={badge} /> : <><p>{message(badge?.reason)}</p><dl className="app-badge-items">{badge?.items.map((item, index) => <div key={`${item.name}-${index}`}><dt className={selected === 'trackers' || selected === 'backup' && item.backupFile ? 'app-badge-item-name' : undefined}><span>{selected === 'backup' ? message(item.name) : item.name}</span>{selected === 'trackers' && <button type="button" className="icon-button" title={t("Copy component name")} aria-label={t("Copy {0}", [item.name])} onClick={() => void copyText(item.name).then(() => useAppStore.getState().notify("Copied"), () => useAppStore.getState().notify("Could not copy to the clipboard."))}><Copy size={14} /></button>}
-          {selected === 'backup' && item.backupFile && <button type="button" className="icon-button" title={t("Show in folder")} aria-label={t("Show {0} in folder", [item.backupFile])} disabled={revealing} onClick={async () => {
+        {selected === 'bloatware' && badge ? <BloatwareDetails check={badge} /> : <><p>{badge?.reason || ''}</p><dl className="app-badge-items">{badge?.items.map((item, index) => <div key={`${item.name}-${index}`}><dt className={selected === 'trackers' || selected === 'backup' && item.backupFile ? 'app-badge-item-name' : undefined}><span>{selected === 'backup' ? item.name : item.name}</span>{selected === 'trackers' && <button type="button" className="icon-button" title="Copy component name" aria-label={`Copy ${item.name}`} onClick={() => void copyText(item.name).then(() => useAppStore.getState().notify("Copied"), () => useAppStore.getState().notify("Could not copy to the clipboard."))}><Copy size={14} /></button>}
+          {selected === 'backup' && item.backupFile && <button type="button" className="icon-button" title="Show in folder" aria-label={`Show ${item.backupFile} in folder`} disabled={revealing} onClick={async () => {
             setRevealing(true); setRevealError('')
             try { await requestBackend({ type: 'apps.revealBackup', file: item.backupFile! }, setRevealError) }
             finally { setRevealing(false) }
           }}><FolderOpen size={16} /></button>}
-        </dt><dd>{message(item.value)}</dd></div>)}</dl>{revealError && <p role="alert">{message(revealError)}</p>}</>}
-        {selected === 'trackers' && <p className="app-badge-attribution">{t("Uses App Manager tracker signatures (GPL-3.0-or-later), including Exodus and ETIP contributions. Source files, revision and licences are available in Components → Detection databases.")}</p>}
+        </dt><dd>{item.value}</dd></div>)}</dl>{revealError && <p role="alert">{revealError}</p>}</>}
+        {selected === 'trackers' && <p className="app-badge-attribution">Uses App Manager tracker signatures (GPL-3.0-or-later), including Exodus and ETIP contributions. Source files, revision and licences are available in Components → Detection databases.</p>}
     </BadgeDialog>}
   </>
 }

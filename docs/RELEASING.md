@@ -38,7 +38,7 @@ Run the required build and tests, then:
 npm run build:distribution
 node scripts/prepare-java-source.mjs
 npm run source:export
-node scripts/prepare-release-assets.mjs release github-ready/ADB-Vault-0.1.1-Source.zip .tools/publication
+node scripts/prepare-release-assets.mjs release github-ready/ADB-Vault-0.1.2-Source.zip .tools/publication
 ```
 
 Use fresh output directories when repeating a release: source export and Portable
@@ -54,13 +54,13 @@ datasets or binary tools change. Do not label the entire bundle MIT.
 
 ## GitHub Release
 
-Create tag **v0.1.1** from the validated source commit and a **pre-release** titled
-**ADB Vault 0.1.1 — Windows ADB setup**. Use
-[docs/releases/v0.1.1.md](releases/v0.1.1.md) as the release body. Upload exactly:
+Create tag **v0.1.2** from the validated source commit and a release marked **Latest** titled
+**ADB Vault 0.1.2 — Smaller Windows download**. Use
+[docs/releases/v0.1.2.md](releases/v0.1.2.md) as the release body. Upload exactly:
 
-1. `ADB-Vault-0.1.1-Windows-x64-Setup.exe`
-2. `ADB-Vault-0.1.1-Windows-x64-Portable.zip`
-3. `ADB-Vault-0.1.1-Source.zip`
+1. `ADB-Vault-0.1.2-Windows-x64-Setup.exe`
+2. `ADB-Vault-0.1.2-Windows-x64-Portable.zip`
+3. `ADB-Vault-0.1.2-Source.zip`
 4. `OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz`
 5. `third-party-sources.json`
 6. `SHA256SUMS.txt`

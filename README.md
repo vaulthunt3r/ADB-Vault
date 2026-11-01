@@ -27,7 +27,7 @@ ADB Vault runs its own collector on the device and streams the selected profile�
 > [report reproducible problems](https://github.com/vaulthunt3r/ADB-Vault/issues)
 > with the app, Android and Windows versions and phone model, without personal data.
 
-[Project website](https://vaulthunt3r.github.io/ADB-Vault/) · [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.1/ADB-Vault-0.1.1-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.1/ADB-Vault-0.1.1-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.1)
+[Project website](https://vaulthunt3r.github.io/ADB-Vault/) · [Download Setup](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.2/ADB-Vault-0.1.2-Windows-x64-Setup.exe) · [Download Portable](https://github.com/vaulthunt3r/ADB-Vault/releases/download/v0.1.2/ADB-Vault-0.1.2-Windows-x64-Portable.zip) · [Release notes and checksums](https://github.com/vaulthunt3r/ADB-Vault/releases/tag/v0.1.2)
 
 ## Illustrated feature cards
 
@@ -57,8 +57,8 @@ Open [Releases](https://github.com/vaulthunt3r/ADB-Vault/releases) and choose a 
 
 | Download | Use it for |
 | --- | --- |
-| `ADB-Vault-0.1.1-Windows-x64-Setup.exe` | Guided installation **or** portable extraction. Choose the destination, shortcuts and whether to launch afterwards. |
-| `ADB-Vault-0.1.1-Windows-x64-Portable.zip` | Extract the entire archive into a writable folder and run `ADB Vault.exe`. Keep `portable-mode` beside it. |
+| `ADB-Vault-0.1.2-Windows-x64-Setup.exe` | Guided installation **or** portable extraction. Choose the destination, shortcuts and whether to launch afterwards. |
+| `ADB-Vault-0.1.2-Windows-x64-Portable.zip` | Extract the entire archive into a writable folder and run `ADB Vault.exe`. Keep `portable-mode` beside it. |
 | `SHA256SUMS.txt` | Verify downloaded files with PowerShell `Get-FileHash -Algorithm SHA256`. |
 
 This release is a **public preview**. The Windows executables are not digitally
@@ -111,7 +111,7 @@ protected operations; ADB Vault does not root a phone.
 - [Detection database scope](DETECTION.md) and [badge details](BADGES.md)
 - [Validation and compatibility coverage](VERIFICATION.md)
 - [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md) and [security reports](SECURITY.md)
-- [Release notes](docs/releases/v0.1.1.md)
+- [Release notes](docs/releases/v0.1.2.md)
 
 ## Licence
 

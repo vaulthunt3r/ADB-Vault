@@ -7,12 +7,13 @@ await fs.writeFile(path.join(profile, 'backend.json'), JSON.stringify({ language
 const env = { ...process.env, ADB_VAULT_SMOKE_TEST: '1' }
 delete env.ELECTRON_RUN_AS_NODE
 delete env.VITE_DEV_SERVER_URL
-const executablePath = path.resolve(process.argv[2] || 'release/english-only-20261025/win-unpacked/ADB Vault.exe')
+const executablePath = path.resolve(process.argv[2] || 'release/win-unpacked/ADB Vault.exe')
 let app
 const errors = []
 try {
   for (let launch = 0; launch < 2; launch++) {
-    app = await electron.launch({ executablePath, args: [`--user-data-dir=${profile}`], env, timeout: 90000 })
+    app = await electron.launch({ executablePath, args: [`--user-data-dir=${profile}`, '--lang=uk-UA'], env, timeout: 90000 })
+    assert.match(await app.evaluate(({ app }) => app.getLocale()), /^en\b/i)
     const runtimeVersion = await app.evaluate(() => process.versions.electron)
     if (process.env.ADB_VAULT_EXPECT_ELECTRON) assert.equal(runtimeVersion, process.env.ADB_VAULT_EXPECT_ELECTRON)
     // Startup detection may still be active on a fast smoke run. Accept only the

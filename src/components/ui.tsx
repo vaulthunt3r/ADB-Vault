@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { AlertCircle, Check, Circle, Download, FolderOpen, PackageCheck, PanelTopOpen, ShieldAlert } from 'lucide-react'
 import { LatticeLoader } from './operation-chip/OperationChip'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
@@ -13,5 +12,5 @@ export function ActionIndicator({ picker = false }: { picker?: boolean }) {
 }
 export function StatusBadge({ status }: { status: ComponentStatus }) {
   const Icon = isReady(status) ? Check : status === 'Package ready' ? PackageCheck : status === 'Blocked' ? ShieldAlert : status === 'Not installed' ? Circle : status === 'Update available' ? Download : AlertCircle
-  return <span className={`status-badge ${statusTone(status)}`} title={status === 'Detected' ? t("Already installed on this computer; installation verified.") : undefined}>{isBusy(status) ? <LatticeLoader /> : <Icon size={12} />}{statusLabel(status)}</span>
+  return <span className={`status-badge ${statusTone(status)}`} title={status === 'Detected' ? "Already installed on this computer; installation verified." : undefined}>{isBusy(status) ? <LatticeLoader /> : <Icon size={12} />}{statusLabel(status)}</span>
 }

@@ -1,4 +1,3 @@
-import { t, message } from "../lib/i18n"
 import type { IpInfo } from '../../electron/network-protocol'
 
 // Bundled SVGs work offline and do not depend on Windows emoji fonts.
@@ -17,7 +16,7 @@ export function NetworkCountry({ info }: { info: IpInfo }) {
   const code = info.countryCode?.toUpperCase()
   if (!code || !/^[A-Z]{2}$/.test(code)) {
     const scope = scopes[info.scope]
-    return <span title={message(scope?.help)} tabIndex={scope ? 0 : undefined}>{(scope?.label && t(scope.label)) || (info.scope === 'Public / other' ? t("Unknown country") : info.scope)}</span>
+    return <span title={scope?.help} tabIndex={scope ? 0 : undefined}>{(scope?.label && scope.label) || (info.scope === 'Public / other' ? "Unknown country" : info.scope)}</span>
   }
   const flag = code === 'XX' ? undefined : flags[`../../node_modules/flag-icons/flags/4x3/${code.toLowerCase()}.svg`]
   return <span className="network-country">

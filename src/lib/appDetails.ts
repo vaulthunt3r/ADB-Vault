@@ -1,4 +1,3 @@
-import { locale as uiLocale } from './i18n'
 import type { AndroidApp } from '../../electron/apps-protocol'
 import type { AppDetails, AppBadgeEvidence, BadgeCheck } from '../../electron/app-details-protocol'
 import { bloatwareAssessment } from './bloatware'
@@ -32,7 +31,7 @@ export function badgeChecks(app: AndroidApp, details?: AppBadgeEvidence | null):
   const result = Object.fromEntries(badgeCatalog.map(([key]): [BadgeKey, BadgeCheck] => [key, { present: null, reason: unavailable[key] || 'Not collected in this snapshot.', items: [] }])) as Record<BadgeKey, BadgeCheck>
   const set = (key: BadgeKey, present: boolean | null, reason: string, items: BadgeCheck['items'] = []) => { result[key] = { present, reason, items } }
   set('type', true, 'Application type reported by Android. Systemless installation is not inferred from the system flag alone.')
-  set('splits', app.splitCount == null ? null : app.splitCount > 0, 'Installed split APKs, excluding the base APK.', details?.splits.map(s => ({ name: s.name, value: `${s.path} · ${s.bytes == null ? 'Size unavailable' : `${s.bytes.toLocaleString(uiLocale())} B`}` })) || [])
+  set('splits', app.splitCount == null ? null : app.splitCount > 0, 'Installed split APKs, excluding the base APK.', details?.splits.map(s => ({ name: s.name, value: `${s.path} · ${s.bytes == null ? 'Size unavailable' : `${s.bytes.toLocaleString('en-US')} B`}` })) || [])
   set('debuggable', app.debuggable, 'Android marks this application as debuggable.')
   set('stopped', app.stopped, 'Android stopped flag. This is separate from whether a process is currently running.')
   set('disabled', !app.enabled, 'Android application enabled state for the selected profile.')

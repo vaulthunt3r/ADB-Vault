@@ -1,5 +1,3 @@
-import { message as translateMessage } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useState } from 'react'
 import { categoryScope, defaultCategoryOptions, fileCategories, serviceFolderGroups, type FileCategory, type ServiceFolderGroup } from '../../electron/file-categories'
 import type { FileLocation } from '../../electron/files-protocol'
@@ -25,19 +23,19 @@ export function FileCategorySettings() {
     try { const r = await filesRequest({ type: 'files.chooseFolder' }); if (r.folder) { const l: FileLocation = { kind: 'local', path: r.folder }; setExtra(l); setChosen(categorySettingsKey(l)); setError('') } }
     catch (e) { setError(e instanceof Error ? e.message : String(e)) }
   }
-  const label = (l: FileLocation) => `${l.kind === 'local' ? t("This PC / SMB") : devices.find(d => d.hardwareId && d.hardwareId === l.hardwareId || d.id === l.id)?.name || l.serial || t("Phone")} · ${l.path}`
+  const label = (l: FileLocation) => `${l.kind === 'local' ? "This PC / SMB" : devices.find(d => d.hardwareId && d.hardwareId === l.hardwareId || d.id === l.id)?.name || l.serial || "Phone"} · ${l.path}`
   return <section className="section-content fm-category-settings" aria-labelledby="file-category-settings-title">
-    <div className="section-heading"><div><div className="eyebrow section-eyebrow">{t("SETTINGS / FILES")}</div><h1 id="file-category-settings-title">{t("Categories")}</h1><p>{t("Choose what appears in Places and where each category searches.")}</p></div></div>
-    <fieldset className="fm-visible-categories"><legend>{t("Show in Places")}</legend>{categories.map(c => <label key={c}><input type="checkbox" checked={settings.options[c]?.visible !== false} onChange={e => settings.change(c, { visible: e.target.checked })} />{t(fileCategories[c].label)}</label>)}</fieldset>
-    <label className="fm-setting-field">{t("Category")}<select value={category} onChange={e => setCategory(e.target.value as FileCategory)}>{categories.map(c => <option key={c} value={c}>{t(fileCategories[c].label)}</option>)}</select></label>
-    <fieldset className="apps-loading-settings"><legend>{t("Include in ")}{t(fileCategories[category].label)}</legend>
-      {category === 'images' && <label><input type="checkbox" checked={options.iconFiles} onChange={e => settings.change(category, { iconFiles: e.target.checked })} /><span><strong>{t("Icon files")}</strong><small>{t("ICO, CUR and ICNS. PNG/SVG images elsewhere keep their normal classification.")}</small></span></label>}
-      {(Object.keys(serviceFolderGroups) as ServiceFolderGroup[]).map(group => <label key={group}><input type="checkbox" checked={options.serviceFolders.includes(group)} onChange={e => settings.change(category, { serviceFolders: e.target.checked ? [...options.serviceFolders, group] : options.serviceFolders.filter(g => g !== group) })} /><span><strong>{t(serviceFolderGroups[group].label)}</strong><small>{serviceFolderGroups[group].names.join(', ')}{t(" — including their contents, anywhere inside the search location.")}</small></span></label>)}
+    <div className="section-heading"><div><div className="eyebrow section-eyebrow">SETTINGS / FILES</div><h1 id="file-category-settings-title">Categories</h1><p>Choose what appears in Places and where each category searches.</p></div></div>
+    <fieldset className="fm-visible-categories"><legend>Show in Places</legend>{categories.map(c => <label key={c}><input type="checkbox" checked={settings.options[c]?.visible !== false} onChange={e => settings.change(c, { visible: e.target.checked })} />{fileCategories[c].label}</label>)}</fieldset>
+    <label className="fm-setting-field">Category<select value={category} onChange={e => setCategory(e.target.value as FileCategory)}>{categories.map(c => <option key={c} value={c}>{fileCategories[c].label}</option>)}</select></label>
+    <fieldset className="apps-loading-settings"><legend>{"Include in "}{fileCategories[category].label}</legend>
+      {category === 'images' && <label><input type="checkbox" checked={options.iconFiles} onChange={e => settings.change(category, { iconFiles: e.target.checked })} /><span><strong>Icon files</strong><small>ICO, CUR and ICNS. PNG/SVG images elsewhere keep their normal classification.</small></span></label>}
+      {(Object.keys(serviceFolderGroups) as ServiceFolderGroup[]).map(group => <label key={group}><input type="checkbox" checked={options.serviceFolders.includes(group)} onChange={e => settings.change(category, { serviceFolders: e.target.checked ? [...options.serviceFolders, group] : options.serviceFolders.filter(g => g !== group) })} /><span><strong>{serviceFolderGroups[group].label}</strong><small>{serviceFolderGroups[group].names.join(', ')}{" — including their contents, anywhere inside the search location."}</small></span></label>)}
     </fieldset>
-    <div className="fm-setting-location"><label className="fm-setting-field">{t("Search location")}<select aria-label={t("Category search location")} value={key || ''} onChange={e => setChosen(e.target.value)}>{!locations.size && <option value="">{t("Open a folder in Files first")}</option>}{[...locations].map(([k, l]) => <option key={k} value={k}>{label(l)}</option>)}</select></label><button className="button secondary" onClick={() => void chooseFolder()}>{t("Choose PC folder…")}</button></div>
-    {error && <p role="alert">{translateMessage(error)}</p>}
+    <div className="fm-setting-location"><label className="fm-setting-field">Search location<select aria-label="Category search location" value={key || ''} onChange={e => setChosen(e.target.value)}>{!locations.size && <option value="">Open a folder in Files first</option>}{[...locations].map(([k, l]) => <option key={k} value={k}>{label(l)}</option>)}</select></label><button className="button secondary" onClick={() => void chooseFolder()}>Choose PC folder…</button></div>
+    {error && <p role="alert">{error}</p>}
     {location && <FolderRuleEditor key={key + category} location={location} category={category} />}
-    <p className="apps-settings-note">{t("Results are kept for this session. Use Refresh in Files after changing these settings or files. A different connection or restarting ADB Vault requires a new scan.")}</p>
+    <p className="apps-settings-note">Results are kept for this session. Use Refresh in Files after changing these settings or files. A different connection or restarting ADB Vault requires a new scan.</p>
   </section>
 }
 
@@ -51,11 +49,11 @@ function FolderRuleEditor({ location, category }: { location: FileLocation; cate
     catch (e) { setError(e instanceof Error ? e.message : String(e)); setMessage('') }
   }
   return <div className="fm-folder-rules">
-    <p>{t("Paths are relative to ")}<code>{location.path}</code>{t(", one per line. Subfolders are included. Exclusions take priority.")}</p>
+    <p>{"Paths are relative to "}<code>{location.path}</code>, one per line. Subfolders are included. Exclusions take priority.</p>
     <div className="fm-rule-columns">
-      <label className="fm-setting-field">{t("Search only these folders")}<textarea aria-label={t("Search only these folders")} rows={5} placeholder={t("DCIM\nPictures")} value={include} onChange={e => { setInclude(e.target.value); setMessage('') }} /><small>{t("Empty: search the entire location.")}</small></label>
-      <label className="fm-setting-field">{t("Skip these folders")}<textarea aria-label={t("Skip these folders")} rows={5} placeholder={t("DCIM/Private\nDownload/Temporary")} value={exclude} onChange={e => { setExclude(e.target.value); setMessage('') }} /><small>{t("Skipped folders are not scanned.")}</small></label>
+      <label className="fm-setting-field">Search only these folders<textarea aria-label="Search only these folders" rows={5} placeholder={"DCIM\nPictures"} value={include} onChange={e => { setInclude(e.target.value); setMessage('') }} /><small>Empty: search the entire location.</small></label>
+      <label className="fm-setting-field">Skip these folders<textarea aria-label="Skip these folders" rows={5} placeholder={"DCIM/Private\nDownload/Temporary"} value={exclude} onChange={e => { setExclude(e.target.value); setMessage('') }} /><small>Skipped folders are not scanned.</small></label>
     </div>
-    <button className="button secondary" onClick={save}>{t("Save folders")}</button>{error && <p role="alert">{translateMessage(error)}</p>}{message && <p role="status">{translateMessage(message)}</p>}
+    <button className="button secondary" onClick={save}>Save folders</button>{error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
   </div>
 }

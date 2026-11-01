@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { useRef, useState } from 'react'
 import type { AndroidApp } from '../../electron/apps-protocol'
 import type { AppPermission } from '../../electron/app-details-protocol'
@@ -26,7 +25,7 @@ export function usePermissionActions(app: AndroidApp, loading: boolean) {
   return {
     pending: pending || (sameAction && action.status === 'running' ? action.permission : null),
     error: requestError || (sameAction && action.status === 'error' ? { permission: action.permission, message: action.message } : null),
-    reason: (entry: AppPermission) => permissionRestriction(entry, app.targetSdk, shared) || (!contextReady ? t("Connect this device and select its loaded profile.") : busy ? t("Wait for the current operation to finish.") : null),
+    reason: (entry: AppPermission) => permissionRestriction(entry, app.targetSdk, shared) || (!contextReady ? "Connect this device and select its loaded profile." : busy ? "Wait for the current operation to finish." : null),
     change: async (entry: AppPermission) => {
       if (lock.current || busy || !contextReady || entry.granted === null || permissionRestriction(entry, app.targetSdk, shared)) return
       lock.current = true; setPending(entry.name); setRequestError(null)

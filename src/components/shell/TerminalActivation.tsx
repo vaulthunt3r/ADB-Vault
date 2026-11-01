@@ -1,4 +1,3 @@
-import { t } from "../../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { terminalModeName } from '../../lib/themes'
@@ -97,7 +96,7 @@ export function TerminalActivation() {
   if (!visible) return null
   return createPortal(<div ref={overlay} popover="manual" className="terminal-activation" role="status" aria-live="polite" aria-atomic="true">
     <span className="terminal-activation__sr">{text}</span>
-    <span className="terminal-activation__prompt" aria-hidden="true">{t(">_")}</span>
+    <span className="terminal-activation__prompt" aria-hidden="true">{">_"}</span>
     <DecryptedGreeting />
   </div>, document.body)
 }

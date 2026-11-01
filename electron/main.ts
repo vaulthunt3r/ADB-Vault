@@ -1,6 +1,4 @@
-import { dialog } from "./localized-dialog.js"
-import { message, t } from './i18n.js'
-import { app, BrowserWindow, clipboard, ipcMain, protocol, Notification, shell } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, ipcMain, protocol, Notification, shell } from 'electron'
 import { Backend } from './backend.js'
 import { CameraPanels } from './camera-panels.js'
 import { TouchPanels } from './touch-panels.js'
@@ -16,6 +14,7 @@ import { fileURLToPath } from 'node:url'
 import { appendFile } from 'node:fs/promises'
 import { configurePortableProfile, portableProfilePath } from './portable-profile.js'
 
+app.commandLine.appendSwitch('lang', 'en-US')
 const portableData = portableProfilePath(process.execPath, app.isPackaged, app.commandLine.hasSwitch('user-data-dir'))
 if (portableData) {
   try { configurePortableProfile(app, portableData) }
@@ -95,7 +94,7 @@ app.whenReady().then(async () => {
     if (window.isMinimized()) window.restore()
     window.show(); window.focus()
     window.webContents.send('backend:event', { type: 'notificationOpen', destination, taskPanel })
-  }, { isSupported: () => Notification.isSupported(), create: options => new Notification({ ...options, title: message(options.title), body: message(options.body) }), beep: () => shell.beep() })
+  }, { isSupported: () => Notification.isSupported(), create: options => new Notification(options), beep: () => shell.beep() })
   let notificationErrorReported = false
   const operationNotifications = new OperationNotifications(preferences, () => !!window?.isFocused(), (alert, channels) => {
     void nativeNotifications.show(alert, channels).catch(error => {
@@ -121,7 +120,7 @@ app.whenReady().then(async () => {
   ], async operations => {
     const options: Electron.MessageBoxOptions = {
       type: 'warning', title: 'Operations are active', message: 'Close ADB Vault with active operations?',
-      detail: operations.map(operation => `• ${message(operation)}`).join('\n') + t('\n\nActive operations will be stopped where possible. Completed changes are kept; interrupted operations may be partial. Installers and operations that cannot be cancelled may need to finish before closing. A command already sent to the phone may still complete.\n\nMinimize the window to keep tasks running.'),
+      detail: operations.map(operation => `• ${operation}`).join('\n') + '\n\nActive operations will be stopped where possible. Completed changes are kept; interrupted operations may be partial. Installers and operations that cannot be cancelled may need to finish before closing. A command already sent to the phone may still complete.\n\nMinimize the window to keep tasks running.',
       buttons: ['Keep working', 'Close safely'], defaultId: 0, cancelId: 0, noLink: true,
     }
     const result = window && !window.isDestroyed() ? await dialog.showMessageBox(window, options) : await dialog.showMessageBox(options)

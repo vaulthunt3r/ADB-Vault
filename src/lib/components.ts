@@ -1,4 +1,3 @@
-import { t } from "./i18n"
 import { componentCatalog, databaseCatalog } from '../../electron/catalog'
 import { geoipComponent } from '../../electron/network-protocol'
 import type { ComponentRecord } from '../../electron/contracts'
@@ -18,7 +17,7 @@ export const initialComponents = [...componentCatalog, ...databaseCatalog.map(co
 
 export const isReady = (status: ComponentStatus) => status === 'Installed' || status === 'Detected'
 export const isNotInstalled = (status: ComponentStatus) => status === 'Not installed' || status === 'Package ready'
-export const statusLabel = (status: ComponentStatus) => t(status === 'Detected' ? "Installed" : status)
+export const statusLabel = (status: ComponentStatus) => status === 'Detected' ? "Installed" : status
 export const isBusy = (status: ComponentStatus) => ['Checking', 'Downloading', 'Installing'].includes(status)
 export const needsAttention = (status: ComponentStatus) => !isReady(status) && !isNotInstalled(status) && !isBusy(status)
 export const isManual = (status: ComponentStatus) => status === 'Blocked' || status === 'Manual action required'
@@ -34,14 +33,14 @@ export function statusTone(status: ComponentStatus): 'success' | 'warning' | 'er
 
 export function recoveryMessage(status: ComponentStatus) {
   const messages: Partial<Record<ComponentStatus, { title: string; body: string }>> = {
-    "Not detected": { title: t("Not found in standard locations"), body: t("Already installed? Locate the component manually, or download a fresh copy.") },
-    "Version mismatch": { title: t("A different version was found"), body: t("The detected version does not match the required version. Repair it or locate a compatible copy.") },
-    "Download failed": { title: t("The download was interrupted"), body: t("Your existing files are unchanged. Retry the download or locate a copy you already have.") },
-    "Install failed": { title: t("Installation could not finish"), body: t("The component is not ready. Retry the repair or choose an existing installation manually.") },
-    "Repair needed": { title: t("Some files need attention"), body: t("Repair the component to restore missing files, or locate a complete installation.") },
-    "Blocked": { title: t("Automatic installation is blocked"), body: t("Installation was blocked. Use a manually prepared copy, then detect again.") },
-    "Manual action required": { title: t("A manual step is required"), body: t("Follow the component instructions below, then check again. Bulk repair will skip this item.") },
-    "Update available": { title: t("An update is available"), body: t("Download the latest available version to bring this component up to date.") },
+    "Not detected": { title: "Not found in standard locations", body: "Already installed? Locate the component manually, or download a fresh copy." },
+    "Version mismatch": { title: "A different version was found", body: "The detected version does not match the required version. Repair it or locate a compatible copy." },
+    "Download failed": { title: "The download was interrupted", body: "Your existing files are unchanged. Retry the download or locate a copy you already have." },
+    "Install failed": { title: "Installation could not finish", body: "The component is not ready. Retry the repair or choose an existing installation manually." },
+    "Repair needed": { title: "Some files need attention", body: "Repair the component to restore missing files, or locate a complete installation." },
+    "Blocked": { title: "Automatic installation is blocked", body: "Installation was blocked. Use a manually prepared copy, then detect again." },
+    "Manual action required": { title: "A manual step is required", body: "Follow the component instructions below, then check again. Bulk repair will skip this item." },
+    "Update available": { title: "An update is available", body: "Download the latest available version to bring this component up to date." },
   }
   return messages[status]
 }

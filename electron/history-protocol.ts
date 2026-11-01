@@ -19,4 +19,4 @@ export interface SavedSession {
 export interface HistoryOverview { current: HistorySession; sessions: HistorySession[]; error?: string; activity?: ActivityItem[] }
 export interface HistorySnapshot extends HistoryOverview { activity: ActivityItem[] }
 export const historyLimits = { sessions: 30, activity: 500, tasks: 100 }
-export const historySessionLabel = (session: HistorySession) => `${new Date(session.startedAt).toLocaleString()} · ${session.status === 'closed' ? 'Closed normally' : session.status === 'interrupted' ? 'Interrupted' : 'Running'} · ${session.id.slice(0, 8)}`
+export const historySessionLabel = (session: HistorySession) => `${new Date(session.startedAt).toLocaleString('en-US')} · ${session.status === 'closed' ? 'Closed normally' : session.status === 'interrupted' ? 'Interrupted' : 'Running'} · ${session.id.slice(0, 8)}`

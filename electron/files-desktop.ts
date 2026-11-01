@@ -1,5 +1,4 @@
-import { dialog } from "./localized-dialog.js"
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow, dialog, shell } from 'electron'
 import { spawn } from 'node:child_process'
 import * as fs from 'node:fs/promises'
 import path from 'node:path'

@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { File } from 'lucide-react'
 import type { FileEntry, FileLocation } from '../../electron/files-protocol'
@@ -22,5 +21,5 @@ export function FileThumbnail({ entry, location, enabled }: { entry: FileEntry; 
     observer.observe(element.current)
     return () => { clearTimeout(timer); observer.disconnect(); release?.() }
   }, [key, enabled]) // Identity includes source, transport, root mode, path and fingerprint.
-  return <span ref={element} className="fm-thumbnail" title={src ? undefined : t("Image previews: PNG, JPEG, WebP, GIF, BMP and AVIF up to 32 MB. Files must be readable with the current access.")}>{src ? <img src={src} alt="" onError={() => setImage(undefined)} /> : <File size={34} />}</span>
+  return <span ref={element} className="fm-thumbnail" title={src ? undefined : "Image previews: PNG, JPEG, WebP, GIF, BMP and AVIF up to 32 MB. Files must be readable with the current access."}>{src ? <img src={src} alt="" onError={() => setImage(undefined)} /> : <File size={34} />}</span>
 }

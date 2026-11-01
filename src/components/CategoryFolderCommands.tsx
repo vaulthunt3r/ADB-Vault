@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { useState } from 'react'
 import { appendCategoryFolders, categoryQuery, defaultCategoryOptions, fileCategories, relativeCategoryFolders, type FileCategory } from '../../electron/file-categories'
 import { searchFolderPolicy } from '../../electron/file-search-folders'
@@ -22,10 +21,10 @@ export function CategoryFolderCommands({ scope, root, paths, category, disabled,
       done()
     } catch (e) { useAppStore.getState().notify(e instanceof Error ? e.message : String(e)) }
   }
-  return <div className="fm-category-folder-commands" role="group" aria-label={t("Category folder rules")}>
-    {category ? <strong>{fileCategories[category].label}</strong> : <label>{t("Category")}<select aria-label={t("Folder rule category")} value={chosen} onChange={e => setChosen(e.target.value as FileCategory)}>{(Object.keys(fileCategories) as FileCategory[]).map(c => <option key={c} value={c}>{fileCategories[c].label}</option>)}</select></label>}
-    <small title={scope.path}>{t("Search location: ")}{scope.path}</small>
-    <button disabled={disabled || !!reason} title={reason || t("Add selected folders and their subfolders to this category’s search list.")} onClick={() => add('include')}>{t("Add to Search only these folders")}</button>
-    <button disabled={disabled || !!reason} title={reason || t("Skip selected folders and their subfolders on the next scan.")} onClick={() => add('exclude')}>{t("Add to Skip these folders")}</button>
+  return <div className="fm-category-folder-commands" role="group" aria-label="Category folder rules">
+    {category ? <strong>{fileCategories[category].label}</strong> : <label>Category<select aria-label="Folder rule category" value={chosen} onChange={e => setChosen(e.target.value as FileCategory)}>{(Object.keys(fileCategories) as FileCategory[]).map(c => <option key={c} value={c}>{fileCategories[c].label}</option>)}</select></label>}
+    <small title={scope.path}>{"Search location: "}{scope.path}</small>
+    <button disabled={disabled || !!reason} title={reason || "Add selected folders and their subfolders to this category’s search list."} onClick={() => add('include')}>Add to Search only these folders</button>
+    <button disabled={disabled || !!reason} title={reason || "Skip selected folders and their subfolders on the next scan."} onClick={() => add('exclude')}>Add to Skip these folders</button>
   </div>
 }

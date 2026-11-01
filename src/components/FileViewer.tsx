@@ -1,6 +1,3 @@
-import { t as translateUi } from '../lib/i18n'
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, ExternalLink, Image as ImageIcon, Maximize2, Minimize2, X } from 'lucide-react'
 import type { FileEntry, FileLocation } from '../../electron/files-protocol'
@@ -14,11 +11,11 @@ import { IconButton } from './ui'
 export interface ViewerSelection { source: FileLocation; entries: FileEntry[]; path: string }
 function playbackError(media: HTMLMediaElement, kind: 'audio' | 'video') {
   switch (media.error?.code) {
-    case 1: return translateUi("Playback was interrupted. Reopen the {0} to try again.", [kind])
-    case 2: return translateUi("The {0} could not be read. Reopen the file to try again, or choose Open with…", [kind])
-    case 3: return translateUi("The {0} could not be decoded. The file may be damaged or use an unsupported codec. Choose Open with…", [kind])
-    case 4: return translateUi("The {0} could not be loaded. Its format may be unsupported. Try reopening it or choose Open with…", [kind])
-    default: return translateUi("Playback failed. Reopen the {0} to try again, or choose Open with…", [kind])
+    case 1: return `Playback was interrupted. Reopen the ${kind} to try again.`
+    case 2: return `The ${kind} could not be read. Reopen the file to try again, or choose Open with…`
+    case 3: return `The ${kind} could not be decoded. The file may be damaged or use an unsupported codec. Choose Open with…`
+    case 4: return `The ${kind} could not be loaded. Its format may be unsupported. Try reopening it or choose Open with…`
+    default: return `Playback failed. Reopen the ${kind} to try again, or choose Open with…`
   }
 }
 export function FileViewer({ selection, close }: { selection: ViewerSelection; close: () => void }) {
@@ -78,7 +75,7 @@ export function FileViewer({ selection, close }: { selection: ViewerSelection; c
   async function toggleFullscreen() {
     setFullscreenError('')
     try { if (document.fullscreenElement) await document.exitFullscreen(); else await video.current?.requestFullscreen() }
-    catch { setFullscreenError(translateUi("Could not enter fullscreen. Try the player’s fullscreen button or reopen the video.")) }
+    catch { setFullscreenError("Could not enter fullscreen. Try the player’s fullscreen button or reopen the video.") }
   }
   const change = (delta: number) => setIndex(i => Math.max(0, Math.min(selection.entries.length - 1, i + delta)))
   async function external(withApp: boolean) {
@@ -88,15 +85,15 @@ export function FileViewer({ selection, close }: { selection: ViewerSelection; c
   return <dialog ref={dialog} aria-labelledby={titleId} aria-modal={inline ? undefined : true} className={`locate-dialog app-badge-dialog file-viewer${audio ? " file-viewer-audio" : ''}${inline ? " file-viewer-mini" : ''}`} onCancel={e => { e.preventDefault(); if (document.fullscreenElement) void document.exitFullscreen(); else close() }}>
     <header className="file-viewer-heading">
       <h2 id={titleId} title={entry.name}>{entry.name}</h2>
-      {audio && <div className="file-viewer-window-actions"><IconButton label={inline ? t("Expand audio player") : t("Minimize audio player")} onClick={() => setMinimized(!inline)}>{inline ? <Maximize2 size={16} /> : <Minimize2 size={16} />}</IconButton>{inline && <IconButton label={t("Close audio player")} onClick={close}><X size={16} /></IconButton>}</div>}
+      {audio && <div className="file-viewer-window-actions"><IconButton label={inline ? "Expand audio player" : "Minimize audio player"} onClick={() => setMinimized(!inline)}>{inline ? <Maximize2 size={16} /> : <Minimize2 size={16} />}</IconButton>{inline && <IconButton label="Close audio player" onClick={close}><X size={16} /></IconButton>}</div>}
     </header>
     <div className="app-badge-dialog-content">
-      <div className="file-viewer-toolbar"><IconButton label={t("Previous file")} disabled={index === 0} onClick={() => change(-1)}><ChevronLeft size={18} /></IconButton><span>{index + 1} / {selection.entries.length}</span><IconButton label={t("Next file")} disabled={index === selection.entries.length - 1} onClick={() => change(1)}><ChevronRight size={18} /></IconButton><small title={entry.path}>{entry.path}</small>{preview?.kind === 'video' && !busy && !error && <IconButton label={fullscreen ? t("Exit video fullscreen") : t("Video fullscreen")} onClick={() => void toggleFullscreen()}><Maximize2 size={16} /></IconButton>}{preview?.kind === 'image' && <button className="button secondary" aria-pressed={actualSize} onClick={() => setActualSize(!actualSize)}>{actualSize ? t("Fit to window") : t("Actual size")}</button>}</div>
+      <div className="file-viewer-toolbar"><IconButton label="Previous file" disabled={index === 0} onClick={() => change(-1)}><ChevronLeft size={18} /></IconButton><span>{index + 1} / {selection.entries.length}</span><IconButton label="Next file" disabled={index === selection.entries.length - 1} onClick={() => change(1)}><ChevronRight size={18} /></IconButton><small title={entry.path}>{entry.path}</small>{preview?.kind === 'video' && !busy && !error && <IconButton label={fullscreen ? "Exit video fullscreen" : "Video fullscreen"} onClick={() => void toggleFullscreen()}><Maximize2 size={16} /></IconButton>}{preview?.kind === 'image' && <button className="button secondary" aria-pressed={actualSize} onClick={() => setActualSize(!actualSize)}>{actualSize ? "Fit to window" : "Actual size"}</button>}</div>
       <div className={`file-viewer-content${actualSize ? " actual-size" : ''}`} tabIndex={0}>
-        {busy ? <p role="status">{location.kind === 'device' ? t("Downloading the complete file to a temporary folder before playback or preview…") : t("Opening file…")}</p> : error ? <div className="file-viewer-error"><p role="alert" className="file-error">{message(error)}</p>{inline && <button className="button secondary" onClick={() => setAttempt(n => n + 1)}>{t("Retry preview")}</button>}</div> : preview?.kind === 'image' ? <img src={preview.url} alt={entry.name} onError={() => setError("This image could not be decoded. Choose Open with…")} /> : preview?.kind === 'video' ? <video ref={video} aria-label={t("Video: {0}", [entry.name])} key={entry.path} src={preview.url} controls onError={e => setError(playbackError(e.currentTarget, 'video'))} /> : preview?.kind === 'audio' ? <audio ref={media} key={entry.path} src={preview.url} controls autoPlay aria-label={t("Audio: {0}", [entry.name])} onError={e => setError(playbackError(e.currentTarget, 'audio'))} /> : preview?.kind === 'text' ? <pre>{preview.text}</pre> : <div className="file-empty"><ImageIcon size={36} /><p>{t("No built-in viewer for this format.")}</p><button className="button secondary" onClick={() => void external(true)}>{t("Open with…")}</button></div>}
+        {busy ? <p role="status">{location.kind === 'device' ? "Downloading the complete file to a temporary folder before playback or preview…" : "Opening file…"}</p> : error ? <div className="file-viewer-error"><p role="alert" className="file-error">{error}</p>{inline && <button className="button secondary" onClick={() => setAttempt(n => n + 1)}>Retry preview</button>}</div> : preview?.kind === 'image' ? <img src={preview.url} alt={entry.name} onError={() => setError("This image could not be decoded. Choose Open with…")} /> : preview?.kind === 'video' ? <video ref={video} aria-label={`Video: ${entry.name}`} key={entry.path} src={preview.url} controls onError={e => setError(playbackError(e.currentTarget, 'video'))} /> : preview?.kind === 'audio' ? <audio ref={media} key={entry.path} src={preview.url} controls autoPlay aria-label={`Audio: ${entry.name}`} onError={e => setError(playbackError(e.currentTarget, 'audio'))} /> : preview?.kind === 'text' ? <pre>{preview.text}</pre> : <div className="file-empty"><ImageIcon size={36} /><p>No built-in viewer for this format.</p><button className="button secondary" onClick={() => void external(true)}>Open with…</button></div>}
       </div>
     </div>
     {fullscreenError && <p role="alert" className="file-error">{fullscreenError}</p>}
-    <div className="dialog-footer">{error && <button className="button secondary" disabled={busy} onClick={() => setAttempt(n => n + 1)}>{t("Retry preview")}</button>}<button className="button secondary" onClick={() => void external(false)}><ExternalLink size={14} />{t("External viewer")}</button><button className="button secondary" onClick={() => void external(true)}>{t("Open with…")}</button><button className="button secondary file-viewer-close" onClick={close}>{t("Close")}</button></div>
+    <div className="dialog-footer">{error && <button className="button secondary" disabled={busy} onClick={() => setAttempt(n => n + 1)}>Retry preview</button>}<button className="button secondary" onClick={() => void external(false)}><ExternalLink size={14} />External viewer</button><button className="button secondary" onClick={() => void external(true)}>Open with…</button><button className="button secondary file-viewer-close" onClick={close}>Close</button></div>
   </dialog>
 }

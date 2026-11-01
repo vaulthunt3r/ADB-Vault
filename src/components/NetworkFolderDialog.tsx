@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { NetworkDiscoveryDialog } from './NetworkDiscoveryDialog'
 import { useState } from 'react'
 import { HelpCircle, Network } from 'lucide-react'
@@ -26,10 +24,10 @@ export function NetworkFolderDialog({ side, initial = '', discover = false, init
     } catch (e) { setError(e instanceof Error ? e.message : String(e)) } finally { setBusy(false) }
   }
   if (discovery) return <NetworkDiscoveryDialog close={close} manual={value => { setAddress(value || ''); setDiscovery(false) }} />
-  return <BadgeDialog title={t("SMB / Samba folder")} className="fm-network-dialog" close={close} closeDisabled={busy} footer={<button className="button primary" disabled={busy || !address.trim()} onClick={() => void open()}><Network size={15} />{busy ? t("Connecting…") : t("Open folder")}</button>}>
-    <div className="fm-network-heading"><span>{t("Windows, NAS or Samba share")}</span><IconButton label={t("About network folders")} aria-expanded={help} onClick={() => setHelp(!help)}><HelpCircle size={16} /></IconButton></div>
-    {help && <p className="fm-search-help">{t("Enter a disk share, for example \\\\NAS\\Shared or smb://NAS/Shared. Windows handles sign-in; ADB Vault stores no passwords. Saved folders appear in Places. Files use the server’s access permissions. Use Search network in Places to discover nearby SMB shares. To cancel a sign-in prompt, use Cancel in the Windows window.")}</p>}
-    <fieldset disabled={busy} className="fm-network-fields"><label>{t("Network folder")}<input placeholder={t("\\\\server\\share")} value={address} onChange={e => setAddress(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void open() } }} /></label><label>{t("Name in Places")}<input placeholder={t("Use folder name")} value={name} maxLength={100} onChange={e => setName(e.target.value)} /></label><label className="fm-network-option"><input type="checkbox" checked={save} onChange={e => setSave(e.target.checked)} />{t("Save in Places")}</label><label className="fm-network-option"><input type="checkbox" checked={prompt} onChange={e => setPrompt(e.target.checked)} />{t("Ask Windows for credentials")}</label></fieldset>
-    {busy && <p className="muted" role="status">{prompt ? t("Complete Windows sign-in if prompted.") : t("Opening with existing Windows access…")}</p>}{error && <p role="alert" className="file-error">{message(error)}</p>}
+  return <BadgeDialog title="SMB / Samba folder" className="fm-network-dialog" close={close} closeDisabled={busy} footer={<button className="button primary" disabled={busy || !address.trim()} onClick={() => void open()}><Network size={15} />{busy ? "Connecting…" : "Open folder"}</button>}>
+    <div className="fm-network-heading"><span>Windows, NAS or Samba share</span><IconButton label="About network folders" aria-expanded={help} onClick={() => setHelp(!help)}><HelpCircle size={16} /></IconButton></div>
+    {help && <p className="fm-search-help">Enter a disk share, for example \\NAS\Shared or smb://NAS/Shared. Windows handles sign-in; ADB Vault stores no passwords. Saved folders appear in Places. Files use the server’s access permissions. Use Search network in Places to discover nearby SMB shares. To cancel a sign-in prompt, use Cancel in the Windows window.</p>}
+    <fieldset disabled={busy} className="fm-network-fields"><label>Network folder<input placeholder="\\server\share" value={address} onChange={e => setAddress(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void open() } }} /></label><label>Name in Places<input placeholder="Use folder name" value={name} maxLength={100} onChange={e => setName(e.target.value)} /></label><label className="fm-network-option"><input type="checkbox" checked={save} onChange={e => setSave(e.target.checked)} />Save in Places</label><label className="fm-network-option"><input type="checkbox" checked={prompt} onChange={e => setPrompt(e.target.checked)} />Ask Windows for credentials</label></fieldset>
+    {busy && <p className="muted" role="status">{prompt ? "Complete Windows sign-in if prompted." : "Opening with existing Windows access…"}</p>}{error && <p role="alert" className="file-error">{error}</p>}
   </BadgeDialog>
 }

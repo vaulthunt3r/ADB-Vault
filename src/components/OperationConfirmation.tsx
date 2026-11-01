@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { AppWindow, ArrowDownToLine, CircleAlert, Eraser, ExternalLink, Power, ShieldAlert, Square, Trash2, X } from 'lucide-react'
 import type { ConfirmationPrompt } from '../../electron/confirmation-protocol'
@@ -38,25 +36,25 @@ function Confirmation({ prompt }: { prompt: ConfirmationPrompt }) {
   }}>
     <header className="confirmation-header">
       <span className="confirmation-symbol"><Icon size={23} strokeWidth={1.7} /></span>
-      <div><h2 id="operation-confirmation-title">{message(prompt.title)}</h2><p id="operation-confirmation-description">{message(prompt.description)}</p></div>
-      <button className="confirmation-close" aria-label={t("Cancel action")} disabled={busy} onClick={() => void answer(false)}><X size={18} /></button>
+      <div><h2 id="operation-confirmation-title">{prompt.title}</h2><p id="operation-confirmation-description">{prompt.description}</p></div>
+      <button className="confirmation-close" aria-label="Cancel action" disabled={busy} onClick={() => void answer(false)}><X size={18} /></button>
     </header>
     <div className="confirmation-body">
-      {!!prompt.context?.length && <dl className="confirmation-context">{prompt.context.map(c => <div key={t(c.label)}><dt>{c.label}</dt><dd>{c.value}</dd></div>)}</dl>}
-      {!!prompt.applications?.length && <section className="confirmation-targets" aria-label={t("Selected applications")}>
-        {prompt.applications.length > 1 && <div className="confirmation-selection"><strong>{prompt.applications.length}{t(" applications")}</strong>{prompt.selection && <span>{prompt.selection.affected}{t(" will run")}{prompt.selection.skipped ? t(" · {0} skipped", [prompt.selection.skipped]) : ''}</span>}</div>}
-        <ul tabIndex={prompt.applications.length > 3 ? 0 : undefined} aria-label={t("Applications")}>{prompt.applications.map(a => <li key={a.packageName} data-skipped={a.skipped || undefined}>
+      {!!prompt.context?.length && <dl className="confirmation-context">{prompt.context.map(c => <div key={c.label}><dt>{c.label}</dt><dd>{c.value}</dd></div>)}</dl>}
+      {!!prompt.applications?.length && <section className="confirmation-targets" aria-label="Selected applications">
+        {prompt.applications.length > 1 && <div className="confirmation-selection"><strong>{prompt.applications.length}{" applications"}</strong>{prompt.selection && <span>{prompt.selection.affected}{" will run"}{prompt.selection.skipped ? ` · ${prompt.selection.skipped} skipped` : ''}</span>}</div>}
+        <ul tabIndex={prompt.applications.length > 3 ? 0 : undefined} aria-label="Applications">{prompt.applications.map(a => <li key={a.packageName} data-skipped={a.skipped || undefined}>
           <span className="confirmation-app-icon">{a.iconPng ? <img alt="" src={`data:image/png;base64,${a.iconPng}`} /> : <AppWindow size={24} strokeWidth={1.5} />}</span>
-          <div className="confirmation-app-name"><strong>{a.label}</strong><span>{a.packageName}</span>{a.note && <small>{message(a.note)}</small>}</div>
-          {a.system && <span className="confirmation-app-tag">{t("System")}</span>}
+          <div className="confirmation-app-name"><strong>{a.label}</strong><span>{a.packageName}</span>{a.note && <small>{a.note}</small>}</div>
+          {a.system && <span className="confirmation-app-tag">System</span>}
         </li>)}</ul>
       </section>}
-      <section className="confirmation-effects"><h3>{t("What will happen")}</h3><ul>{prompt.effects.map(effect => <li key={effect}>{message(effect)}</li>)}</ul></section>
-      {!!prompt.warnings?.length && <aside className="confirmation-warning"><ShieldAlert size={18} /><div>{prompt.warnings.map(w => <p key={w}>{message(w)}</p>)}</div></aside>}
-      {!!prompt.details?.length && <details className="confirmation-details"><summary>{t("Additional details")}</summary>{prompt.details.map(d => <p key={d}>{message(d)}</p>)}</details>}
-      {prompt.termsUrl && <button className="confirmation-terms" onClick={() => void requestBackend({ type: 'web.open', url: prompt.termsUrl! })}>{t("View license terms ↗")}</button>}
-      {error && <p className="confirmation-error" role="alert"><CircleAlert size={16} />{message(error)}</p>}
+      <section className="confirmation-effects"><h3>What will happen</h3><ul>{prompt.effects.map(effect => <li key={effect}>{effect}</li>)}</ul></section>
+      {!!prompt.warnings?.length && <aside className="confirmation-warning"><ShieldAlert size={18} /><div>{prompt.warnings.map(w => <p key={w}>{w}</p>)}</div></aside>}
+      {!!prompt.details?.length && <details className="confirmation-details"><summary>Additional details</summary>{prompt.details.map(d => <p key={d}>{d}</p>)}</details>}
+      {prompt.termsUrl && <button className="confirmation-terms" onClick={() => void requestBackend({ type: 'web.open', url: prompt.termsUrl! })}>View license terms ↗</button>}
+      {error && <p className="confirmation-error" role="alert"><CircleAlert size={16} />{error}</p>}
     </div>
-    <footer className="confirmation-footer"><button ref={cancelRef} className="button secondary" disabled={busy} onClick={() => void answer(false)}>{t("Cancel")}</button><button className="button confirmation-submit" disabled={busy} onClick={() => void answer(true)}>{message(prompt.confirmLabel)}</button></footer>
+    <footer className="confirmation-footer"><button ref={cancelRef} className="button secondary" disabled={busy} onClick={() => void answer(false)}>Cancel</button><button className="button confirmation-submit" disabled={busy} onClick={() => void answer(true)}>{prompt.confirmLabel}</button></footer>
   </dialog>
 }

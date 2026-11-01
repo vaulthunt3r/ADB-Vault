@@ -1,6 +1,6 @@
 {
   "name": "adb-vault",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "ADB Vault — Android device manager for Windows",
   "author": "ADB Vault",
@@ -11,7 +11,7 @@
     "dev": "node scripts/dev.mjs",
     "dev:web": "vite --host 127.0.0.1",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
-    "build": "npm run helper:check && npm run inspector:check && npm run typecheck && vite build && tsc -p tsconfig.electron.json && node scripts/preload.mjs",
+    "build": "npm run helper:check && npm run inspector:check && npm run typecheck && vite build && node scripts/clean-electron-output.mjs && tsc -p tsconfig.electron.json && node scripts/preload.mjs",
     "build:win": "npm run build && node scripts/prepare-installer.mjs && electron-builder --win nsis --x64 --publish never --config.electronDist=node_modules/electron/dist",
     "build:distribution": "npm run build:win && node scripts/package-portable.mjs release",
     "test": "playwright test",
@@ -73,6 +73,7 @@
       "NOTICE.md"
     ],
     "win": {
+      "electronLanguages": ["en-US"],
       "icon": "build/icon.ico",
       "target": "nsis",
       "artifactName": "ADB-Vault-${version}-Windows-${arch}-Setup.${ext}"

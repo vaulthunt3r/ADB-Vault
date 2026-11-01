@@ -99,7 +99,7 @@ export class FileSearchService {
   get phoneBusy() { return this.busy && this.state.location.kind === 'device' && this.state.query.source === 'live' }
   private publish(force = false) { if (!force && Date.now() - this.lastPublish < 250) return; this.lastPublish = Date.now(); this.state.revision++; this.emit({ type: 'fileSearch', state: structuredClone(this.state) }) }
   private warning(s: string) { if (this.state.warnings.length < 20 && !this.state.warnings.includes(s)) this.state.warnings.push(s) }
-  private result(r: FileSearchResult) { this.state.matched++; if (this.state.results.length < MAX_RESULTS) this.state.results.push(r); else this.warning(`Showing the first ${MAX_RESULTS.toLocaleString()} matches. Narrow the conditions to see the rest.`) }
+  private result(r: FileSearchResult) { this.state.matched++; if (this.state.results.length < MAX_RESULTS) this.state.results.push(r); else this.warning(`Showing the first ${MAX_RESULTS.toLocaleString('en-US')} matches. Narrow the conditions to see the rest.`) }
   private indexPath(l: FileLocation) {
     validateLocation(l)
     const identity = JSON.stringify([l.kind, l.id, l.serial, !!l.root, l.kind === 'local' && process.platform === 'win32' ? l.path.toLowerCase() : l.path])

@@ -1,4 +1,3 @@
-import { t as tr } from "../lib/i18n"
 import { startFileCategory, stopCategoryForTab } from '../lib/fileCategories'
 import { bookmarkKey, savedFileLocation, resolveFileReadLocation } from '../../electron/file-places'
 import { useConnectionStore } from './useConnectionStore'
@@ -113,12 +112,12 @@ export const useFilesStore = create<FilesStore>()(persist((set, get) => ({
       const owner = findFileTab(t.id), message = error instanceof Error ? error.message : String(error)
       const profile = t.location.kind === 'device' && /^\/storage\/emulated\/(\d+)(?:\/|$)/.exec(t.location.path)
       const profileHint = profile && /Permission denied|Operation not permitted|does not allow reading|No such file/i.test(message) ? ` This is storage for Android profile ID ${profile[1]}. Start and unlock that profile on the phone. Android may still block ADB access; granted root access may help but does not unlock encrypted data.` : ''
-      if (owner?.tab.request === request) get().updateTab(owner.side, t.id, { loading: false, error: message + profileHint + (isNetworkPath(t.location.path) ? tr(" For network sign-in, use SMB / Samba in the source selector.") : ''), selected: [], listing: undefined })
+      if (owner?.tab.request === request) get().updateTab(owner.side, t.id, { loading: false, error: message + profileHint + (isNetworkPath(t.location.path) ? " For network sign-in, use SMB / Samba in the source selector." : ''), selected: [], listing: undefined })
     }
   },
   closeTab: (side, id) => { const s = get(), p = s.panes[side]; if (p.tabs.length === 1) return; stopCategoryForTab(side, id); const tabs = p.tabs.filter(t => t.id !== id); set({ panes: { ...s.panes, [side]: { tabs, active: p.active === id ? tabs[Math.max(0, p.tabs.findIndex(t => t.id === id) - 1)].id : p.active } } }) },
   switchTab: (side, id) => { const s = get(); set({ active: side, panes: { ...s.panes, [side]: { ...s.panes[side], active: id } } }); if (!currentTab(get().panes[side]).listing) void get().load(side) },
-  bookmark: (location, kind) => set(s => { const saved = savedFileLocation(location, useConnectionStore.getState().devices); const matches = (l: FileLocation) => bookmarkKey(savedFileLocation(l, useConnectionStore.getState().devices)) === bookmarkKey(saved); return { bookmarks: s.bookmarks.some(b => matches(b.location)) ? s.bookmarks.filter(b => !matches(b.location)) : [...s.bookmarks, { name: fileBase(location.path) || tr("This PC"), kind, location: saved }] } }),
+  bookmark: (location, kind) => set(s => { const saved = savedFileLocation(location, useConnectionStore.getState().devices); const matches = (l: FileLocation) => bookmarkKey(savedFileLocation(l, useConnectionStore.getState().devices)) === bookmarkKey(saved); return { bookmarks: s.bookmarks.some(b => matches(b.location)) ? s.bookmarks.filter(b => !matches(b.location)) : [...s.bookmarks, { name: fileBase(location.path) || "This PC", kind, location: saved }] } }),
   view: (location, patch, category) => set(s => {
     const key = locationKey(location) + (category ? '#' + category : '')
     const prune = (pane: FilePane): FilePane => ({ ...pane, tabs: pane.tabs.map(t => {

@@ -1,8 +1,3 @@
-import { t as localeText } from '../lib/i18n'
-import { t as translateUi } from '../lib/i18n'
-import { locale as uiLocale } from '../lib/i18n'
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Grid2X2, MapPin, RefreshCw, X } from 'lucide-react'
 import type { DeviceRecord } from '../../electron/contracts'
@@ -20,9 +15,9 @@ const endpoint = (ip: string, port: number) => `${ip.includes(':') ? `[${ip}]` :
 function CopyValue({ value, label, children }: { value: string; label: string; children: ReactNode }) {
   async function copy() {
     try { await copyText(value); useAppStore.getState().notify(`${label} copied · ${value}`, 2500) }
-    catch { useAppStore.getState().notify(translateUi("Could not copy {0}", [label.toLowerCase()])) }
+    catch { useAppStore.getState().notify(`Could not copy ${label.toLowerCase()}`) }
   }
-  return <button className="network-copy-value" title={t("Copy {0} · {1}", [label.toLowerCase(), value])} onClick={() => void copy()}>{children}</button>
+  return <button className="network-copy-value" title={`Copy ${label.toLowerCase()} · ${value}`} onClick={() => void copy()}>{children}</button>
 }
 export function NetworkConnectionsPanel({ device, visible, blocked }: { device?: DeviceRecord; visible: boolean; blocked: boolean }) {
   const { paused, interval, networkFilter } = useMonitorStore()
@@ -41,7 +36,7 @@ export function NetworkConnectionsPanel({ device, visible, blocked }: { device?:
         const reply = await window.desktop!.request({ type: 'network.connections', target, requestId: id })
         if (stopped) return
         if (!reply.ok) throw new Error(reply.error)
-        if (!reply.phoneConnections) throw new Error(translateUi("No phone network reading was returned."))
+        if (!reply.phoneConnections) throw new Error("No phone network reading was returned.")
         setSample(reply.phoneConnections); setError('')
       } catch (e) { if (!stopped) setError(e instanceof Error ? e.message : String(e)) }
       finally { if (!stopped) { setReading(false); timer = setTimeout(() => void poll(), interval * 1000) } }
@@ -58,36 +53,36 @@ export function NetworkConnectionsPanel({ device, visible, blocked }: { device?:
   const allSockets = sample?.sockets || []
   const sockets = allSockets.filter(s => (includeListening || s.remotePort !== 0 && s.remoteAddress !== '0.0.0.0' && s.remoteAddress !== '::') && (!profile || s.userId === +profile) && (!appFilter || s.userId === appFilter.userId && s.packages.includes(appFilter.packageName)) && `${s.packages.map(p => label(p, s.uid)).join(' ')} ${s.packages.join(' ')} ${s.uid} ${s.localAddress} ${s.remoteAddress} ${s.remotePort} ${s.protocol} ${s.state} ${s.ip.country || ''} ${s.ip.organization || ''}`.toLowerCase().includes(query.toLowerCase()))
   const profiles = [...new Set([...knownProfiles.map(p => p.id), ...allSockets.map(s => s.userId), ...(profile ? [+profile] : [])])].sort((a, b) => a - b)
-  return <div className="phone-network" aria-label={t("Phone connections")}>
+  return <div className="phone-network" aria-label="Phone connections">
     <div className="network-tools">
-      <input aria-label={t("Filter connections")} placeholder={t("Application, IP, port or network…")} value={query} onChange={e => setQuery(e.target.value)} />
-      <select aria-label={t("Connection profile")} title={t("Filter connections by Android profile; does not switch the phone's active user")} value={profile} onChange={e => setProfile(e.target.value)}><option value="">{t("All Android profiles")}</option>{profiles.map(id => <option key={id} value={id}>{profileLabel(id)}</option>)}</select>
-      <label><input type="checkbox" checked={includeListening} onChange={e => setIncludeListening(e.target.checked)} />{t("Include listening / unconnected")}</label>
-      <button className="button secondary" disabled={!connected || blocked || reading} onClick={() => { useMonitorStore.setState({ paused: false }); setRefresh(n => n + 1) }}><RefreshCw size={14} />{t("Refresh connections")}</button>
+      <input aria-label="Filter connections" placeholder="Application, IP, port or network…" value={query} onChange={e => setQuery(e.target.value)} />
+      <select aria-label="Connection profile" title="Filter connections by Android profile; does not switch the phone's active user" value={profile} onChange={e => setProfile(e.target.value)}><option value="">All Android profiles</option>{profiles.map(id => <option key={id} value={id}>{profileLabel(id)}</option>)}</select>
+      <label><input type="checkbox" checked={includeListening} onChange={e => setIncludeListening(e.target.checked)} />Include listening / unconnected</label>
+      <button className="button secondary" disabled={!connected || blocked || reading} onClick={() => { useMonitorStore.setState({ paused: false }); setRefresh(n => n + 1) }}><RefreshCw size={14} />Refresh connections</button>
     </div>
-    {appFilter && <div className="network-app-filter">{appFilter.packageName} · {profileLabel(appFilter.userId)}<button className="button secondary" onClick={() => { useMonitorStore.setState({ networkFilter: null }); setProfile('') }}><X size={14} />{t("Clear app filter")}</button></div>}
-    <p className="monitor-note" role="status">{!connected ? t("Phone disconnected") : blocked ? t("Paused during diagnostic collection") : paused ? t("Paused") : !visible ? t("Paused while hidden") : reading ? t("Reading phone sockets…") : sample ? t("{0} connections shown · Updated {1}", [sockets.length, new Date(sample.time).toLocaleTimeString(uiLocale())]) : t("Waiting for phone connections")}{error && sample ? t(" · Showing the last successful reading") : ''}</p>
-    {error && <p role="alert" className="operation-error">{message(error)}</p>}
-    <p className="monitor-note">{t("Click an address to copy its IP without the port. Click a network to copy its name and ASN. Short connections may disappear between readings; shared UIDs show all possible app owners.")}</p>
-    <div className="monitor-table-wrap network-sockets"><table><thead><tr><th>{t("Application / UID")}</th><th>{t("Remote address")}</th><th>{t("Protocol / state")}</th><th>{t("Country")}</th><th>{t("Network")}</th><th>{t("Local address")}</th></tr></thead><tbody>
+    {appFilter && <div className="network-app-filter">{appFilter.packageName} · {profileLabel(appFilter.userId)}<button className="button secondary" onClick={() => { useMonitorStore.setState({ networkFilter: null }); setProfile('') }}><X size={14} />Clear app filter</button></div>}
+    <p className="monitor-note" role="status">{!connected ? "Phone disconnected" : blocked ? "Paused during diagnostic collection" : paused ? "Paused" : !visible ? "Paused while hidden" : reading ? "Reading phone sockets…" : sample ? `${sockets.length} connections shown · Updated ${new Date(sample.time).toLocaleTimeString('en-US')}` : "Waiting for phone connections"}{error && sample ? " · Showing the last successful reading" : ''}</p>
+    {error && <p role="alert" className="operation-error">{error}</p>}
+    <p className="monitor-note">Click an address to copy its IP without the port. Click a network to copy its name and ASN. Short connections may disappear between readings; shared UIDs show all possible app owners.</p>
+    <div className="monitor-table-wrap network-sockets"><table><thead><tr><th>Application / UID</th><th>Remote address</th><th>Protocol / state</th><th>Country</th><th>Network</th><th>Local address</th></tr></thead><tbody>
       {sockets.map(s => <tr key={s.key}>
         <td>{s.packages.length ? s.packages.map(pkg => {
           const app = appFor(pkg, s.uid)
           return <div className="network-app-owner" key={pkg}>
-            {app ? <AppIcon app={app} /> : <span className="network-app-placeholder" title={t("App icon not loaded for this profile")}><Grid2X2 size={20} aria-hidden="true" /></span>}
+            {app ? <AppIcon app={app} /> : <span className="network-app-placeholder" title="App icon not loaded for this profile"><Grid2X2 size={20} aria-hidden="true" /></span>}
             <div><strong>{app?.label || pkg}</strong>{app?.label && app.label !== pkg && <small>{pkg}</small>}</div>
           </div>
-        }) : <strong>{t("Unknown / system UID ")}{s.uid}</strong>}<small>{t("UID ")}{s.uid} · {profileLabel(s.userId)}{s.packages.length > 1 && <> · <span tabIndex={0} title={t("These applications share the same UID. The available data cannot identify which one opened this connection.")}>{t("Shared UID · ")}{s.packages.length}{t(" possible owners")}</span></>}</small></td>
-        <td><CopyValue value={s.remoteAddress} label={t("Remote IP")}>{endpoint(s.remoteAddress, s.remotePort)}</CopyValue></td>
-        <td>{s.protocol}{t(" · IPv")}{s.family}<small>{s.state}</small></td>
+        }) : <strong>{"Unknown / system UID "}{s.uid}</strong>}<small>{"UID "}{s.uid} · {profileLabel(s.userId)}{s.packages.length > 1 && <> · <span tabIndex={0} title="These applications share the same UID. The available data cannot identify which one opened this connection.">{"Shared UID · "}{s.packages.length}{" possible owners"}</span></>}</small></td>
+        <td><CopyValue value={s.remoteAddress} label="Remote IP">{endpoint(s.remoteAddress, s.remotePort)}</CopyValue></td>
+        <td>{s.protocol}{" · IPv"}{s.family}<small>{s.state}</small></td>
         <td><NetworkCountry info={s.ip} /></td>
-        <td>{s.ip.organization || s.ip.asn ? <CopyValue value={[s.ip.organization, s.ip.asn ? `AS${s.ip.asn}` : ''].filter(Boolean).join(' · ')} label={localeText("Network")}><span>{s.ip.organization || `AS${s.ip.asn}`}</span>{s.ip.organization && s.ip.asn && <small>AS{s.ip.asn}</small>}</CopyValue> : s.ip.scope === 'Public / other' ? t("Unknown network") : '—'}</td>
-        <td><CopyValue value={s.localAddress} label={t("Local IP")}>{endpoint(s.localAddress, s.localPort)}</CopyValue></td>
+        <td>{s.ip.organization || s.ip.asn ? <CopyValue value={[s.ip.organization, s.ip.asn ? `AS${s.ip.asn}` : ''].filter(Boolean).join(' · ')} label="Network"><span>{s.ip.organization || `AS${s.ip.asn}`}</span>{s.ip.organization && s.ip.asn && <small>AS{s.ip.asn}</small>}</CopyValue> : s.ip.scope === 'Public / other' ? "Unknown network" : '—'}</td>
+        <td><CopyValue value={s.localAddress} label="Local IP">{endpoint(s.localAddress, s.localPort)}</CopyValue></td>
       </tr>)}
     </tbody></table></div>
-    {!sockets.length && sample && <p className="monitor-empty">{sample.issues.length && !sample.sockets.length ? t("No readable socket data. See Android’s response below.") : t("No current connections match these filters.")}</p>}
+    {!sockets.length && sample && <p className="monitor-empty">{sample.issues.length && !sample.sockets.length ? "No readable socket data. See Android’s response below." : "No current connections match these filters."}</p>}
     {sample?.issues.map((issue, index) => <p className="monitor-notice" key={index}>{issue}</p>)}
-    <div className="network-geoip"><MapPin size={15} /><span>{sample?.geoip || t("Country and ASN use optional local GeoIP databases.")}</span></div>
+    <div className="network-geoip"><MapPin size={15} /><span>{sample?.geoip || "Country and ASN use optional local GeoIP databases."}</span></div>
 
   </div>
 }

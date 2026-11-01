@@ -1,4 +1,3 @@
-import { t } from "./i18n"
 import type { MonitorPoint } from '../store/useMonitorStore'
 export function networkRate(points: MonitorPoint[], index: number, name: string, direction: 'received' | 'sent'): number | null {
   const now = points[index]?.sample, before = points[index - 1]?.sample
@@ -10,7 +9,7 @@ export function networkRate(points: MonitorPoint[], index: number, name: string,
   return (a[direction] - b[direction]) / (uptime - oldUptime)
 }
 export function formatBytes(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(n)) return t("Unavailable")
+  if (n == null || !Number.isFinite(n)) return "Unavailable"
   const unit = n >= 1024 ** 3 ? 3 : n >= 1024 ** 2 ? 2 : n >= 1024 ? 1 : 0
-  return `${(n / 1024 ** unit).toLocaleString(undefined, { maximumFractionDigits: 1 })} ${['B', 'KiB', 'MiB', 'GiB'][unit]}`
+  return `${(n / 1024 ** unit).toLocaleString('en-US', { maximumFractionDigits: 1 })} ${['B', 'KiB', 'MiB', 'GiB'][unit]}`
 }

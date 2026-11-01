@@ -1,4 +1,3 @@
-import { t } from "./i18n"
 import type { AndroidApp } from '../../electron/apps-protocol'
 import type { AppBadgeEvidence } from '../../electron/app-details-protocol'
 import type { BadgeKey } from './appDetails'
@@ -24,18 +23,18 @@ export interface AppSort { key: AppSortKey; direction: 'asc' | 'desc' }
 export const defaultAppFilters = (): AppFilters => ({ badges: [], badgeMatch: 'all', type: 'all', updatedSystem: false, availability: 'all', stopped: false, suspended: false, packaging: 'all', installer: '', targetSdkMin: null, targetSdkMax: null })
 export const defaultAppSort = (): AppSort => ({ key: 'label', direction: 'asc' })
 export const appSortFields: { key: AppSortKey; label: string; ascending: string; descending: string }[] = [
-  { key: 'label', get label() { return t("Name") }, ascending: 'A → Z', descending: 'Z → A' },
-  { key: 'packageName', get label() { return t("Package name") }, ascending: 'A → Z', descending: 'Z → A' },
-  { key: 'firstInstallTime', get label() { return t("Installation date") }, get ascending() { return t("Oldest first") }, get descending() { return t("Newest first") } },
-  { key: 'lastUpdateTime', get label() { return t("Last update date") }, get ascending() { return t("Oldest first") }, get descending() { return t("Newest first") } },
-  { key: 'targetSdk', get label() { return t("Target SDK") }, get ascending() { return t("Lowest first") }, get descending() { return t("Highest first") } },
-  { key: 'minSdk', get label() { return t("Minimum SDK") }, get ascending() { return t("Lowest first") }, get descending() { return t("Highest first") } },
-  { key: 'apkSizeBytes', get label() { return t("APK size") }, get ascending() { return t("Smallest first") }, get descending() { return t("Largest first") } },
-  { key: 'dataBytes', get label() { return t("Data (includes cache)") }, get ascending() { return t("Smallest first") }, get descending() { return t("Largest first") } },
-  { key: 'dataWithoutCache', get label() { return t("Data (excludes cache)") }, get ascending() { return t("Smallest first") }, get descending() { return t("Largest first") } },
-  { key: 'cacheBytes', get label() { return t("Cache") }, get ascending() { return t("Smallest first") }, get descending() { return t("Largest first") } },
-  { key: 'installer', get label() { return t("Installer") }, ascending: 'A → Z', descending: 'Z → A' },
-  { key: 'debuggable', get label() { return t("Debuggable") }, get ascending() { return t("No first") }, get descending() { return t("Yes first") } },
+  { key: 'label', label: "Name", ascending: 'A → Z', descending: 'Z → A' },
+  { key: 'packageName', label: "Package name", ascending: 'A → Z', descending: 'Z → A' },
+  { key: 'firstInstallTime', label: "Installation date", ascending: "Oldest first", descending: "Newest first" },
+  { key: 'lastUpdateTime', label: "Last update date", ascending: "Oldest first", descending: "Newest first" },
+  { key: 'targetSdk', label: "Target SDK", ascending: "Lowest first", descending: "Highest first" },
+  { key: 'minSdk', label: "Minimum SDK", ascending: "Lowest first", descending: "Highest first" },
+  { key: 'apkSizeBytes', label: "APK size", ascending: "Smallest first", descending: "Largest first" },
+  { key: 'dataBytes', label: "Data (includes cache)", ascending: "Smallest first", descending: "Largest first" },
+  { key: 'dataWithoutCache', label: "Data (excludes cache)", ascending: "Smallest first", descending: "Largest first" },
+  { key: 'cacheBytes', label: "Cache", ascending: "Smallest first", descending: "Largest first" },
+  { key: 'installer', label: "Installer", ascending: 'A → Z', descending: 'Z → A' },
+  { key: 'debuggable', label: "Debuggable", ascending: "No first", descending: "Yes first" },
 ]
 export const isStorageSort = (key: AppSortKey) => ['dataBytes', 'dataWithoutCache', 'cacheBytes'].includes(key)
 export const appSortDirection = (key: AppSortKey): AppSort['direction'] => ['firstInstallTime', 'lastUpdateTime', 'apkSizeBytes', 'debuggable'].includes(key) || isStorageSort(key) ? 'desc' : 'asc'
@@ -46,16 +45,16 @@ export function appStorageValue(app: AndroidApp, key: 'dataBytes' | 'cacheBytes'
 }
 export function activeAppFilters(filters: AppFilters): { key: keyof AppFilters; label: string; badge?: BadgeKey }[] {
   const result: { key: keyof AppFilters; label: string; badge?: BadgeKey }[] = []
-  for (const key of filters.badges) result.push({ key: 'badges', badge: key, label: t("Badge: {0}", [badgeFilterChoices.find(choice => choice.key === key)!.label]) })
-  if (filters.type !== 'all') result.push({ key: 'type', label: filters.type === 'system' ? t("System") : t("User") })
-  if (filters.updatedSystem) result.push({ key: 'updatedSystem', label: t("Updated system") })
-  if (filters.availability !== 'all') result.push({ key: 'availability', label: filters.availability === 'enabled' ? t("Enabled") : t("Disabled") })
-  if (filters.stopped) result.push({ key: 'stopped', label: t("Stopped") })
-  if (filters.suspended) result.push({ key: 'suspended', label: t("Suspended") })
-  if (filters.packaging !== 'all') result.push({ key: 'packaging', label: filters.packaging === 'single' ? t("Single APK") : t("Split APK") })
-  if (filters.installer) result.push({ key: 'installer', label: t("Installer: {0}", [filters.installer === '@unknown' ? t("Unavailable") : filters.installer]) })
-  if (filters.targetSdkMin != null) result.push({ key: 'targetSdkMin', label: t("Target SDK ≥ {0}", [filters.targetSdkMin]) })
-  if (filters.targetSdkMax != null) result.push({ key: 'targetSdkMax', label: t("Target SDK ≤ {0}", [filters.targetSdkMax]) })
+  for (const key of filters.badges) result.push({ key: 'badges', badge: key, label: `Badge: ${badgeFilterChoices.find(choice => choice.key === key)!.label}` })
+  if (filters.type !== 'all') result.push({ key: 'type', label: filters.type === 'system' ? "System" : "User" })
+  if (filters.updatedSystem) result.push({ key: 'updatedSystem', label: "Updated system" })
+  if (filters.availability !== 'all') result.push({ key: 'availability', label: filters.availability === 'enabled' ? "Enabled" : "Disabled" })
+  if (filters.stopped) result.push({ key: 'stopped', label: "Stopped" })
+  if (filters.suspended) result.push({ key: 'suspended', label: "Suspended" })
+  if (filters.packaging !== 'all') result.push({ key: 'packaging', label: filters.packaging === 'single' ? "Single APK" : "Split APK" })
+  if (filters.installer) result.push({ key: 'installer', label: `Installer: ${filters.installer === '@unknown' ? "Unavailable" : filters.installer}` })
+  if (filters.targetSdkMin != null) result.push({ key: 'targetSdkMin', label: `Target SDK ≥ ${filters.targetSdkMin}` })
+  if (filters.targetSdkMax != null) result.push({ key: 'targetSdkMax', label: `Target SDK ≤ ${filters.targetSdkMax}` })
   return result
 }
 export function filterAndSortApps(apps: AndroidApp[], filters: AppFilters, search: string, sort: AppSort, evidence: Record<string, AppBadgeEvidence> = {}): AndroidApp[] {
@@ -91,9 +90,9 @@ export function filterAndSortApps(apps: AndroidApp[], filters: AppFilters, searc
 }
 
 export function formatApkSize(bytes: number | null | undefined): string {
-  if (bytes == null || bytes <= 0) return t("Unavailable")
+  if (bytes == null || bytes <= 0) return "Unavailable"
   const unit = bytes >= 1024 ** 3 ? 3 : bytes >= 1024 ** 2 ? 2 : bytes >= 1024 ? 1 : 0
-  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(bytes / 1024 ** unit)} ${['B', 'KiB', 'MiB', 'GiB'][unit]}`
+  return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(bytes / 1024 ** unit)} ${['B', 'KiB', 'MiB', 'GiB'][unit]}`
 }
 
 export const formatStorageSize = (bytes: number | null | undefined) => bytes === 0 ? '0 B' : formatApkSize(bytes)

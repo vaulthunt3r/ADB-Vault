@@ -1,4 +1,3 @@
-import { message } from "./i18n.js"
 import type { Notification } from 'electron'
 import { notificationChannels, type NotificationChannels, type NotificationDestination, type NotificationSettings, type OperationAlert } from './notifications-protocol.js'
 
@@ -21,7 +20,7 @@ export class DesktopNotifications {
       if (settings.sound) this.system.beep()
       throw new Error('Desktop notifications are unavailable on this system.')
     }
-    const notification = this.system.create({ title: `ADB Vault · ${message(alert.title)}`, body: message(alert.body).slice(0, 500), silent: !settings.sound })
+    const notification = this.system.create({ title: `ADB Vault · ${alert.title}`, body: alert.body.slice(0, 500), silent: !settings.sound })
     this.active.add(notification)
     while (this.active.size > 40) { const oldest = this.active.values().next().value!; oldest.close(); this.active.delete(oldest) }
     notification.on('click', () => { if (!this.stopped) this.navigate(alert.destination, alert.taskPanel) })

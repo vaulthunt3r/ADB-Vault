@@ -1,4 +1,3 @@
-import { dialog } from "./localized-dialog.js"
 import { AppNotes } from './app-notes.js'
 import { validateAppNoteDraft, validNoteId, validNoteDate, type AppNoteDraft, type AppNoteOrigin } from './app-notes-protocol.js'
 import { FileClipboardService } from './file-clipboard.js'
@@ -44,7 +43,7 @@ import { appActionIds } from './app-actions-protocol.js'
 import { AdbLifecycle } from './adb-lifecycle.js'
 import { DatabaseService } from './databases.js'
 import { isDatabaseId, databaseIds } from './database-protocol.js'
-import { BrowserWindow, shell } from 'electron'
+import { BrowserWindow, dialog, shell } from 'electron'
 import type { BackendEvent, BackendReply, BackendRequest, BackendSnapshot, ComponentId } from './contracts.js'
 import { Storage } from './storage.js'
 import { notificationSettings, validateNotificationSettings } from './notifications-protocol.js'

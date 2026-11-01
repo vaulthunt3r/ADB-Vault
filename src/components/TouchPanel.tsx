@@ -1,5 +1,3 @@
-import { t as translateUi } from '../lib/i18n'
-import { t, message } from "../lib/i18n"
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { TouchEngine } from '../../electron/touch-engine'
 import { editingKey, type TouchInput } from '../../electron/touch-input'
@@ -10,7 +8,7 @@ import './touch-panel.css'
 
 type Mode = 'edit' | 'play' | 'menu'
 export function TouchPanel() {
-  const [state, setState] = useState<TouchState>({ title: t("Touch controls") })
+  const [state, setState] = useState<TouchState>({ title: "Touch controls" })
   const [pinPending, setPinPending] = useState(false), pinSubmitting = useRef(false)
   const [profiles, setProfiles] = useState<TouchProfile[]>([touchTemplate('empty')]), [selected, setSelected] = useState(0)
   const [mode, setMode] = useState<Mode>('menu'), [markId, setMarkId] = useState(''), [properties, setProperties] = useState(true)
@@ -145,7 +143,7 @@ export function TouchPanel() {
       if (generation !== inputGeneration.current) { generation = inputGeneration.current; padArmed = false }
       const pad = [...navigator.getGamepads()].find(p => p?.connected && p.mapping === 'standard') || null
       activePad = pad
-      const name = pad ? translateUi("Gamepad: {0}", [pad.id]) : t("No standard gamepad detected · press a controller button")
+      const name = pad ? `Gamepad: ${pad.id}` : "No standard gamepad detected · press a controller button"
       if (name !== lastPadName) { lastPadName = name; setGamepad(name) }
       if (padIndex !== (pad?.index ?? -1)) { if (padIndex >= 0) handlers.current.pause(); padIndex = pad?.index ?? -1; padArmed = false }
       const buttons = new Set((pad?.buttons || []).flatMap((b, i) => b.pressed || b.value > .25 ? [`Pad${i}`] : []))
@@ -288,7 +286,7 @@ export function TouchPanel() {
     if (enabled) play(); else pause('menu')
   }
   return <main className={`touch-root mode-${mode}`} onContextMenu={e => e.preventDefault()}>
-    {mode === 'menu' && <textarea ref={textField} className="touch-text-input" aria-label={t("Type in Android app")} autoComplete="off" autoCapitalize="off" spellCheck={false} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false; commitText() }} onInput={commitText} onBlur={() => { composing.current = false; if (textField.current) textField.current.value = '' }} />}
+    {mode === 'menu' && <textarea ref={textField} className="touch-text-input" aria-label="Type in Android app" autoComplete="off" autoCapitalize="off" spellCheck={false} onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false; commitText() }} onInput={commitText} onBlur={() => { composing.current = false; if (textField.current) textField.current.value = '' }} />}
     <div className="touch-stage" ref={stage} style={{ width: videoWidth, height: videoHeight, left: (size.width - videoWidth) / 2, top: (size.height - videoHeight) / 2 }}
       onPointerMove={e => {
         const moving = drag.current; if (!moving || mode !== 'edit') return
@@ -297,17 +295,17 @@ export function TouchPanel() {
         const rect = e.currentTarget.getBoundingClientRect()
         patch(moving.id, { x: Math.max(0, Math.min(1, (e.clientX - rect.left - moving.dx) / rect.width)), y: Math.max(0, Math.min(1, (e.clientY - rect.top - moving.dy) / rect.height)) })
       }} onPointerUp={() => { const moving = drag.current; drag.current = null; if (moving && !moving.moved) setProperties(true) }} onLostPointerCapture={() => { drag.current = null }}>
-      {mode === 'edit' && profile.marks.map(m => <button key={m.id} aria-label={t("Move {0} {1}", [m.kind, m.id])} className={`touch-mark kind-${m.kind} ${markId === m.id ? 'selected' : ''}`} style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%`, width: m.kind === 'button' ? 48 : m.radius * Math.min(videoWidth, videoHeight) * 2, height: m.kind === 'button' ? 48 : m.radius * Math.min(videoWidth, videoHeight) * 2 }} onPointerDown={e => {
+      {mode === 'edit' && profile.marks.map(m => <button key={m.id} aria-label={`Move ${m.kind} ${m.id}`} className={`touch-mark kind-${m.kind} ${markId === m.id ? 'selected' : ''}`} style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%`, width: m.kind === 'button' ? 48 : m.radius * Math.min(videoWidth, videoHeight) * 2, height: m.kind === 'button' ? 48 : m.radius * Math.min(videoWidth, videoHeight) * 2 }} onPointerDown={e => {
         if (e.button !== 0) return
         e.preventDefault(); e.stopPropagation(); setMarkId(m.id)
         const rect = stage.current!.getBoundingClientRect(); drag.current = { id: m.id, dx: e.clientX - rect.left - m.x * rect.width, dy: e.clientY - rect.top - m.y * rect.height, startX: e.clientX, startY: e.clientY, moved: false }; stage.current!.setPointerCapture(e.pointerId)
-      }}><span>{m.kind === 'stick' ? m.bindings.map(bindingLabel).join(' ') : m.kind === 'look' ? t("Mouse / RS") : bindingLabel(m.bindings[0] || m.bindings[1]) || t("+ Key")}</span><small>{m.kind === 'stick' ? t("Move · LS") : m.kind === 'look' ? t("Look") : m.bindings[0] && m.bindings[1] ? bindingLabel(m.bindings[1]) : t("Touch")}</small></button>)}
+      }}><span>{m.kind === 'stick' ? m.bindings.map(bindingLabel).join(' ') : m.kind === 'look' ? "Mouse / RS" : bindingLabel(m.bindings[0] || m.bindings[1]) || "+ Key"}</span><small>{m.kind === 'stick' ? "Move · LS" : m.kind === 'look' ? "Look" : m.bindings[0] && m.bindings[1] ? bindingLabel(m.bindings[1]) : "Touch"}</small></button>)}
     </div>
     {toolbarVisible && <header className="touch-ui touch-toolbar">
-      <strong>{mode === 'edit' ? t("Edit layout") : mode === 'play' ? focused ? t("Game controls active") : t("Return to game to resume") : t("Typing · PC layout")}</strong>
-      <button aria-pressed={mode === 'play'} className={mode === 'play' ? 'active' : ''} title={t("On: keys press your game's touch buttons. Off: type using your PC layout. This choice is remembered for this app and orientation.")} disabled={!loaded || !!validation || !!state.error || !profile.marks.length} onClick={toggleGame}>{mode === 'play' ? t("Game controls: On") : t("Game controls: Off")}</button>
-      {mode === 'edit' && <button onClick={() => pause('menu')}>{t("Done · type in app")}</button>}<button title={t("Arrange touch controls and change their bindings.")} onClick={() => { pause('edit'); setProperties(v => mode !== 'edit' || !v) }}>{t("Edit layout")}{hotkeys.edit && ` · ${hotkeyLabel(hotkeys.edit)}`}</button>
-      <button onClick={() => { openEditor(); setHotkeysOpen(true) }}>{t("Hotkeys")}</button>
+      <strong>{mode === 'edit' ? "Edit layout" : mode === 'play' ? focused ? "Game controls active" : "Return to game to resume" : "Typing · PC layout"}</strong>
+      <button aria-pressed={mode === 'play'} className={mode === 'play' ? 'active' : ''} title="On: keys press your game's touch buttons. Off: type using your PC layout. This choice is remembered for this app and orientation." disabled={!loaded || !!validation || !!state.error || !profile.marks.length} onClick={toggleGame}>{mode === 'play' ? "Game controls: On" : "Game controls: Off"}</button>
+      {mode === 'edit' && <button onClick={() => pause('menu')}>Done · type in app</button>}<button title="Arrange touch controls and change their bindings." onClick={() => { pause('edit'); setProperties(v => mode !== 'edit' || !v) }}>Edit layout{hotkeys.edit && ` · ${hotkeyLabel(hotkeys.edit)}`}</button>
+      <button onClick={() => { openEditor(); setHotkeysOpen(true) }}>Hotkeys</button>
       {state.canSetAlwaysOnTop && <WindowPinButton compact enabled={state.alwaysOnTop} disabled={pinPending || state.windowBusy} onClick={async () => {
         if (!window.touchDesk || pinSubmitting.current) return
         pinSubmitting.current = true; setPinPending(true); setError('')
@@ -315,33 +313,33 @@ export function TouchPanel() {
         catch (e) { setError(e instanceof Error ? e.message : String(e)) }
         finally { pinSubmitting.current = false; setPinPending(false) }
       }} />}
-      <span className="touch-shortcut" title={mode === 'menu' ? t("Unlock the phone for PC typing. Change the language on your PC; the on-screen keyboard has its own layout. Text uses Android paste, so fields that block paste may reject it.") : undefined}>{mode === 'menu' ? t("Ctrl+C / V · copy / paste") : `${hotkeys.release ? `${hotkeyLabel(hotkeys.release)} / ` : ''}${t("Esc: switch to typing")}`}</span>
-      <button aria-label={t("Hide controls")} title={t("Hide controls{0}", [hotkeys.panel ? t(" · {0} shows them again", [hotkeyLabel(hotkeys.panel)]) : t(" · Esc shows them again")])} onClick={() => setToolbarVisible(false)}>−{hotkeys.panel && ` ${hotkeyLabel(hotkeys.panel)}`}</button><button aria-label={t("Close window controls")} title={t("Close PC typing and game controls. The window returns to scrcpy input.")} onClick={() => void close()}>×</button>
+      <span className="touch-shortcut" title={mode === 'menu' ? "Unlock the phone for PC typing. Change the language on your PC; the on-screen keyboard has its own layout. Text uses Android paste, so fields that block paste may reject it." : undefined}>{mode === 'menu' ? "Ctrl+C / V · copy / paste" : `${hotkeys.release ? `${hotkeyLabel(hotkeys.release)} / ` : ''}Esc: switch to typing`}</span>
+      <button aria-label="Hide controls" title={`Hide controls${hotkeys.panel ? ` · ${hotkeyLabel(hotkeys.panel)} shows them again` : " · Esc shows them again"}`} onClick={() => setToolbarVisible(false)}>−{hotkeys.panel && ` ${hotkeyLabel(hotkeys.panel)}`}</button><button aria-label="Close window controls" title="Close PC typing and game controls. The window returns to scrcpy input." onClick={() => void close()}>×</button>
     </header>}
-    {mode === 'play' && focused && !pointerLocked && profile.marks.some(m => m.kind === 'look') && <div className="touch-ui touch-capture"><button onClick={captureMouse}>{t("Click the game to capture mouse")}</button><small>{t("Esc: menu")}</small></div>}
-    {(error || validation || state.error || !geometry) && <div className="touch-ui touch-alert" role="alert">{message(state.error || error || validation) || t("Connecting to the virtual display…")}</div>}
+    {mode === 'play' && focused && !pointerLocked && profile.marks.some(m => m.kind === 'look') && <div className="touch-ui touch-capture"><button onClick={captureMouse}>Click the game to capture mouse</button><small>Esc: menu</small></div>}
+    {(error || validation || state.error || !geometry) && <div className="touch-ui touch-alert" role="alert">{(state.error || error || validation) || "Connecting to the virtual display…"}</div>}
     {toolbarVisible && mode === 'edit' && properties && <aside className="touch-ui touch-inspector">
-      <div className="touch-heading"><div><h2>{t("Game layout")}</h2><small title={state.title}>{state.title}</small></div><button aria-label={t("Hide layout settings")} onClick={() => setProperties(false)}>−</button></div>
-      <p>{t("Drag markers onto the game's touch buttons. Settings hide while dragging; click a marker to edit it. Radius sets the stick travel or look area.")}</p>
+      <div className="touch-heading"><div><h2>Game layout</h2><small title={state.title}>{state.title}</small></div><button aria-label="Hide layout settings" onClick={() => setProperties(false)}>−</button></div>
+      <p>Drag markers onto the game's touch buttons. Settings hide while dragging; click a marker to edit it. Radius sets the stick travel or look area.</p>
       <fieldset disabled={!loaded}>
-        <label>{t("Profile")}<select value={selected} onChange={e => { pause('edit'); setSelected(Number(e.target.value)); setMarkId('') }}>{profiles.map((p, i) => <option key={i} value={i}>{p.name}</option>)}</select></label>
-        <label>{t("Profile name")}<input maxLength={60} value={profile.name} onChange={e => setProfiles(list => list.map((p, i) => i === selected ? { ...p, name: e.target.value } : p))} /></label>
-        <div className="touch-row"><button disabled={profiles.length >= 20} onClick={() => addProfile('empty', true)}>{t("Duplicate")}</button><button disabled={profiles.length <= 1} onClick={() => { setProfiles(profiles.filter((_, i) => i !== selected)); setSelected(0); setMarkId('') }}>{t("Delete profile")}</button></div>
-        <details className="touch-hotkeys" open={hotkeysOpen} onToggle={e => setHotkeysOpen(e.currentTarget.open)}><summary>{t("Hotkeys")}</summary>
-          <p>{t("Click an assignment, then press a key or combination. Saved with this profile. Escape cancels assignment and always releases the cursor.")}</p>
-          {touchHotkeyActions.map(action => <div className="touch-hotkey" key={action}><span>{t(touchHotkeyLabels[action])}</span><button aria-label={t("Assign {0}", [t(touchHotkeyLabels[action])])} onClick={() => { setCapture(null); setHotkeyCapture(action); setError('') }}>{hotkeyCapture === action ? t("Press keys…") : hotkeyLabel(hotkeys[action])}</button><button aria-label={t("Clear {0}", [t(touchHotkeyLabels[action])])} onClick={() => assignHotkey(action, '')}>×</button></div>)}
+        <label>Profile<select value={selected} onChange={e => { pause('edit'); setSelected(Number(e.target.value)); setMarkId('') }}>{profiles.map((p, i) => <option key={i} value={i}>{p.name}</option>)}</select></label>
+        <label>Profile name<input maxLength={60} value={profile.name} onChange={e => setProfiles(list => list.map((p, i) => i === selected ? { ...p, name: e.target.value } : p))} /></label>
+        <div className="touch-row"><button disabled={profiles.length >= 20} onClick={() => addProfile('empty', true)}>Duplicate</button><button disabled={profiles.length <= 1} onClick={() => { setProfiles(profiles.filter((_, i) => i !== selected)); setSelected(0); setMarkId('') }}>Delete profile</button></div>
+        <details className="touch-hotkeys" open={hotkeysOpen} onToggle={e => setHotkeysOpen(e.currentTarget.open)}><summary>Hotkeys</summary>
+          <p>Click an assignment, then press a key or combination. Saved with this profile. Escape cancels assignment and always releases the cursor.</p>
+          {touchHotkeyActions.map(action => <div className="touch-hotkey" key={action}><span>{touchHotkeyLabels[action]}</span><button aria-label={`Assign ${touchHotkeyLabels[action]}`} onClick={() => { setCapture(null); setHotkeyCapture(action); setError('') }}>{hotkeyCapture === action ? "Press keys…" : hotkeyLabel(hotkeys[action])}</button><button aria-label={`Clear ${touchHotkeyLabels[action]}`} onClick={() => assignHotkey(action, '')}>×</button></div>)}
         </details>
-        <label>{t("New from template")}<select value="" disabled={profiles.length >= 20} onChange={e => { if (e.target.value) addProfile(e.target.value as TouchTemplate) }}><option value="">{t("Choose a template…")}</option><option value="shooter">{t("Shooter · WASD, aim, fire, jump")}</option><option value="racing">{t("Racing · steer, pedals, boost")}</option><option value="platformer">{t("Platformer · move, jump, action")}</option><option value="empty">{t("Empty layout")}</option></select></label>
-        <div className="touch-row"><button disabled={profile.marks.length >= 8} onClick={() => addMark('button')}>{t("+ Button")}</button><button disabled={profile.marks.length >= 8 || profile.marks.some(m => m.kind === 'stick')} onClick={() => addMark('stick')}>{t("+ Stick")}</button><button disabled={profile.marks.length >= 8 || profile.marks.some(m => m.kind === 'look')} onClick={() => addMark('look')}>{t("+ Look")}</button></div>
-        {selectedMark && <section className="touch-selection"><h3>{selectedMark.kind === 'button' ? t("Touch button") : selectedMark.kind === 'stick' ? t("Movement stick") : t("Look zone")}</h3>
-          {selectedMark.bindings.map((key, slot) => <div className="touch-binding" key={slot}><span>{selectedMark.kind === 'stick' ? t(['Up', 'Left', 'Down', 'Right'][slot]) : slot ? t("Alternative") : t("Primary")}</span><button onClick={() => setCapture({ id: selectedMark.id, slot })}>{capture?.id === selectedMark.id && capture.slot === slot ? t("Press a key / button…") : key ? bindingLabel(key) : t("Assign…")}</button><button aria-label={t("Clear binding {0}", [slot + 1])} onClick={() => { const bindings = [...selectedMark.bindings]; bindings[slot] = ''; patch(selectedMark.id, { bindings }) }}>×</button></div>)}
-          {selectedMark.kind !== 'button' && <><label>{t("Radius · ")}{Math.round(selectedMark.radius * 100)}%<input type="range" min=".01" max=".4" step=".005" value={selectedMark.radius} onChange={e => patch(selectedMark.id, { radius: Number(e.target.value) })} /></label><label className="touch-check"><input type="checkbox" checked={selectedMark.gamepad} onChange={e => patch(selectedMark.id, { gamepad: e.target.checked })} />{selectedMark.kind === 'stick' ? t("Use left gamepad stick") : t("Use right gamepad stick")}</label></>}
-          {selectedMark.kind === 'look' && <label>{t("Sensitivity · ")}{selectedMark.sensitivity.toFixed(1)}<input type="range" min=".1" max="5" step=".1" value={selectedMark.sensitivity} onChange={e => patch(selectedMark.id, { sensitivity: Number(e.target.value) })} /></label>}
+        <label>New from template<select value="" disabled={profiles.length >= 20} onChange={e => { if (e.target.value) addProfile(e.target.value as TouchTemplate) }}><option value="">Choose a template…</option><option value="shooter">Shooter · WASD, aim, fire, jump</option><option value="racing">Racing · steer, pedals, boost</option><option value="platformer">Platformer · move, jump, action</option><option value="empty">Empty layout</option></select></label>
+        <div className="touch-row"><button disabled={profile.marks.length >= 8} onClick={() => addMark('button')}>+ Button</button><button disabled={profile.marks.length >= 8 || profile.marks.some(m => m.kind === 'stick')} onClick={() => addMark('stick')}>+ Stick</button><button disabled={profile.marks.length >= 8 || profile.marks.some(m => m.kind === 'look')} onClick={() => addMark('look')}>+ Look</button></div>
+        {selectedMark && <section className="touch-selection"><h3>{selectedMark.kind === 'button' ? "Touch button" : selectedMark.kind === 'stick' ? "Movement stick" : "Look zone"}</h3>
+          {selectedMark.bindings.map((key, slot) => <div className="touch-binding" key={slot}><span>{selectedMark.kind === 'stick' ? ['Up', 'Left', 'Down', 'Right'][slot] : slot ? "Alternative" : "Primary"}</span><button onClick={() => setCapture({ id: selectedMark.id, slot })}>{capture?.id === selectedMark.id && capture.slot === slot ? "Press a key / button…" : key ? bindingLabel(key) : "Assign…"}</button><button aria-label={`Clear binding ${slot + 1}`} onClick={() => { const bindings = [...selectedMark.bindings]; bindings[slot] = ''; patch(selectedMark.id, { bindings }) }}>×</button></div>)}
+          {selectedMark.kind !== 'button' && <><label>{"Radius · "}{Math.round(selectedMark.radius * 100)}%<input type="range" min=".01" max=".4" step=".005" value={selectedMark.radius} onChange={e => patch(selectedMark.id, { radius: Number(e.target.value) })} /></label><label className="touch-check"><input type="checkbox" checked={selectedMark.gamepad} onChange={e => patch(selectedMark.id, { gamepad: e.target.checked })} />{selectedMark.kind === 'stick' ? "Use left gamepad stick" : "Use right gamepad stick"}</label></>}
+          {selectedMark.kind === 'look' && <label>{"Sensitivity · "}{selectedMark.sensitivity.toFixed(1)}<input type="range" min=".1" max="5" step=".1" value={selectedMark.sensitivity} onChange={e => patch(selectedMark.id, { sensitivity: Number(e.target.value) })} /></label>}
           <div className="touch-row">{(['x', 'y'] as const).map(axis => <label key={axis}>{axis.toUpperCase()} %<input type="number" min="0" max="100" step=".1" value={Math.round(selectedMark[axis] * 1000) / 10} onChange={e => patch(selectedMark.id, { [axis]: Math.max(0, Math.min(1, Number(e.target.value) / 100)) })} /></label>)}</div>
-          <button className="danger" onClick={() => { setProfiles(list => list.map((p, i) => i === selected ? { ...p, marks: p.marks.filter(m => m.id !== selectedMark.id) } : p)); setMarkId(''); setCapture(null) }}>{t("Remove control")}</button>
+          <button className="danger" onClick={() => { setProfiles(list => list.map((p, i) => i === selected ? { ...p, marks: p.marks.filter(m => m.id !== selectedMark.id) } : p)); setMarkId(''); setCapture(null) }}>Remove control</button>
         </section>}
       </fieldset>
-      <footer><span>{message(saved)} · {t(orientation)}</span><small>{message(gamepad)}</small><small>{t("Templates are starting layouts. Adjust their positions for this game's on-screen controls.")}</small></footer>
+      <footer><span>{saved} · {orientation}</span><small>{gamepad}</small><small>Templates are starting layouts. Adjust their positions for this game's on-screen controls.</small></footer>
     </aside>}
   </main>
 }

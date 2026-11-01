@@ -13,6 +13,9 @@ import './monitor.css'
 import { applyTheme, applyZenMode, applyCornerStyle, getActiveTheme } from './lib/themes'
 import { useAppearanceStore } from './store/useAppearanceStore'
 
+// Remove the preference left by early development builds, including in detached windows.
+try { localStorage.removeItem('adb-vault-language') } catch { /* Storage may be unavailable. */ }
+
 applyTheme(getActiveTheme(useAppearanceStore.getState().themeId, useAppearanceStore.getState().terminalMode, useAppearanceStore.getState().terminalColor))
 applyZenMode(useAppearanceStore.getState().zenMode)
 applyCornerStyle(useAppearanceStore.getState().cornerStyle)

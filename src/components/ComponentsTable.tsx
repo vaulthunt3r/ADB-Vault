@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { useMemo } from 'react'
 import { Search } from 'lucide-react'
 import {
@@ -25,8 +24,8 @@ const features = tableFeatures({
 const column = createColumnHelper<typeof features, ManagedComponent>()
 
 function ComponentName({ component, selected, select }: { component: ManagedComponent; selected: boolean; select: () => void }) {
-  return <button className="component-select" aria-label={t("Select {0}", [t(component.name)])} aria-pressed={selected} onClick={select}>
-    <ComponentIcon id={component.id} /><span><strong>{t(component.name)}</strong><span className="component-subtitle">{t(component.subtitle)}</span>
+  return <button className="component-select" aria-label={`Select ${component.name}`} aria-pressed={selected} onClick={select}>
+    <ComponentIcon id={component.id} /><span><strong>{component.name}</strong><span className="component-subtitle">{component.subtitle}</span>
       {component.status === 'Downloading' && <span className="inline-progress"><span style={{ width: `${component.progress}%` }} /></span>}
     </span>
   </button>
@@ -35,14 +34,14 @@ function ComponentName({ component, selected, select }: { component: ManagedComp
 // Stable column definitions preserve the custom desktop presentation.
 const columns = column.columns([
   column.accessor(component => `${component.name} ${component.subtitle}`, {
-    id: 'name', header: () => t('COMPONENT'), filterFn: (row, _column, value) => (t(row.original.name) + ' ' + t(row.original.subtitle) + ' ' + row.original.name).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()),
+    id: 'name', header: () => 'COMPONENT', filterFn: (row, columnId, value) => row.getValue<string>(columnId).toLocaleLowerCase().includes(String(value).toLocaleLowerCase()),
     meta: { cellClass: 'component-name-cell' },
     cell: ({ row }) => <ComponentName component={row.original} selected={row.getIsSelected()} select={() => row.toggleSelected(true)} />,
   }),
-  column.accessor('version', { header: () => t('VERSION'), meta: { get cellClass() { return "version-col mono" }, headerClass: 'version-col' } }),
-  column.accessor('size', { header: () => t('DOWNLOAD'), meta: { get cellClass() { return "size-col mono" }, headerClass: 'size-col', get title() { return t("Download size") } } }),
+  column.accessor('version', { header: () => 'VERSION', meta: { cellClass: "version-col mono", headerClass: 'version-col' } }),
+  column.accessor('size', { header: () => 'DOWNLOAD', meta: { cellClass: "size-col mono", headerClass: 'size-col', title: "Download size" } }),
   column.accessor('status', {
-    header: () => t('STATUS'), meta: { cellClass: 'status-cell', headerClass: 'status-heading' },
+    header: () => 'STATUS', meta: { cellClass: 'status-cell', headerClass: 'status-heading' },
     filterFn: (row, _columnId, filter: ComponentFilter) => filter === 'all' || (filter === 'ready' ? isReady : filter === 'not-installed' ? isNotInstalled : needsAttention)(settledStatus(row.original)),
     cell: ({ row }) => <><StatusBadge status={row.original.status} />{row.original.status === 'Downloading' && <span className="download-percentage mono">{row.original.progress}%</span>}</>,
   }),
@@ -72,16 +71,16 @@ export function ComponentsTable({ components, search, filter, resetFilters }: {
     },
   })
   const groups = table.getRowModel().rows
-  return <div className="component-table" role="table" aria-label={t("Dependencies and components")} aria-colcount={4}>
+  return <div className="component-table" role="table" aria-label="Dependencies and components" aria-colcount={4}>
     {table.getHeaderGroups().map(group => <div className="table-heading" role="row" key={group.id}>
       {group.headers.map(header => <span role="columnheader" key={header.id} className={header.column.columnDef.meta?.headerClass} title={header.column.columnDef.meta?.title}><table.FlexRender header={header} /></span>)}
     </div>)}
     {groups.map(group => <div role="rowgroup" key={group.id}>
-      <div className="component-group" role="row"><span role="cell" aria-colspan={4}>{t(group.original.group)}<span className="group-count">{group.subRows.length}</span>{group.original.group === 'Optional components' && <span className="optional-caption">{t("Extend your setup")}</span>}</span></div>
+      <div className="component-group" role="row"><span role="cell" aria-colspan={4}>{group.original.group}<span className="group-count">{group.subRows.length}</span>{group.original.group === 'Optional components' && <span className="optional-caption">Extend your setup</span>}</span></div>
       {group.subRows.map(row => <div key={row.id} className={`component-row ${row.getIsSelected() ? 'selected' : ''}`} role="row" data-testid={`component-${row.id}`}>
         {row.getVisibleCells().map(cell => <div role="cell" key={cell.id} className={cell.column.columnDef.meta?.cellClass}><table.FlexRender cell={cell} /></div>)}
       </div>)}
     </div>)}
-    {groups.length === 0 && <div className="no-results"><Search size={25} /><h3>{t("No components found")}</h3><p>{t("Try a different search or filter.")}</p><button className="text-button" onClick={resetFilters}>{t("Show all components")}</button></div>}
+    {groups.length === 0 && <div className="no-results"><Search size={25} /><h3>No components found</h3><p>Try a different search or filter.</p><button className="text-button" onClick={resetFilters}>Show all components</button></div>}
   </div>
 }

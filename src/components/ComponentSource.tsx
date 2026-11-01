@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { Copy } from 'lucide-react'
 import type { ComponentRecord } from '../../electron/contracts'
 import { requestBackend } from '../lib/backend'
@@ -9,15 +8,15 @@ export function ComponentSource({ component }: { component: ComponentRecord }) {
   if (!component.sourceUrl) return null
   const sourceUrl = component.sourceUrl
   return <div className="component-source">
-    <dt>{t("Source")}</dt>
+    <dt>Source</dt>
     <dd>
-      <a className="component-source-link" href={sourceUrl} target="_blank" rel="noopener noreferrer" title={t("Open source in browser")} onClick={event => {
+      <a className="component-source-link" href={sourceUrl} target="_blank" rel="noopener noreferrer" title="Open source in browser" onClick={event => {
         if (window.desktop) {
           event.preventDefault()
           void requestBackend({ type: 'components.source', id: component.id })
         }
       }}><span>{sourceUrl}</span></a>
-      <button className="icon-button" aria-label={t("Copy source URL")} title={t("Copy source URL")} onClick={() => void copyText(sourceUrl).then(
+      <button className="icon-button" aria-label="Copy source URL" title="Copy source URL" onClick={() => void copyText(sourceUrl).then(
         () => useAppStore.getState().notify("Copied"),
         () => useAppStore.getState().notify("Could not copy to the clipboard."),
       )}><Copy size={14} aria-hidden="true" /></button>

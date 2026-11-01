@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { IconButton } from './ui'
@@ -22,5 +20,5 @@ export function ActionDialog({ prompt, close }: { prompt: ActionPrompt | null; c
     setBusy(true); setError('')
     try { if (await prompt.action(value)) close(); else setError("The action was not completed. Check the name, demo result, or device connection, then try again.") }
     finally { setBusy(false) }
-  }}><div className="dialog-heading"><span className="eyebrow">{t("SIMULATED ACTION")}</span><IconButton label={t("Close action dialog")} disabled={busy} onClick={close}><X size={16} /></IconButton></div><h2 id="action-title">{prompt?.title}</h2><p>{message(prompt?.description)}</p>{prompt?.label && <><label htmlFor="action-value">{prompt.label}</label><div className="path-input-row"><input id="action-value" autoFocus value={value} maxLength={128} disabled={busy} onChange={event => setValue(event.target.value)} required /></div></>}{error && <p className="field-error" role="alert">{message(error)}</p>}<div className="dialog-footer action-dialog-footer"><button type="button" className="button secondary" disabled={busy} onClick={close}>{t("Cancel")}</button><button type="submit" className="button primary" disabled={busy || !!prompt?.label && !value.trim()}>{busy ? t("Working…") : prompt?.confirm}</button></div></form></dialog>
+  }}><div className="dialog-heading"><span className="eyebrow">SIMULATED ACTION</span><IconButton label="Close action dialog" disabled={busy} onClick={close}><X size={16} /></IconButton></div><h2 id="action-title">{prompt?.title}</h2><p>{prompt?.description || ''}</p>{prompt?.label && <><label htmlFor="action-value">{prompt.label}</label><div className="path-input-row"><input id="action-value" autoFocus value={value} maxLength={128} disabled={busy} onChange={event => setValue(event.target.value)} required /></div></>}{error && <p className="field-error" role="alert">{error}</p>}<div className="dialog-footer action-dialog-footer"><button type="button" className="button secondary" disabled={busy} onClick={close}>Cancel</button><button type="submit" className="button primary" disabled={busy || !!prompt?.label && !value.trim()}>{busy ? "Working…" : prompt?.confirm}</button></div></form></dialog>
 }

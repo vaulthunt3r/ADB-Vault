@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { create } from 'zustand'
 import { emptyApps, type AppsSnapshot } from '../../electron/apps-protocol'
 import { requestBackend } from '../lib/backend'
@@ -28,7 +27,7 @@ export const useAppsStore = create<AppsState>((set, get) => ({
     if (get().status === 'loading') return
     const previous = get().deviceId === id ? get() : emptyApps()
     const userId = requestedUserId ?? previous.userId ?? undefined
-    set({ ...emptyApps(), options: get().options, loadingMode: get().loadingMode, cachedUserIds: previous.cachedUserIds, deviceId: id, userId: userId ?? null, profiles: previous.profiles, currentUserId: previous.currentUserId, status: 'loading', message: t("Starting application collection…"), selectedPackage: null })
+    set({ ...emptyApps(), options: get().options, loadingMode: get().loadingMode, cachedUserIds: previous.cachedUserIds, deviceId: id, userId: userId ?? null, profiles: previous.profiles, currentUserId: previous.currentUserId, status: 'loading', message: "Starting application collection…", selectedPackage: null })
     if (!await requestBackend({ type: 'apps.refresh', id, ...(userId !== undefined ? { userId } : {}) }) && get().status === 'loading') set({ status: 'error', error: 'Could not collect applications. Check the device connection and retry.' })
   },
   selectProfile: async (id, userId) => { await requestBackend({ type: 'apps.selectProfile', id, userId }) },

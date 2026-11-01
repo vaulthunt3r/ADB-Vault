@@ -1,6 +1,3 @@
-import { t as translateUi } from '../lib/i18n'
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { ActionIndicator } from './ui'
 import { HintButton } from './Tooltip'
 import { useAdbConsoleStore } from '../store/useAdbConsoleStore'
@@ -29,7 +26,7 @@ export function usePowerBlocked(requiresAdb = true) {
   const action = useAppActionsStore(s => s.action?.status === 'running')
   const backup = useBackupStore(s => s.state?.status === 'running')
   const restore = useRestoreBusy()
-  const components = useAppStore(s => s.componentPending || s.bulkBusy || s.components.some(c => ['Checking', translateUi("Downloading"), translateUi("Installing")].includes(c.status)))
+  const components = useAppStore(s => s.componentPending || s.bulkBusy || s.components.some(c => ['Checking', "Downloading", "Installing"].includes(c.status)))
   return phoneTools || consoleBusy || diagnostic || connection || apps || action || backup || restore || components || fastboot
 }
 
@@ -37,8 +34,8 @@ export function DevicePowerActions({ device }: { device: DeviceRecord }) {
   const [dialog, setDialog] = useState<{ device: DeviceRecord; shutdown: boolean } | null>(null)
   const blocked = usePowerBlocked() || device.status !== 'connected'
   return <>
-    <HintButton hint={t("Choose Android, Recovery, Bootloader or Fastbootd, then confirm the restart.")} className="button secondary" disabled={blocked} onClick={() => setDialog({ device: { ...device }, shutdown: false })}><RotateCw size={14} />{t("Restart")}<ActionIndicator /></HintButton>
-    <HintButton hint={t("Shut down the phone after confirmation. You will need to turn it on manually.")} className="button secondary" disabled={blocked} onClick={() => setDialog({ device: { ...device }, shutdown: true })}><Power size={14} />{t("Power off")}<ActionIndicator /></HintButton>
+    <HintButton hint="Choose Android, Recovery, Bootloader or Fastbootd, then confirm the restart." className="button secondary" disabled={blocked} onClick={() => setDialog({ device: { ...device }, shutdown: false })}><RotateCw size={14} />Restart<ActionIndicator /></HintButton>
+    <HintButton hint="Shut down the phone after confirmation. You will need to turn it on manually." className="button secondary" disabled={blocked} onClick={() => setDialog({ device: { ...device }, shutdown: true })}><Power size={14} />Power off<ActionIndicator /></HintButton>
     {dialog && <DevicePowerDialog device={dialog.device} shutdown={dialog.shutdown} close={() => setDialog(null)} />}
   </>
 }
@@ -56,12 +53,12 @@ export function DevicePowerDialog({ device, shutdown, close }: { device: DeviceR
     return () => { dialog?.close(); if (previous?.isConnected) previous.focus({ preventScroll: true }) }
   }, [])
   const warning = shutdown
-    ? t("The phone will shut down completely. ADB Vault will lose all control of it and cannot turn it back on. You will need to turn on the phone manually and reconnect.")
+    ? "The phone will shut down completely. ADB Vault will lose all control of it and cannot turn it back on. You will need to turn on the phone manually and reconnect."
     : mode === 'bootloader' || mode === 'fastboot'
-      ? translateUi("The phone will restart into {0}. Normal ADB control will be unavailable. Connect it by USB and use Find Fastboot devices in Connection to return to Android, or use the phone’s buttons. Mode support depends on the phone.", [mode === 'fastboot' ? t("Fastbootd") : t("Bootloader / Fastboot")])
+      ? `The phone will restart into ${mode === 'fastboot' ? "Fastbootd" : "Bootloader / Fastboot"}. Normal ADB control will be unavailable. Connect it by USB and use Find Fastboot devices in Connection to return to Android, or use the phone’s buttons. Mode support depends on the phone.`
       : mode === 'recovery'
-        ? t("The phone will restart into Recovery. The connection will be interrupted; ADB control may be unavailable. To return to Android, choose Reboot system on the phone. Mode support depends on the phone.")
-        : t("The phone will restart and the connection will be interrupted. After startup, unlock the phone; you may need to reconnect Wi-Fi debugging.")
+        ? "The phone will restart into Recovery. The connection will be interrupted; ADB control may be unavailable. To return to Android, choose Reboot system on the phone. Mode support depends on the phone."
+        : "The phone will restart and the connection will be interrupted. After startup, unlock the phone; you may need to reconnect Wi-Fi debugging."
   return <dialog ref={ref} className="locate-dialog" aria-labelledby="device-power-title" aria-describedby="device-power-warning" onCancel={event => { event.preventDefault(); if (!submitting.current) close() }}>
     <form onSubmit={async event => {
       event.preventDefault()
@@ -74,14 +71,14 @@ export function DevicePowerDialog({ device, shutdown, close }: { device: DeviceR
         }
       } finally { submitting.current = false; setPending(false) }
     }}>
-      <h2 id="device-power-title">{shutdown ? t("Power off phone?") : t("Restart phone")}</h2>
+      <h2 id="device-power-title">{shutdown ? "Power off phone?" : "Restart phone"}</h2>
       <p><strong>{device.name}</strong><br /><span className="forget-device-address">{device.method} · {device.serial}</span></p>
-      {!shutdown && <fieldset disabled={pending} className="device-power-options"><legend>{t("Restart to")}</legend>{(['restart', 'recovery', 'bootloader', 'fastboot'] as const).map(value => <label key={value}><input type="radio" name="restart-mode" value={value} checked={mode === value} onChange={() => setMode(value)} />{value === 'restart' ? t("Android") : value === 'recovery' ? t("Recovery") : value === 'fastboot' ? t("Fastbootd") : t("Bootloader / Fastboot")}</label>)}</fieldset>}
+      {!shutdown && <fieldset disabled={pending} className="device-power-options"><legend>Restart to</legend>{(['restart', 'recovery', 'bootloader', 'fastboot'] as const).map(value => <label key={value}><input type="radio" name="restart-mode" value={value} checked={mode === value} onChange={() => setMode(value)} />{value === 'restart' ? "Android" : value === 'recovery' ? "Recovery" : value === 'fastboot' ? "Fastbootd" : "Bootloader / Fastboot"}</label>)}</fieldset>}
       <p id="device-power-warning">{warning}</p>
-      {!available && !pending && <p className="field-error" role="status">{t("The selected connection changed or is no longer available. Close this dialog and select the phone again.")}</p>}
-      {blocked && !pending && <p className="component-description" role="status">{t("Wait for the current operation to finish.")}</p>}
-      {error && <p className="field-error" role="alert">{message(error)}</p>}
-      <div className="dialog-footer"><button ref={cancel} type="button" className="button secondary" disabled={pending} onClick={close}>{t("Cancel")}</button><button type="submit" className="button primary" disabled={pending || blocked || !available}>{pending ? <LoaderCircle size={14} className="spin" /> : shutdown ? <Power size={14} /> : <RotateCw size={14} />}{pending ? t("Sending command…") : shutdown ? t("Power off phone") : t("Restart phone")}</button></div>
+      {!available && !pending && <p className="field-error" role="status">The selected connection changed or is no longer available. Close this dialog and select the phone again.</p>}
+      {blocked && !pending && <p className="component-description" role="status">Wait for the current operation to finish.</p>}
+      {error && <p className="field-error" role="alert">{error}</p>}
+      <div className="dialog-footer"><button ref={cancel} type="button" className="button secondary" disabled={pending} onClick={close}>Cancel</button><button type="submit" className="button primary" disabled={pending || blocked || !available}>{pending ? <LoaderCircle size={14} className="spin" /> : shutdown ? <Power size={14} /> : <RotateCw size={14} />}{pending ? "Sending command…" : shutdown ? "Power off phone" : "Restart phone"}</button></div>
     </form>
   </dialog>
 }

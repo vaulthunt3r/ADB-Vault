@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { clampSidebarWidth, fitSidebarWidths } from '../lib/layout'
@@ -131,7 +130,7 @@ export const useAppStore = create<AppState>()(persist((set, get) => ({
     const previous = state.activity.find(i => i.operation?.key === operation.key || i.diagnostic?.operationId === operation.key)
     if (previous?.operation) operation = { ...operation, deviceName: previous.operation.deviceName, profileName: previous.operation.profileName }
     if (previous && JSON.stringify(previous.operation) === JSON.stringify(operation)) return {}
-    const item: ActivityItem = { id: previous?.id ?? sequence++, time: operation.startedAt || previous?.time || time(), text: t("{0} · {1} applications", [operation.title, operation.items.length]), tone: operation.status === 'running' ? 'info' : operation.status === 'success' ? 'success' : 'warning', source: 'apps', device: operation.deviceName, operation,
+    const item: ActivityItem = { id: previous?.id ?? sequence++, time: operation.startedAt || previous?.time || time(), text: `${operation.title} · ${operation.items.length} applications`, tone: operation.status === 'running' ? 'info' : operation.status === 'success' ? 'success' : 'warning', source: 'apps', device: operation.deviceName, operation,
       diagnostic: previous?.diagnostic, endedAt: operation.status === 'running' ? undefined : previous?.endedAt || time() }
     return { ...retainActivity(previous ? state.activity.map(i => i.id === item.id ? item : i) : [item, ...state.activity], state.dismissedOperations, state.dismissedDiagnostics), ...(operation.status !== 'running' && previous?.operation?.status !== operation.status ? { lastOperationId: item.id } : {}) }
   }),

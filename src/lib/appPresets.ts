@@ -1,4 +1,3 @@
-import { t } from "./i18n"
 import { activeAppFilters, filterAndSortApps, type AppFilters } from './appView'
 import { useAppsStore } from '../store/useAppsStore'
 import { useAppsViewStore } from '../store/useAppsViewStore'
@@ -17,7 +16,7 @@ export function presetNames(filters: AppFilters, search: string, current: string
   const partial = marked.length !== current.length
   const markedName = hidden || !base ? suffix : partial ? `${base.slice(0, 77 - suffix.length)} — ${suffix}` : base
   const safe = (name: string) => name.slice(0, 80).replace(/[. ]+$/g, '')
-  return { current: safe(base || (filters.badges.length ? t("Filtered apps") : t("All apps"))), marked: safe(markedName), hidden }
+  return { current: safe(base || (filters.badges.length ? "Filtered apps" : "All apps")), marked: safe(markedName), hidden }
 }
 
 export function openAppsBackup(preferred?: 'current' | 'marked', onlyMarked = false) {

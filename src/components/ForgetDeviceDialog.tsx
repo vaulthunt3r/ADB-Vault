@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { DeviceRecord } from '../../electron/contracts'
@@ -31,12 +29,12 @@ export function ForgetDeviceDialog({ device, close }: { device: DeviceRecord; cl
       } finally { submitting.current = false; setPending(false) }
     }}>
       <div className="dialog-heading"><span className="dialog-icon"><Trash2 size={22} /></span></div>
-      <h2 id="forget-device-title">{t("Forget ")}{device.name}?</h2>
+      <h2 id="forget-device-title">{"Forget "}{device.name}?</h2>
       <p className="forget-device-address">{device.method} · {device.endpoint || device.serial}</p>
-      <p id="forget-device-description">{t("Remove this entry from Known devices in ADB Vault? Phone pairing and USB debugging authorization will remain unchanged.")}</p>
-      {!canForget && !pending && <p role="status" className="field-error">{t("This entry is no longer available to forget. If the device reconnected, disconnect it first.")}</p>}
-      {error && <p role="alert" className="field-error">{message(error)}</p>}
-      <div className="dialog-footer"><button ref={cancel} type="button" className="button secondary" disabled={pending} onClick={close}>{t("Cancel")}</button><button type="submit" className="button primary" disabled={pending || busy || !canForget}><Trash2 size={14} />{pending ? t("Forgetting…") : t("Forget device")}</button></div>
+      <p id="forget-device-description">Remove this entry from Known devices in ADB Vault? Phone pairing and USB debugging authorization will remain unchanged.</p>
+      {!canForget && !pending && <p role="status" className="field-error">This entry is no longer available to forget. If the device reconnected, disconnect it first.</p>}
+      {error && <p role="alert" className="field-error">{error}</p>}
+      <div className="dialog-footer"><button ref={cancel} type="button" className="button secondary" disabled={pending} onClick={close}>Cancel</button><button type="submit" className="button primary" disabled={pending || busy || !canForget}><Trash2 size={14} />{pending ? "Forgetting…" : "Forget device"}</button></div>
     </form>
   </dialog>
 }

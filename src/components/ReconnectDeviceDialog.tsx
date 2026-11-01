@@ -1,5 +1,3 @@
-import { message } from "../lib/i18n"
-import { t } from "../lib/i18n"
 import { useEffect, useRef, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { requestBackend } from '../lib/backend'
@@ -29,11 +27,11 @@ export function ReconnectDeviceDialog({ close, onUsed }: { close: () => void; on
     return () => { element?.close(); if (returnFocus.current?.isConnected) returnFocus.current.focus() }
   }, [])
   return <dialog ref={dialog} className="locate-dialog" aria-labelledby="reconnect-title" onCancel={e => { e.preventDefault(); if (!submitting.current) close() }}>
-    <h2 id="reconnect-title">{t("Find devices")}</h2>
-    <p>{pending ? t("Checking known devices and current wireless addresses…") : message(discovery?.message)}</p>
-    {!pending && !error && <div className="reconnect-candidates">{discovery?.candidates.map(c => <label className="reconnect-candidate" key={c.token}><input type="radio" name="reconnect-device" checked={selected === c.token} onChange={() => setSelected(c.token)} /><span><strong>{c.name}</strong><span>{c.method} · {c.address}</span><span>{c.connected ? t("Already connected — use this device") : t("Available on the network — connect and verify identity")}</span></span></label>)}</div>}
-    {error && <p role="alert" className="field-error">{message(error)}</p>}
-    <div className="dialog-footer"><button className="button secondary" disabled={pending} onClick={close}>{t("Cancel")}</button><button className="button secondary" disabled={pending} onClick={() => void search()}><RefreshCw size={14} />{t("Search again")}</button><button className="button primary" disabled={pending || !candidate || !!error} onClick={async () => {
+    <h2 id="reconnect-title">Find devices</h2>
+    <p>{pending ? "Checking known devices and current wireless addresses…" : discovery?.message || ''}</p>
+    {!pending && !error && <div className="reconnect-candidates">{discovery?.candidates.map(c => <label className="reconnect-candidate" key={c.token}><input type="radio" name="reconnect-device" checked={selected === c.token} onChange={() => setSelected(c.token)} /><span><strong>{c.name}</strong><span>{c.method} · {c.address}</span><span>{c.connected ? "Already connected — use this device" : "Available on the network — connect and verify identity"}</span></span></label>)}</div>}
+    {error && <p role="alert" className="field-error">{error}</p>}
+    <div className="dialog-footer"><button className="button secondary" disabled={pending} onClick={close}>Cancel</button><button className="button secondary" disabled={pending} onClick={() => void search()}><RefreshCw size={14} />Search again</button><button className="button primary" disabled={pending || !candidate || !!error} onClick={async () => {
       if (!candidate || submitting.current) return
       submitting.current = true; setPending(true); setError('')
       try {
@@ -44,6 +42,6 @@ export function ReconnectDeviceDialog({ close, onUsed }: { close: () => void; on
         }
         else setError(useConnectionStore.getState().error || "Could not use this result. Search again; the address may have changed.")
       } finally { submitting.current = false; setPending(false) }
-    }}>{candidate?.connected ? t("Use device") : t("Connect device")}</button></div>
+    }}>{candidate?.connected ? "Use device" : "Connect device"}</button></div>
   </dialog>
 }

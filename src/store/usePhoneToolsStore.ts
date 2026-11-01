@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { create } from 'zustand'
 import type { DeviceRecord } from '../../electron/contracts'
 import { samePhoneTarget, type PhoneDataKind, type PhoneToolsRequest, type PhoneToolsState, type PhoneToolsTarget } from '../../electron/phone-tools-protocol'
@@ -23,7 +22,7 @@ export const usePhoneToolsStore = create<State>((set, get) => ({
   open: (kind, device) => {
     const target = device ? { id: device.id, serial: device.serial, transportId: device.transportId } : null
     const current = get(), same = target === null && current.clipboardDraftTarget === null || samePhoneTarget(current.clipboardDraftTarget, target)
-    set({ view: { kind, target, name: device?.name || t("This computer") }, error: '',
+    set({ view: { kind, target, name: device?.name || "This computer" }, error: '',
       ...(kind === 'clipboard' ? { clipboardDraftTarget: target, clipboardDraft: same ? current.clipboardDraft : samePhoneTarget(current.clipboard?.target, target) ? current.clipboard!.text : '' } : {}) })
   },
   request: async request => {

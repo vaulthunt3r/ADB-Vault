@@ -8,7 +8,7 @@ body:
     id: version
     attributes:
       label: ADB Vault version and distribution
-      placeholder: 0.1.1, Setup or Portable
+      placeholder: 0.1.2, Setup or Portable
     validations:
       required: true
   - type: input

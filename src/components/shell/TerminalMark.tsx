@@ -1,4 +1,3 @@
-import { t } from "../../lib/i18n"
 import { useEffect, useId, useState } from 'react'
 import { Command, Terminal } from 'lucide-react'
 import { nextTerminalQuote } from '../../lib/terminalQuotes'
@@ -17,7 +16,7 @@ export function TerminalMark() {
   }, [terminalMode, engaged])
   const toggle = () => { setQuote(null); toggleTerminalMode() }
   return <span className="app-mark-wrap" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-    <button type="button" className="app-mark" aria-label={t("Terminal mode")} aria-pressed={terminalMode}
+    <button type="button" className="app-mark" aria-label="Terminal mode" aria-pressed={terminalMode}
       aria-describedby={terminalMode && quote ? tooltipId : undefined}
       onDoubleClick={event => { event.stopPropagation(); toggle() }}
       onContextMenu={event => {
@@ -36,6 +35,6 @@ export function TerminalMark() {
       }}>
       {terminalMode ? <Terminal size={14} strokeWidth={2.3} /> : <Command size={14} strokeWidth={2.3} />}
     </button>
-    {terminalMode && quote && <span className="terminal-quote" id={tooltipId} role="tooltip" aria-label={`${quote} — ${t("Hackers · 1995")}`}><TerminalText text={quote} kind="quote" /><small>{t("Hackers · 1995")}</small></span>}
+    {terminalMode && quote && <span className="terminal-quote" id={tooltipId} role="tooltip" aria-label={`${quote} — Hackers · 1995`}><TerminalText text={quote} kind="quote" /><small>Hackers · 1995</small></span>}
   </span>
 }

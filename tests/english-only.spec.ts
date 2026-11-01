@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test'
 import { installBackendFixture } from './backend-fixture'
 import { badgeDescriptions } from '../src/lib/badgeAppearance'
 
+test.use({ locale: 'uk-UA' })
+
 for (const language of ['ru', 'uk']) {
   test(`legacy ${language} preferences cannot switch the English interface`, async ({ page }) => {
     await installBackendFixture(page)

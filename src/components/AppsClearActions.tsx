@@ -1,4 +1,3 @@
-import { t } from "../lib/i18n"
 import { ActionIndicator } from './ui'
 import { useId, useState } from 'react'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
@@ -23,12 +22,12 @@ export function AppsClearActions({ chosen, ready, options }: { chosen: AndroidAp
     finally { setSubmitting(false) }
   }
   return <div className="apps-clear">
-    <button className="button secondary app-action-destructive" aria-expanded={expanded} aria-controls={panelId} disabled={!eligible && !expanded} title={!eligible ? t("Cleanup is unavailable for core or shared Android UIDs") : t("Choose what to clear")} onClick={() => setExpanded(v => !v)}><Trash2 size={15} />{t("Clear")}{expanded ? <ChevronUp size={14} className="action-indicator" aria-hidden="true" /> : <ChevronDown size={14} className="action-indicator" aria-hidden="true" />}</button>
-    {expanded && <div id={panelId} className="apps-clear-options" role="group" aria-label={t("Cleanup categories")}>
-      {cleanupParts.map(part => <label key={part}><input type="checkbox" aria-label={cleanupLabels[part]} checked={parts.includes(part) || (part === 'cache' && includedCache)} disabled={disabled || (part === 'cache' && includedCache)} onChange={() => toggle(part)} /><span>{cleanupLabels[part]}{part === 'cache' && includedCache ? <small>{t("Included in app data")}</small> : (part === 'data' || part === 'cache') && <PackageActionBadge apps={chosen} action={('clear-' + part) as PackageAction} options={options || {}} />}</span></label>)}
-      <button className="text-button" disabled={disabled} onClick={() => setParts([...cleanupParts])}>{t("Select all")}</button>
-      <button className="button secondary app-action-destructive" disabled={disabled || !parts.length || !eligible} title={t("{0} applications will be affected; confirmation follows", [eligible])} onClick={() => void clear()}>{t("Clear selected")}<ActionIndicator /></button>
-      {eligible < chosen.length && <small>{chosen.length - eligible}{t(" unavailable applications will be skipped.")}</small>}
+    <button className="button secondary app-action-destructive" aria-expanded={expanded} aria-controls={panelId} disabled={!eligible && !expanded} title={!eligible ? "Cleanup is unavailable for core or shared Android UIDs" : "Choose what to clear"} onClick={() => setExpanded(v => !v)}><Trash2 size={15} />Clear{expanded ? <ChevronUp size={14} className="action-indicator" aria-hidden="true" /> : <ChevronDown size={14} className="action-indicator" aria-hidden="true" />}</button>
+    {expanded && <div id={panelId} className="apps-clear-options" role="group" aria-label="Cleanup categories">
+      {cleanupParts.map(part => <label key={part}><input type="checkbox" aria-label={cleanupLabels[part]} checked={parts.includes(part) || (part === 'cache' && includedCache)} disabled={disabled || (part === 'cache' && includedCache)} onChange={() => toggle(part)} /><span>{cleanupLabels[part]}{part === 'cache' && includedCache ? <small>Included in app data</small> : (part === 'data' || part === 'cache') && <PackageActionBadge apps={chosen} action={('clear-' + part) as PackageAction} options={options || {}} />}</span></label>)}
+      <button className="text-button" disabled={disabled} onClick={() => setParts([...cleanupParts])}>Select all</button>
+      <button className="button secondary app-action-destructive" disabled={disabled || !parts.length || !eligible} title={`${eligible} applications will be affected; confirmation follows`} onClick={() => void clear()}>Clear selected<ActionIndicator /></button>
+      {eligible < chosen.length && <small>{chosen.length - eligible}{" unavailable applications will be skipped."}</small>}
     </div>}
   </div>
 }

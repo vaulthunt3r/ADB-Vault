@@ -1,6 +1,3 @@
-import { t as translateUi } from '../../lib/i18n'
-import { message } from "../../lib/i18n"
-import { t } from "../../lib/i18n"
 import { useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Activity, AppWindow, Cable, Camera, ChevronDown, ClipboardList, FileDown, FileSearch, ListChecks, ListTodo, MonitorSmartphone, Moon, MoreVertical, RefreshCw, ScanLine, Settings2, SlidersHorizontal, Smartphone, Sun } from 'lucide-react'
 import { isBusy, isReady, settledStatus } from '../../lib/components'
@@ -93,30 +90,30 @@ export function TopBar() {
     requestAnimationFrame(() => { const editor = document.getElementById('status-bar-settings'); editor?.scrollIntoView({ block: 'start' }); editor?.focus({ preventScroll: true }) })
   }
   const actions: ToolbarAction[] = [
-    ...(section === 'components' ? [{ id: 'workspace' as const, label: t("Check components"), hint: t("Check components"), icon: <ListChecks />, disabled: componentsBusy, run: () => { void useAppStore.getState().detectAll() } }]
-      : localApks ? [{ id: 'workspace' as const, label: t("Open APK"), hint: t("Choose a local APK to inspect in slot A."), icon: <FileSearch />, disabled: localBusy, run: () => { void requestBackend({ type: 'inspector.open', slot: 'before' }) } }]
-      : section === 'apps' ? [{ id: 'workspace' as const, label: t("Refresh applications"), hint: t("Refresh applications"), icon: <RefreshCw />, disabled: blocked || !connected || pending, run: () => { if (device) void apps.refresh(device.id) } }] : []),
-    { id: 'screenshot', label: t("Screenshot"), hint: pending ? t("Saving screenshot or opening screen…") : t("Save the selected phone screen as a PNG image on this computer."), icon: <ScanLine />, disabled: !connected || blocked || pending, run: () => { void screenAction('screenshot') } },
-    { id: 'mirror', label: t("Mirror screen"), hint: canMirror ? t("View and control the selected phone in scrcpy.") : t("Install or locate scrcpy in Components first."), icon: <MonitorSmartphone />, disabled: !connected || blocked || pending || !canMirror, run: () => { void screenAction('open') } },
-    { id: 'screenOptions', label: t("Screen & recording"), hint: t("Choose capture mode, sound and recording options."), icon: <Settings2 />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions() },
-    { id: 'virtualDisplay', label: t("Virtual display"), hint: screenApplication ? t("Open {0} in a separate Android window.", [screenApplication.label]) : t("Choose an application for a separate Android window."), icon: <AppWindow />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions('virtual') },
-    extra('openWindows', () => setWindowsOpen(true), false, screenSessions.length ? translateUi("{0} open. Configure touch controls or close a running window.", [screenSessions.length]) : t("Open a virtual display first to configure touch controls.")),
-    { id: 'camera', label: t("Camera"), hint: t("Choose a phone camera and preview or recording options."), icon: <Camera />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions('camera') },
-    { id: 'cameraControls', label: t("Camera controls"), hint: cameraSession ? t("Show live controls for the selected phone’s camera.") : t("Start a camera preview on the selected phone first."), icon: <SlidersHorizontal />, disabled: !connected || !cameraSession, run: () => { if (cameraSession) void requestBackend({ type: 'connection.cameraPanel', sessionId: cameraSession.id }) } },
-    { id: 'wake', label: t("Wake screen"), hint: t("Wake the selected phone’s screen."), icon: <Sun />, disabled: !connected || blocked || pending, run: () => { void screenAction('wake') } },
-    { id: 'sleep', label: t("Sleep screen"), hint: t("Put the selected phone’s screen to sleep."), icon: <Moon />, disabled: !connected || blocked || pending, run: () => { void screenAction('sleep') } },
-    ...(['logcat', 'bugreport'] as const).map(kind => ({ id: kind, label: kind === 'logcat' ? t("Android logs") : t("Bug report"), hint: kind === 'logcat' ? t("Open Android logs (Logcat).") : t("Open diagnostic report options."), icon: kind === 'logcat' ? <ClipboardList /> : <FileDown />, disabled: !connected || (blocked && !(diagnostic.job?.status === 'running' && diagnostic.job.kind === kind && sameDiagnosticTarget(diagnostic.job.target, device))), run: () => openDiagnostics(kind) })),
-    { id: 'tasks', label: t("File tasks"), hint: t("Open the current file operation queue."), icon: <ListTodo />, run: () => { useHistoryStore.setState({ filesSession: null }); useFilesStore.setState({ taskPanel: true }) } },
-    { id: 'activity', label: t("Activity"), hint: t("Open the current session history."), icon: <Activity />, run: () => useAppStore.getState().openActivity() },
-    { id: 'connection', label: t("Connection"), hint: t("Open device connections."), icon: <Cable />, run: () => useAppStore.getState().setSection('connection') },
+    ...(section === 'components' ? [{ id: 'workspace' as const, label: "Check components", hint: "Check components", icon: <ListChecks />, disabled: componentsBusy, run: () => { void useAppStore.getState().detectAll() } }]
+      : localApks ? [{ id: 'workspace' as const, label: "Open APK", hint: "Choose a local APK to inspect in slot A.", icon: <FileSearch />, disabled: localBusy, run: () => { void requestBackend({ type: 'inspector.open', slot: 'before' }) } }]
+      : section === 'apps' ? [{ id: 'workspace' as const, label: "Refresh applications", hint: "Refresh applications", icon: <RefreshCw />, disabled: blocked || !connected || pending, run: () => { if (device) void apps.refresh(device.id) } }] : []),
+    { id: 'screenshot', label: "Screenshot", hint: pending ? "Saving screenshot or opening screen…" : "Save the selected phone screen as a PNG image on this computer.", icon: <ScanLine />, disabled: !connected || blocked || pending, run: () => { void screenAction('screenshot') } },
+    { id: 'mirror', label: "Mirror screen", hint: canMirror ? "View and control the selected phone in scrcpy." : "Install or locate scrcpy in Components first.", icon: <MonitorSmartphone />, disabled: !connected || blocked || pending || !canMirror, run: () => { void screenAction('open') } },
+    { id: 'screenOptions', label: "Screen & recording", hint: "Choose capture mode, sound and recording options.", icon: <Settings2 />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions() },
+    { id: 'virtualDisplay', label: "Virtual display", hint: screenApplication ? `Open ${screenApplication.label} in a separate Android window.` : "Choose an application for a separate Android window.", icon: <AppWindow />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions('virtual') },
+    extra('openWindows', () => setWindowsOpen(true), false, screenSessions.length ? `${screenSessions.length} open. Configure touch controls or close a running window.` : "Open a virtual display first to configure touch controls."),
+    { id: 'camera', label: "Camera", hint: "Choose a phone camera and preview or recording options.", icon: <Camera />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions('camera') },
+    { id: 'cameraControls', label: "Camera controls", hint: cameraSession ? "Show live controls for the selected phone’s camera." : "Start a camera preview on the selected phone first.", icon: <SlidersHorizontal />, disabled: !connected || !cameraSession, run: () => { if (cameraSession) void requestBackend({ type: 'connection.cameraPanel', sessionId: cameraSession.id }) } },
+    { id: 'wake', label: "Wake screen", hint: "Wake the selected phone’s screen.", icon: <Sun />, disabled: !connected || blocked || pending, run: () => { void screenAction('wake') } },
+    { id: 'sleep', label: "Sleep screen", hint: "Put the selected phone’s screen to sleep.", icon: <Moon />, disabled: !connected || blocked || pending, run: () => { void screenAction('sleep') } },
+    ...(['logcat', 'bugreport'] as const).map(kind => ({ id: kind, label: kind === 'logcat' ? "Android logs" : "Bug report", hint: kind === 'logcat' ? "Open Android logs (Logcat)." : "Open diagnostic report options.", icon: kind === 'logcat' ? <ClipboardList /> : <FileDown />, disabled: !connected || (blocked && !(diagnostic.job?.status === 'running' && diagnostic.job.kind === kind && sameDiagnosticTarget(diagnostic.job.target, device))), run: () => openDiagnostics(kind) })),
+    { id: 'tasks', label: "File tasks", hint: "Open the current file operation queue.", icon: <ListTodo />, run: () => { useHistoryStore.setState({ filesSession: null }); useFilesStore.setState({ taskPanel: true }) } },
+    { id: 'activity', label: "Activity", hint: "Open the current session history.", icon: <Activity />, run: () => useAppStore.getState().openActivity() },
+    { id: 'connection', label: "Connection", hint: "Open device connections.", icon: <Cable />, run: () => useAppStore.getState().setSection('connection') },
     ...(['restart', 'powerOff'] as const).map(id => extra(id, () => { if (device && connected) setPowerDialog({ device: structuredClone(device), shutdown: id === 'powerOff' }) }, !connected || blocked)),
     ...(['clipboard', 'contacts', 'calls', 'sms'] as const).map(id => extra(id, () => usePhoneToolsStore.getState().open(id, device), id !== 'clipboard' && !connected)),
     extra('root', () => { if (device) void requestBackend({ type: 'connection.root', id: device.id, requestAccess: true }) }, !connected || connection.busy || !connection.adbAvailable || device?.root?.status === 'checking'),
     extra('deviceInfo', () => { if (device) void readDeviceInfo(device.id) }, !connected || connection.busy || !connection.adbAvailable || device?.info?.status === 'loading'),
     extra('reconnect', () => { if (device) void connection.reconnect(device.id) }, !device || connection.busy || !connection.adbAvailable),
-    extra('disconnect', () => { if (device) void connection.disconnect(device.id) }, !connected || connection.busy || !device?.canDetach, device?.method === 'USB' && !device.canDetach ? t("This ADB backend cannot detach a single USB device. Unplug the cable to disconnect it.") : undefined),
+    extra('disconnect', () => { if (device) void connection.disconnect(device.id) }, !connected || connection.busy || !device?.canDetach, device?.method === 'USB' && !device.canDetach ? "This ADB backend cannot detach a single USB device. Unplug the cable to disconnect it." : undefined),
     extra('findDevices', () => { useAppStore.getState().setSection('connection'); void connection.scan() }, connection.manualScanning || connection.busy || !connection.adbAvailable),
-    extra('fastboot', () => { useAppStore.getState().setSection('connection'); void requestBackend({ type: 'connection.fastboot.scan' }) }, !canFastboot || blockedWithoutAdb, !canFastboot ? t("Install or locate Fastboot in Components first.") : undefined),
+    extra('fastboot', () => { useAppStore.getState().setSection('connection'); void requestBackend({ type: 'connection.fastboot.scan' }) }, !canFastboot || blockedWithoutAdb, !canFastboot ? "Install or locate Fastboot in Components first." : undefined),
     extra('localApks', () => useAppStore.getState().openLocalApks()),
     extra('install', () => useRestoreStore.getState().open('install'), appOperations.running || appOperations.blocked),
     extra('backup', () => openAppsBackup('marked', true), appOperations.running || appOperations.blocked),
@@ -144,30 +141,30 @@ export function TopBar() {
   const hasProfile = section === 'apps' && !localApks && !!connection.activeDeviceId && apps.deviceId === connection.activeDeviceId && apps.profiles.length > 0
   const profile = hasProfile ? <AppsProfilePicker deviceId={connection.activeDeviceId} /> : null
   function menuAction(action: ToolbarAction) {
-    return <button type="button" key={action.id} data-overflow-action={action.id} className="toolbar-menu-action" disabled={action.disabled} title={message(action.hint)} onClick={() => { menu.current?.hidePopover(); action.run() }}>{action.icon}<span>{action.label}</span></button>
+    return <button type="button" key={action.id} data-overflow-action={action.id} className="toolbar-menu-action" disabled={action.disabled} title={action.hint} onClick={() => { menu.current?.hidePopover(); action.run() }}>{action.icon}<span>{action.label}</span></button>
   }
-  return <><div className="topbar unified-toolbar" data-operation-position={operationPosition} aria-label={t("Workspace toolbar")}>
-    {showDevice && <button type="button" className="toolbar-card toolbar-device" aria-label={t("Select phone")} aria-haspopup="dialog" aria-controls={deviceMenuId} aria-expanded={deviceMenuOpen} popoverTarget={deviceMenuId} title={device ? `${device.name}\n${device.status} · ${device.method}\n${device.serial}` : t("Connect or select a phone")} onClick={event => positionPopover(deviceMenu.current, event.currentTarget)}>
-      <Smartphone /><span className="toolbar-device-copy"><strong>{device?.name || t("No phone selected")}</strong><small><i className={connected ? 'connected' : ''} />{device ? `${connected ? t("Connected") : device.status} · ${device.method}` : t("Open Connection")}</small></span><ChevronDown />
+  return <><div className="topbar unified-toolbar" data-operation-position={operationPosition} aria-label="Workspace toolbar">
+    {showDevice && <button type="button" className="toolbar-card toolbar-device" aria-label="Select phone" aria-haspopup="dialog" aria-controls={deviceMenuId} aria-expanded={deviceMenuOpen} popoverTarget={deviceMenuId} title={device ? `${device.name}\n${device.status} · ${device.method}\n${device.serial}` : "Connect or select a phone"} onClick={event => positionPopover(deviceMenu.current, event.currentTarget)}>
+      <Smartphone /><span className="toolbar-device-copy"><strong>{device?.name || "No phone selected"}</strong><small><i className={connected ? 'connected' : ''} />{device ? `${connected ? "Connected" : device.status} · ${device.method}` : "Open Connection"}</small></span><ChevronDown />
     </button>}
     {hasProfile && <div className="toolbar-profile-slot">{profile}</div>}
-    <div className="toolbar-action-lane" ref={row} aria-label={t("Quick actions")}>
+    <div className="toolbar-action-lane" ref={row} aria-label="Quick actions">
       {shown.map(action => <ToolbarButton key={action.id} action={action} labels={labels} />)}
     </div>
     <WorkspaceProgress />
-    <button type="button" className="toolbar-card toolbar-more" aria-label={t("More toolbar actions")} title={t("More toolbar actions")} aria-haspopup="dialog" aria-controls={menuId} aria-expanded={menuOpen} popoverTarget={menuId} onClick={event => positionPopover(menu.current, event.currentTarget)}><MoreVertical /></button>
+    <button type="button" className="toolbar-card toolbar-more" aria-label="More toolbar actions" title="More toolbar actions" aria-haspopup="dialog" aria-controls={menuId} aria-expanded={menuOpen} popoverTarget={menuId} onClick={event => positionPopover(menu.current, event.currentTarget)}><MoreVertical /></button>
     <div className="toolbar-measurements" aria-hidden="true" inert ref={measurements}>{chosen.map(action => <span key={action.id} className={`toolbar-card toolbar-action${labels ? " with-label" : ''}`}>{action.icon}{labels && <span>{action.label}</span>}</span>)}</div>
-    <div popover="auto" id={deviceMenuId} ref={deviceMenu} className="toolbar-popover" role="dialog" aria-label={t("Select a phone")} onToggle={event => setDeviceMenuOpen(event.newState === 'open')}><strong>{t("Selected phone")}</strong>
+    <div popover="auto" id={deviceMenuId} ref={deviceMenu} className="toolbar-popover" role="dialog" aria-label="Select a phone" onToggle={event => setDeviceMenuOpen(event.newState === 'open')}><strong>Selected phone</strong>
       {available.map(item => <button className="toolbar-menu-action" key={item.id} aria-pressed={item.id === connection.activeDeviceId} disabled={blocked || pending} onClick={() => { deviceMenu.current?.hidePopover(); connection.selectDevice(item.id) }}><Smartphone /><span>{item.name}<small>{item.method} · {item.serial}</small></span></button>)}
-      {!available.length && <p>{t("No connected phones.")}</p>}
-      <button className="toolbar-menu-action" onClick={() => { deviceMenu.current?.hidePopover(); useAppStore.getState().setSection('connection') }}><Cable /><span>{t("Open Connection")}</span></button>
+      {!available.length && <p>No connected phones.</p>}
+      <button className="toolbar-menu-action" onClick={() => { deviceMenu.current?.hidePopover(); useAppStore.getState().setSection('connection') }}><Cable /><span>Open Connection</span></button>
     </div>
-    <div popover="auto" id={menuId} ref={menu} className="toolbar-popover" role="dialog" aria-label={t("Toolbar actions")} onToggle={event => setMenuOpen(event.newState === 'open')}>
-      {!showDevice && <button type="button" className="toolbar-menu-action" aria-label={t("Select phone")} aria-haspopup="dialog" aria-controls={deviceMenuId} aria-expanded={deviceMenuOpen} onClick={event => { const trigger = event.currentTarget; positionPopover(deviceMenu.current, trigger); menu.current?.hidePopover(); deviceMenu.current?.showPopover() }}><Smartphone /><span>{t("Select phone")}<small>{device ? `${device.name} · ${connected ? t("Connected") : device.status} · ${device.method}` : t("No phone selected")}</small></span><ChevronDown /></button>}
+    <div popover="auto" id={menuId} ref={menu} className="toolbar-popover" role="dialog" aria-label="Toolbar actions" onToggle={event => setMenuOpen(event.newState === 'open')}>
+      {!showDevice && <button type="button" className="toolbar-menu-action" aria-label="Select phone" aria-haspopup="dialog" aria-controls={deviceMenuId} aria-expanded={deviceMenuOpen} onClick={event => { const trigger = event.currentTarget; positionPopover(deviceMenu.current, trigger); menu.current?.hidePopover(); deviceMenu.current?.showPopover() }}><Smartphone /><span>Select phone<small>{device ? `${device.name} · ${connected ? "Connected" : device.status} · ${device.method}` : "No phone selected"}</small></span><ChevronDown /></button>}
       {hasProfile && <div className="toolbar-profile-overflow">{profile}</div>}
-      {hidden.length > 0 && <div className="toolbar-menu-group" aria-label={t("Pinned actions")}>{hidden.map(menuAction)}</div>}
-      {unpinned.length > 0 && <div className="toolbar-menu-group" aria-label={t("Other actions")}>{unpinned.map(menuAction)}</div>}
-      <button className="toolbar-menu-action toolbar-customize" onClick={() => { menu.current?.hidePopover(); openSettings() }}><Settings2 /><span>{t("Customize status bar…")}</span></button>
+      {hidden.length > 0 && <div className="toolbar-menu-group" aria-label="Pinned actions">{hidden.map(menuAction)}</div>}
+      {unpinned.length > 0 && <div className="toolbar-menu-group" aria-label="Other actions">{unpinned.map(menuAction)}</div>}
+      <button className="toolbar-menu-action toolbar-customize" onClick={() => { menu.current?.hidePopover(); openSettings() }}><Settings2 /><span>Customize status bar…</span></button>
     </div>
   </div>{powerDialog && <DevicePowerDialog device={powerDialog.device} shutdown={powerDialog.shutdown} close={() => setPowerDialog(null)} />}{windowsOpen && <ScreenSessionsDialog close={() => setWindowsOpen(false)} />}</>
 }

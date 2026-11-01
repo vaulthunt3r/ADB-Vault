@@ -1,5 +1,3 @@
-import { t as translateUi } from '../../lib/i18n'
-import { t, message as localizeMessage } from "../../lib/i18n"
 import { useEffect, useId, useState, type CSSProperties, type ReactNode } from 'react'
 import { Check, CircleAlert, Clock3, Pause, Square, X } from 'lucide-react'
 import './operation-chip.css'
@@ -31,7 +29,7 @@ function Elapsed({ startedAt }: { startedAt: number }) {
   }, [])
   const seconds = Math.max(0, Math.floor((now - startedAt) / 1000))
   const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
-  return <span className="operation-chip__timer" title={t("Elapsed time (including waits)")} aria-label={t("Elapsed time: {0}", [time])} aria-live="off">{time}</span>
+  return <span className="operation-chip__timer" title="Elapsed time (including waits)" aria-label={`Elapsed time: ${time}`} aria-live="off">{time}</span>
 }
 
 export function LatticeLoader() {
@@ -56,22 +54,22 @@ export function OperationChip({ label, message, status = 'running', statusText =
       <span className="operation-chip__glyph" aria-hidden="true">{glyph}</span>
       <span className="operation-chip__content">
         <span className="operation-chip__heading"><span className="operation-chip__label">{label}</span>
-          {measurement && layout !== 'toolbar' && <span className="workspace-progress-measure">{localizeMessage(measurement)}</span>}
-          {phase && <span className="operation-chip__phase">{localizeMessage(phase)}</span>}
+          {measurement && layout !== 'toolbar' && <span className="workspace-progress-measure">{measurement}</span>}
+          {phase && <span className="operation-chip__phase">{phase}</span>}
         </span>
-        {layout === 'toolbar' && measurement ? <span className="workspace-progress-measure">{localizeMessage(measurement)}</span> : message && message !== label && message !== phase && <span className="operation-chip__message">{message}</span>}
+        {layout === 'toolbar' && measurement ? <span className="workspace-progress-measure">{measurement}</span> : message && message !== label && message !== phase && <span className="operation-chip__message">{message}</span>}
       </span>
       {!finished && startedAt !== undefined && Number.isFinite(startedAt) && <Elapsed startedAt={startedAt} />}
   </>
-  const title = [label, phase && localizeMessage(phase), message, measurement ? localizeMessage(measurement) : !finished ? t(unknownText) : ''].filter(Boolean).join('\n')
+  const title = [label, phase && phase, message, measurement ? measurement : !finished ? unknownText : ''].filter(Boolean).join('\n')
   return <div className="operation-chip" data-status={status} data-measured={measured} data-layout={layout} data-interactive={!!onOpen}
-    role={onOpen ? undefined : 'group'} aria-label={onOpen ? undefined : accessibleLabel ? t(accessibleLabel) : label} aria-describedby={onOpen ? undefined : descriptionId}>
-    {measured && <span className="operation-chip__progress" role="progressbar" aria-label={t(progressLabel)} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} aria-valuetext={localizeMessage(measurement)}>
+    role={onOpen ? undefined : 'group'} aria-label={onOpen ? undefined : accessibleLabel ? accessibleLabel : label} aria-describedby={onOpen ? undefined : descriptionId}>
+    {measured && <span className="operation-chip__progress" role="progressbar" aria-label={progressLabel} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} aria-valuetext={measurement || ''}>
       <span className="call-chip__fill" style={{ '--chip-fraction': (percent ?? 0) / 100 } as CSSProperties} aria-hidden="true" />
     </span>}
-    {onOpen ? <button type="button" className="workspace-progress-open operation-chip__open" onClick={onOpen} aria-label={accessibleLabel ? t(accessibleLabel) : label} aria-describedby={descriptionId} title={translateUi("{0}\nShow details", [title])}>{content}</button> : <div className="operation-chip__open" title={title}>{content}</div>}
+    {onOpen ? <button type="button" className="workspace-progress-open operation-chip__open" onClick={onOpen} aria-label={accessibleLabel ? accessibleLabel : label} aria-describedby={descriptionId} title={`${title}\nShow details`}>{content}</button> : <div className="operation-chip__open" title={title}>{content}</div>}
     {trailing && <span className="operation-chip__actions">{trailing}</span>}
-    <span className="operation-chip__sr" id={descriptionId}>{localizeMessage(statusText)}</span>
-    {!measured && !finished && <span className="operation-chip__sr">{t(unknownText)}</span>}
+    <span className="operation-chip__sr" id={descriptionId}>{statusText}</span>
+    {!measured && !finished && <span className="operation-chip__sr">{unknownText}</span>}
   </div>
 }

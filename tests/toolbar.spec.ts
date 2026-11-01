@@ -216,6 +216,8 @@ test('mini cards expose descriptions on hover and focus, filter and pin without 
   const settings = page.getByRole('group', { name: 'Status bar', exact: true })
   const before = await page.evaluate(() => window.backendTest.requests.length)
   const card = settings.getByRole('button', { name: 'Pin Virtual display', exact: true })
+  // Scrolling closes tooltips. Finish scrolling the settings pane before hovering.
+  await card.scrollIntoViewIfNeeded()
   await card.hover()
   const hint = page.getByRole('tooltip', { name: 'Choose an application for a separate Android window.', exact: true })
   await expect(hint).toBeVisible()

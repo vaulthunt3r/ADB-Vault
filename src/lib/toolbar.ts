@@ -1,6 +1,6 @@
 export const toolbarActions = [
   { id: 'workspace', label: "Workspace action", description: "Check components, refresh installed applications or open a local APK in the current view." },
-  { id: 'screenshot', label: "Screenshot", description: "Save the selected phone screen to this computer." },
+  { id: 'screenshot', label: "Screenshot", description: "Capture the selected phone screen. Save a PNG, copy the image, or both, using Settings → Screen & audio." },
   { id: 'mirror', label: "Mirror screen", description: "Open the selected phone in scrcpy." },
   { id: 'screenOptions', label: "Screen & recording", description: "Choose capture mode, sound and recording options." },
   { id: 'virtualDisplay', label: "Virtual display", description: "Choose an application for a separate Android window." },

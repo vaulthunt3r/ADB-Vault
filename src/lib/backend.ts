@@ -2,7 +2,7 @@ import { useAppNotesStore } from '../store/useAppNotesStore'
 import { useAdbConsoleStore } from '../store/useAdbConsoleStore'
 import { useApkInspectorStore } from '../store/useApkInspectorStore'
 import { usePhoneToolsStore } from '../store/usePhoneToolsStore'
-import { useScreenStore, useScreenPreferences } from '../store/useScreenStore'
+import { useScreenStore, useScreenPreferences, useScreenshotSettings } from '../store/useScreenStore'
 import { screenLaunch } from '../../electron/screen-protocol'
 import { useNotificationStore } from '../store/useNotificationStore'
 import { useConfirmationStore } from '../store/useConfirmationStore'
@@ -47,6 +47,7 @@ function recordOperations() {
   if (restore) record(restoreOperation(restore))
 }
 function snapshot(value: BackendSnapshot) {
+  if (value.screenshots) useScreenshotSettings.setState(value.screenshots)
   if (value.appNotes) useAppNotesStore.setState(value.appNotes)
   if (value.apkInspector) useApkInspectorStore.getState().receive(value.apkInspector)
   if (value.phoneTools) usePhoneToolsStore.getState().receive(value.phoneTools)

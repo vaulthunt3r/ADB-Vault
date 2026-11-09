@@ -80,6 +80,7 @@ export const requestExitOperation: Record<BackendRequest['type'], ExitOperation 
   'androidDiagnostics.start': 'diagnostics', 'androidDiagnostics.cancel': null, 'androidDiagnostics.reveal': null,
   'androidDiagnostics.exportLog': 'diagnosticExport', 'diagnostics.read': 'diagnosticExport', 'diagnostics.export': 'diagnosticExport',
   'settings.stopAdbOnExit': 'settings', 'settings.apkZstd': 'settings',
+  'settings.screenshots': 'settings', 'settings.screenshotFolder': 'settings', 'settings.openScreenshotFolder': null,
   'settings.exportMode': 'settings', 'settings.exportFolder': 'settings', 'web.open': null,
 }
 

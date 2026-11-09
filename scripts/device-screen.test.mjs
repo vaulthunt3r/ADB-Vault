@@ -141,12 +141,17 @@ test('touch overlay uses only the display ID reported by its owned virtual proce
   await f.service.shutdown()
 })
 
-test('cancelled picker and changed transport do not capture a screen', async () => {
-  const cancelled = fixture()
-  assert.equal(await cancelled.service.execute(target, 'screenshot'), null); assert.equal(cancelled.calls.length, 0)
-  const changed = fixture({ save: async () => { changed.state.devices[0].transportId = '9'; return 'screen.png' } })
+test('screenshot freezes the frame before the picker and rejects a changed capture transport', async () => {
+  const cancelled = fixture({ save: async () => { assert.equal(cancelled.calls.length, 1); return null } })
+  assert.equal(await cancelled.service.execute(target, 'screenshot'), null); assert.equal(cancelled.calls.length, 1)
+  let picked = false
+  const changed = fixture({ save: async () => { picked = true; return 'screen.png' }, runner: async (_file, _args, _timeout, _input, _env, config) => {
+    await writeFile(config.stdoutFile, png)
+    changed.state.devices[0].transportId = '9'
+    return { code: 0, stdout: '', stderr: '' }
+  } })
   await assert.rejects(changed.service.execute(target, 'screenshot'), /connection changed/)
-  assert.equal(changed.calls.length, 0)
+  assert.equal(picked, false)
 })
 
 test('PNG capture is binary-safe, replaces only after validation, and removes temporary output', async () => {

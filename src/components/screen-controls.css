@@ -50,3 +50,8 @@
 .screen-app-search > label { flex: 1; min-width: 0; }
 .screen-app-picker > label { display: grid; gap: 6px; }
 .screen-app-picker select { width: 100%; min-width: 0; }
+.screenshot-settings { display: grid; gap: 12px; min-width: 0; margin: 18px 0 24px; padding: 16px; border: 1px solid var(--line); border-radius: var(--ui-radius); }
+.screenshot-settings legend { padding: 0 6px; font-weight: 600; }
+.screenshot-folder { display: grid; gap: 8px; }
+.screenshot-folder code { overflow-wrap: anywhere; color: var(--muted); font-size: 12px; }
+.screenshot-folder > div { display: flex; flex-wrap: wrap; gap: 8px; }

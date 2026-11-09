@@ -147,7 +147,8 @@
 
 .left-sidebar.icons { padding-left: 6px; padding-right: 6px; }
 .left-sidebar.icons .nav-item > span { display: none; }
-.left-sidebar.icons .nav-item { justify-content: center; padding: 0; gap: 0; }
+.left-sidebar .nav-item { padding-left: 12px; padding-right: 12px; justify-content: flex-start; }
+.left-sidebar.icons .nav-item { gap: 0; }
 .left-sidebar.icons .nav-item.active::before { left: -7px; }
 .nav-entry { position: relative; flex-shrink: 0; }
 .nav-item > .nav-status-mark { display: block; position: absolute; top: 7px; left: 27px; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 2px var(--sidebar); }

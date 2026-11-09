@@ -1,6 +1,7 @@
 import { ActionIndicator } from './ui'
 import { HintButton } from './Tooltip'
-import { useScreenStore } from '../store/useScreenStore'
+import { useScreenStore, useScreenshotSettings } from '../store/useScreenStore'
+import { screenshotHint } from '../../electron/screenshot-protocol'
 import { ScreenSessions } from './ScreenControls'
 import { Settings2 } from 'lucide-react'
 import { useAndroidDiagnosticsStore } from '../store/useAndroidDiagnosticsStore'
@@ -23,6 +24,7 @@ const actions = [
 ] as const
 
 export function DeviceScreenActions({ device }: { device: DeviceRecord }) {
+  const screenshots = useScreenshotSettings()
   const [pending, setPending] = useState<ScreenAction | null>(null), submitting = useRef(false)
   const diagnostic = useAndroidDiagnosticsStore(s => s.pending || s.job?.status === 'running')
   const connection = useConnectionStore(s => s.busy || !s.adbAvailable)
@@ -35,12 +37,12 @@ export function DeviceScreenActions({ device }: { device: DeviceRecord }) {
   const available = !!scrcpy?.location && ['Detected', 'Installed', 'Update available'].includes(scrcpy.status)
   const blocked = diagnostic || !!pending || connection || device.status !== 'connected' || appAction || backup || restore || componentPending || components.some(c => ['Checking', "Downloading", "Installing"].includes(c.status))
   return <>
-    {actions.map(({ action, label, icon: Icon, hint }) => <HintButton key={action} className="button secondary" disabled={blocked || action === 'open' && !available} hint={action === 'open' && !available ? "Install or locate scrcpy in Components first." : hint} onClick={async () => {
+    {actions.map(({ action, label, icon: Icon, hint }) => <HintButton key={action} className="button secondary" disabled={blocked || action === 'open' && !available} hint={action === 'screenshot' ? screenshotHint(screenshots) : action === 'open' && !available ? "Install or locate scrcpy in Components first." : hint} onClick={async () => {
       if (submitting.current) return
       submitting.current = true; setPending(action)
       try { await requestBackend({ type: 'connection.screen', id: device.id, serial: device.serial, transportId: device.transportId, action }) }
       finally { submitting.current = false; setPending(null) }
-    }}>{pending === action ? <LoaderCircle size={14} className="spin" /> : <Icon size={14} />}{pending === action ? action === 'screenshot' ? "Saving screenshot…" : "Please wait…" : label}{action === 'screenshot' && pending !== action && <ActionIndicator picker />}</HintButton>)}
+    }}>{pending === action ? <LoaderCircle size={14} className="spin" /> : <Icon size={14} />}{pending === action ? action === 'screenshot' ? "Taking screenshot…" : "Please wait…" : label}{action === 'screenshot' && pending !== action && screenshots.saveToFile && screenshots.askWhereToSave && <ActionIndicator picker />}</HintButton>)}
     <HintButton hint="Choose screen mirroring, a virtual display or a camera, with audio and recording options." className="button secondary" disabled={blocked || !available} onClick={() => useScreenStore.getState().open(device)}><Settings2 size={14} />{"Screen & recording"}<ActionIndicator /></HintButton>
     <ScreenSessions deviceId={device.id} />
     {!available && <p className="component-description">Mirror screen requires scrcpy. Install or locate it in Components.</p>}

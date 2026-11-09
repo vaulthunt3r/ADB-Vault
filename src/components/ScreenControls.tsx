@@ -10,6 +10,7 @@ import { usePowerBlocked } from './DevicePowerActions'
 import { ScreenApplicationPicker } from './ScreenApplicationPicker'
 import { CameraCaptureOptions } from './CameraCaptureOptions'
 import './screen-controls.css'
+import { ScreenshotSettings } from './ScreenshotSettings'
 
 function useCapabilities() {
   const component = useAppStore(s => s.components.find(c => c.id === 'scrcpy'))
@@ -139,8 +140,10 @@ function ScreenSessionRow({ session: s }: { session: ScreenSession }) {
 
 export function ScreenSettings() {
   const { preferences, set } = useScreenPreferences(), { capabilities, error, ready, retry } = useCapabilities()
-  return <section className="section-content screen-settings" aria-labelledby="screen-settings-title"><div className="section-heading"><div><div className="eyebrow section-eyebrow">{"SETTINGS / SCREEN & AUDIO"}</div><h1 id="screen-settings-title">{"Screen & audio"}</h1><p>Defaults for scrcpy windows. Changes apply to the next launch and are saved automatically.</p></div></div>
+  return <section className="section-content screen-settings" aria-labelledby="screen-settings-title"><div className="section-heading"><div><div className="eyebrow section-eyebrow">{"SETTINGS / SCREEN & AUDIO"}</div><h1 id="screen-settings-title">{"Screen & audio"}</h1><p>Screenshot destinations and defaults for screen, camera and recording windows.</p></div></div>
+    <ScreenshotSettings />
     <p className="screen-note">{capabilities ? `scrcpy ${capabilities.version} · installed options detected` : !ready ? "Install or locate scrcpy in Components to start mirroring." : error || "Checking installed scrcpy…"}{error && <button className="button secondary" onClick={retry}>Retry check</button>}</p>
+    <p className="screen-note">Window defaults apply to the next launch and are saved automatically.</p>
     <ScreenOptions value={preferences} change={set} capabilities={capabilities} />
     <Shortcuts capabilities={capabilities} /><ScreenSessions /><button className="button secondary" onClick={() => set({ ...screenDefaults })}>Reset screen defaults</button>
   </section>

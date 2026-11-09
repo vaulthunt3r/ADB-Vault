@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { DeviceRecord } from '../../electron/contracts'
 import { screenDefaults, screenLaunch, validateScreenLaunch, type ScreenMode, type ScreenPreferences, type ScreenSession } from '../../electron/screen-protocol'
+import { screenshotDefaults, type ScreenshotSettings } from '../../electron/screenshot-protocol'
+export const useScreenshotSettings = create<ScreenshotSettings>(() => ({ ...screenshotDefaults }))
 
 export function sanitizeScreenPreferences(value: unknown): ScreenPreferences {
   const source = value && typeof value === 'object' ? value as Partial<ScreenPreferences> : {}

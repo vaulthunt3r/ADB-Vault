@@ -43,7 +43,10 @@ import { appActionIds } from './app-actions-protocol.js'
 import { AdbLifecycle } from './adb-lifecycle.js'
 import { DatabaseService } from './databases.js'
 import { isDatabaseId, databaseIds } from './database-protocol.js'
-import { BrowserWindow, dialog, shell } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
+import { copyScreenshotImage } from './screenshot-clipboard.js'
+import { Screenshots } from './screenshots.js'
+import { validateScreenshotOptions } from './screenshot-protocol.js'
 import type { BackendEvent, BackendReply, BackendRequest, BackendSnapshot, ComponentId } from './contracts.js'
 import { Storage } from './storage.js'
 import { notificationSettings, validateNotificationSettings } from './notifications-protocol.js'
@@ -149,6 +152,8 @@ export function validateRequest(input: unknown): BackendRequest {
     case 'settings.apkZstd': if (typeof r.enabled !== 'boolean') throw new Error('Invalid APK transfer setting.'); break
     case 'settings.exportMode': if (r.mode !== 'ask' && r.mode !== 'fixed') throw new Error('Invalid export destination mode.'); break
     case 'settings.exportFolder': break
+    case 'settings.screenshots': validateScreenshotOptions(r.options); break
+    case 'settings.screenshotFolder': case 'settings.openScreenshotFolder': break
     case 'apps.loadingMode': if (r.mode !== 'selected' && r.mode !== 'preload') throw new Error('Invalid Apps loading mode.'); break
     case 'apps.scan': case 'apps.details': text('id', 512); validateAppTarget(r.packageName as string, r.userId as number); break
     case 'apps.options': if (!r.options || typeof r.options !== 'object' || !['icons', 'early', 'storage'].every(key => typeof (r.options as Record<string, unknown>)[key] === 'boolean') || ('root' in r.options && typeof r.options.root !== 'boolean')) throw new Error('Invalid Apps options.'); break
@@ -192,6 +197,7 @@ export class Backend {
   diagnostics: AdbDiagnosticsService
   failureDiagnostics: FailureDiagnosticsService
   screens: DeviceScreenService
+  screenshots: Screenshots
   fastboot: FastbootService
   exportDestination: ExportDestination
   private backupCatalogue: BackupCatalog
@@ -251,13 +257,25 @@ export class Backend {
       const record = this.components.records.find(r => r.id === 'fastboot')
       return record?.location && ['Detected', 'Installed', 'Update available'].includes(record.status) ? path.join(record.location, 'fastboot.exe') : null
     }, publish, runner)
+    this.screenshots = new Screenshots(storage, path.join(app.getPath('pictures'), 'ADB Vault', 'Screenshots'), {
+      chooseFolder: async current => {
+        const pick = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0], { title: 'Choose screenshot folder', defaultPath: current, properties: ['openDirectory', 'createDirectory'] })
+        return pick.canceled ? null : pick.filePaths[0] || null
+      },
+      saveAs: async file => {
+        const pick = await dialog.showSaveDialog(BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0], { title: 'Save screenshot', defaultPath: file, filters: [{ name: 'PNG image', extensions: ['png'] }], properties: ['showOverwriteConfirmation'] })
+        return pick.canceled ? null : pick.filePath || null
+      },
+      copyImage: copyScreenshotImage,
+      openFolder: async folder => { const error = await shell.openPath(folder); if (error) throw new Error(error) },
+    })
     this.screens = new DeviceScreenService(() => this.components.adbPath(), () => {
       const record = this.components.records.find(r => r.id === 'scrcpy')
       return record?.location && ['Detected', 'Installed', 'Update available'].includes(record.status) ? path.join(record.location, 'scrcpy.exe') : null
     }, () => this.connection.state, publish, async name => {
       const result = await dialog.showSaveDialog(BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0], { title: name.endsWith('.png') ? 'Save screenshot' : 'Save recording as a new file', defaultPath: name, filters: [{ name: name.endsWith('.png') ? 'PNG image' : 'Video recording', extensions: [path.extname(name).slice(1)] }], properties: ['showOverwriteConfirmation'] })
       return result.canceled ? null : result.filePath || null
-    }, runner)
+    }, runner, undefined, undefined, undefined, (file, name) => this.screenshots.deliver(file, name))
     this.appActions = new AppActionsService(() => this.components.adbPath(), () => this.connection.state, () => this.apps.state,
       state => publish({ type: 'appAction', state }),
       () => {}, {
@@ -286,7 +304,7 @@ export class Backend {
       }, (id, userId, packageName) => this.closing ? Promise.resolve() : this.apps.refreshAfterAction(id, userId, packageName), runner)
     if (storage.data.appsOptions) this.apps.configureOptions(storage.data.appsOptions)
   }
-  snapshot(): BackendSnapshot { return { appNotes: this.appNotes.state, apkInspector: this.inspector.state, phoneTools: structuredClone(this.phoneTools.state), adbConsole: structuredClone(this.adbConsole.state), screenSessions: this.screens.state, confirmation: this.confirmations.state, notifications: notificationSettings(this.storage.data.notifications), history: this.history.snapshot(), androidDiagnostics: this.androidDiagnostics.state, failureDiagnostics: this.failureDiagnostics.summaries, apkZstd: this.storage.data.apkZstd === true, files: this.files.state, fileSearch: this.fileSearch.state, fastboot: this.fastboot.state, restore: this.restores.state, exportDestination: this.exportDestination.settings, backup: this.backups.state, presetPreview: this.backups.preview, components: [...this.components.records, ...this.databases.records, this.geoip.record], connection: this.connection.state, apps: this.withBackups(this.apps.state), adbDiagnostics: this.diagnostics.state, stopAdbOnExit: this.storage.data.stopAdbOnExit !== false, appAction: this.appActions.state } }
+  snapshot(): BackendSnapshot { return { screenshots: this.screenshots.settings, appNotes: this.appNotes.state, apkInspector: this.inspector.state, phoneTools: structuredClone(this.phoneTools.state), adbConsole: structuredClone(this.adbConsole.state), screenSessions: this.screens.state, confirmation: this.confirmations.state, notifications: notificationSettings(this.storage.data.notifications), history: this.history.snapshot(), androidDiagnostics: this.androidDiagnostics.state, failureDiagnostics: this.failureDiagnostics.summaries, apkZstd: this.storage.data.apkZstd === true, files: this.files.state, fileSearch: this.fileSearch.state, fastboot: this.fastboot.state, restore: this.restores.state, exportDestination: this.exportDestination.settings, backup: this.backups.state, presetPreview: this.backups.preview, components: [...this.components.records, ...this.databases.records, this.geoip.record], connection: this.connection.state, apps: this.withBackups(this.apps.state), adbDiagnostics: this.diagnostics.state, stopAdbOnExit: this.storage.data.stopAdbOnExit !== false, appAction: this.appActions.state } }
   private withBackups(apps: AppsSnapshot): AppsSnapshot {
     const device = this.connection.state.devices.find(d => d.id === apps.deviceId)
     return { ...apps, apps: apps.apps.map(app => ({ ...app, backupCheck: this.backupCatalogue.check(device, app), actionEvidence: (this.storage.data.packageActionEvidence || []).filter(e => e.device === (device?.hardwareId || device?.id) && e.fingerprint === app.actionContext?.fingerprint && e.userId === app.userId && e.packageName === app.packageName && e.versionCode === app.versionCode) })) }
@@ -615,6 +633,13 @@ export class Backend {
         case 'apps.restoreCancel': this.restores.cancel(); break
         case 'settings.exportMode': await this.exportDestination.configure(r.mode); break
         case 'settings.exportFolder': await this.exportDestination.configure('fixed', true); break
+        case 'settings.screenshots':
+          if (this.screens.busy) throw new Error('Wait for the current screenshot or screen operation to finish.')
+          await this.screenshots.configure(r.options); break
+        case 'settings.screenshotFolder':
+          if (this.screens.busy) throw new Error('Wait for the current screenshot or screen operation to finish.')
+          await this.screenshots.chooseFolder(); break
+        case 'settings.openScreenshotFolder': await this.screenshots.openFolder(); break
         case 'settings.apkZstd': {
           if (this.backups.busy || this.appActions.busy) throw new Error('Wait for the current application operation before changing APK transfer settings.')
           const previous = this.storage.data.apkZstd

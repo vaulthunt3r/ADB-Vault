@@ -1,6 +1,8 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
-import { open, rename, rm, stat, link, copyFile } from 'node:fs/promises'
+import { open, rm, stat, link, copyFile, mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import type { ScreenshotResult } from './screenshots.js'
 import { constants } from 'node:fs'
 import path from 'node:path'
 import type { BackendEvent, ConnectionSnapshot, DeviceRecord } from './contracts.js'
@@ -38,7 +40,8 @@ export class DeviceScreenService {
     private connection: () => ConnectionSnapshot, private emit: (event: BackendEvent) => void,
     private savePath: (name: string) => Promise<string | null>, private runner: Runner = run, private launch: Launch = spawn,
     private closeChild: (child: ChildProcess) => Promise<void> = closeWindow,
-    private cameraPort: CameraControlPort = new WindowsCameraControls()) {}
+    private cameraPort: CameraControlPort = new WindowsCameraControls(),
+    private screenshotOutput?: (file: string, name: string) => Promise<ScreenshotResult | null>) {}
 
   private changed() { this.emit({ type: 'screenSessions', sessions: this.state }) }
   async screenWindow(id: string) {
@@ -310,11 +313,9 @@ export class DeviceScreenService {
   }
   private async screenshot(target: ScreenTarget, device: DeviceRecord, adb: string, selector: string[]) {
     const name = device.name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').slice(0, 80).replace(/[. ]+$/, '') || 'Phone'
-    const destination = await this.savePath(`${name}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`)
-    if (!destination) return null
-    this.device(target) // The picker may remain open while the phone disconnects.
-    if (path.extname(destination).toLowerCase() !== '.png') throw new Error('Choose a PNG file name.')
-    const temporary = path.join(path.dirname(destination), `.adb-vault-${randomUUID()}.png.tmp`)
+    const filename = `${name}-${new Date().toISOString().replace(/[:.]/g, '-')}.png`
+    const directory = await mkdtemp(path.join(tmpdir(), 'adb-vault-screenshot-'))
+    const temporary = path.join(directory, 'capture.png')
     try {
       checked(await this.runner(adb, [...selector, 'exec-out', 'screencap', '-p'], 20000, undefined, undefined, { stdoutFile: temporary, signal: this.controller.signal }))
       const size = (await stat(temporary)).size
@@ -324,12 +325,23 @@ export class DeviceScreenService {
         const head = Buffer.alloc(24), tail = Buffer.alloc(12)
         await file.read(head, 0, 24, 0); await file.read(tail, 0, 12, size - 12)
         if (!head.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) || head.toString('ascii', 12, 16) !== 'IHDR' || !head.readUInt32BE(16) || !head.readUInt32BE(20) || !tail.equals(Buffer.from('0000000049454e44ae426082', 'hex'))) throw new Error('Android did not return a complete PNG screenshot. Protected content may not be capturable.')
+        if (head.readUInt32BE(16) * head.readUInt32BE(20) > 64_000_000) throw new Error('Android returned an oversized screenshot.')
       } finally { await file.close() }
       if (this.closing) throw new Error('ADB Vault is closing.')
-      await rename(temporary, destination)
+      this.device(target)
+      if (this.screenshotOutput) {
+        const result = await this.screenshotOutput(temporary, filename)
+        if (!result) return null
+        this.log(device, result.message, result.warning ? 'warning' : 'success')
+        return result.message
+      }
+      const destination = await this.savePath(filename)
+      if (!destination) return null
+      if (path.extname(destination).toLowerCase() !== '.png') throw new Error('Choose a PNG file name.')
+      await copyFile(temporary, destination)
       this.log(device, `Screenshot saved: ${destination}`, 'success')
       return `Screenshot saved: ${destination}`
-    } finally { await rm(temporary, { force: true }).catch(() => {}) }
+    } finally { await rm(directory, { recursive: true, force: true }).catch(() => {}) }
   }
   private async pickRecording(device: DeviceRecord, options: ScreenLaunch) {
     const name = device.name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').slice(0, 80) || 'Phone'

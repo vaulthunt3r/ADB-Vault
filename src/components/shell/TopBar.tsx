@@ -12,7 +12,8 @@ import { useFilesStore } from '../../store/useFilesStore'
 import { useHistoryStore } from '../../store/useHistoryStore'
 import { useAndroidDiagnosticsStore, sameDiagnosticTarget } from '../../store/useAndroidDiagnosticsStore'
 import { useToolbarStore } from '../../store/useToolbarStore'
-import { useScreenStore } from '../../store/useScreenStore'
+import { useScreenStore, useScreenshotSettings } from '../../store/useScreenStore'
+import { screenshotHint } from '../../../electron/screenshot-protocol'
 import { screenSessionMatchesDevice, type ScreenMode } from '../../../electron/screen-protocol'
 import { DevicePowerDialog, usePowerBlocked } from '../DevicePowerActions'
 import type { DeviceRecord } from '../../../electron/contracts'
@@ -39,6 +40,7 @@ function positionPopover(node: HTMLDivElement | null, trigger: HTMLButtonElement
 }
 
 export function TopBar() {
+  const screenshots = useScreenshotSettings()
   const section = useAppStore(s => s.section)
   const localApks = useAppStore(s => s.section === 'apps' && s.appsView === 'apk')
   const installedAppsView = useAppStore(s => s.appsView === 'installed')
@@ -93,7 +95,7 @@ export function TopBar() {
     ...(section === 'components' ? [{ id: 'workspace' as const, label: "Check components", hint: "Check components", icon: <ListChecks />, disabled: componentsBusy, run: () => { void useAppStore.getState().detectAll() } }]
       : localApks ? [{ id: 'workspace' as const, label: "Open APK", hint: "Choose a local APK to inspect in slot A.", icon: <FileSearch />, disabled: localBusy, run: () => { void requestBackend({ type: 'inspector.open', slot: 'before' }) } }]
       : section === 'apps' ? [{ id: 'workspace' as const, label: "Refresh applications", hint: "Refresh applications", icon: <RefreshCw />, disabled: blocked || !connected || pending, run: () => { if (device) void apps.refresh(device.id) } }] : []),
-    { id: 'screenshot', label: "Screenshot", hint: pending ? "Saving screenshot or opening screen…" : "Save the selected phone screen as a PNG image on this computer.", icon: <ScanLine />, disabled: !connected || blocked || pending, run: () => { void screenAction('screenshot') } },
+    { id: 'screenshot', label: "Screenshot", hint: pending ? "Taking screenshot or opening screen…" : screenshotHint(screenshots), icon: <ScanLine />, disabled: !connected || blocked || pending, run: () => { void screenAction('screenshot') } },
     { id: 'mirror', label: "Mirror screen", hint: canMirror ? "View and control the selected phone in scrcpy." : "Install or locate scrcpy in Components first.", icon: <MonitorSmartphone />, disabled: !connected || blocked || pending || !canMirror, run: () => { void screenAction('open') } },
     { id: 'screenOptions', label: "Screen & recording", hint: "Choose capture mode, sound and recording options.", icon: <Settings2 />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions() },
     { id: 'virtualDisplay', label: "Virtual display", hint: screenApplication ? `Open ${screenApplication.label} in a separate Android window.` : "Choose an application for a separate Android window.", icon: <AppWindow />, disabled: !connected || blocked || pending || !canMirror, run: () => openScreenOptions('virtual') },

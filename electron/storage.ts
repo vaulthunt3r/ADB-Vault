@@ -5,7 +5,8 @@ import type { ComponentId, DeviceRecord } from './contracts.js'
 import { defaultAppsOptions, type AppsOptions } from './apps-protocol.js'
 import type { ExportDestinationSettings } from './app-backup-protocol.js'
 import { notificationSettings, type NotificationSettings } from './notifications-protocol.js'
-export interface Settings { packageActionEvidence?: PackageActionEvidence[]; notifications?: NotificationSettings; paths: Partial<Record<ComponentId, string>>; manualAdb?: boolean; known: DeviceRecord[]; appsLoadingMode?: 'selected' | 'preload'; appsOptions?: AppsOptions; stopAdbOnExit?: boolean; apkZstd?: boolean; exportDestination?: ExportDestinationSettings }
+import { screenshotSettings, type ScreenshotSettings } from './screenshot-protocol.js'
+export interface Settings { screenshots?: ScreenshotSettings; packageActionEvidence?: PackageActionEvidence[]; notifications?: NotificationSettings; paths: Partial<Record<ComponentId, string>>; manualAdb?: boolean; known: DeviceRecord[]; appsLoadingMode?: 'selected' | 'preload'; appsOptions?: AppsOptions; stopAdbOnExit?: boolean; apkZstd?: boolean; exportDestination?: ExportDestinationSettings }
 export class Storage {
   data: Settings = { paths: {}, known: [] }
   private pending = Promise.resolve()
@@ -16,6 +17,8 @@ export class Storage {
       const saved = JSON.parse(await readFile(path.join(this.root, 'backend.json'), 'utf8'))
       this.data.packageActionEvidence = Array.isArray(saved.packageActionEvidence) ? saved.packageActionEvidence.filter(validEvidence).slice(-1000) : []
       this.data.notifications = notificationSettings(saved.notifications)
+      this.data.screenshots = screenshotSettings(saved.screenshots)
+      if (this.data.screenshots.folder && !path.isAbsolute(this.data.screenshots.folder)) this.data.screenshots.folder = null
       if (typeof saved.stopAdbOnExit === 'boolean') this.data.stopAdbOnExit = saved.stopAdbOnExit
       this.data.apkZstd = saved.apkZstd === true
       this.data.manualAdb = saved.manualAdb === true

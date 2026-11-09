@@ -43,7 +43,7 @@ test('metadata failures identify their component and source while independent ch
   assert.match(events[1].text, /^scrcpy:/)
 })
 test('ADB device parser separates unauthorized, offline, network and emulator transports', () => {
-  const result = parseDevices('List of devices attached\nUSB1 unauthorized usb:1-2\nUSB2 offline\n192.168.1.5:39001 device product:x model:Pixel_8 transport_id:2\nemulator-5554 device model:sdk_gphone\n* daemon started successfully *')
+  const result = parseDevices('List of devices attached\nUSB1 unauthorized usb:1-2\nUSB2 offline\n192.168.1.5:39001 device product:x model:Pixel_8 transport_id:2\nemulator-5598 device model:sdk_gphone\n* daemon started successfully *')
   assert.equal(result.length, 4); assert.equal(result[0].status, 'unauthorized'); assert.equal(result[1].status, 'offline'); assert.equal(result[2].name, 'Pixel 8'); assert.equal(result[2].method, 'Wi-Fi'); assert.equal(result[3].method, 'Emulator')
 })
 test('endpoint validation rejects shell fragments, invalid IPs and invalid ports', () => {

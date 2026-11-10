@@ -25,7 +25,7 @@ export function AppsBatchActions({ ready }: { ready: boolean }) {
     <div className="apps-action-group">
       {chosen.length === 1 && <AppVirtualDisplayAction app={chosen[0]} ready={ready} />}
       <button className="button secondary" disabled={!ready || !chosen.length} onClick={() => openAppsBackup('marked', true)}><FileOutput size={15} />Backup ({chosen.length})<ActionIndicator /></button>
-      {batchActionIds.filter(action => !action.startsWith('clear-')).map(action => {
+      {batchActionIds.filter(action => action !== 'install-existing' && !action.startsWith('clear-')).map(action => {
         const eligible = chosen.filter(a => !batchSkipReason(action, a, apps)).length, skipped = chosen.length - eligible
         const Icon = action === 'force-stop' ? Square : action === 'suspend' ? Pause : action === 'unsuspend' ? Play : action === 'enable' || action === 'disable' ? Power : Trash2
         const actionOptions = packageActionIds.includes(action as PackageAction) ? { ...options, ...(action === 'uninstall' ? { keepData } : {}) } : undefined

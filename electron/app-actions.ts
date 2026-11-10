@@ -14,6 +14,8 @@ import { ApkTransferSession, type ApkTransferInfo } from './apk-transfer.js'
 import { packageActionIds, validatePackageOptions, type PackageAction, type PackageActionOptions } from './package-actions-protocol.js'
 import { runPackageAction, runRestoreExisting, PackageActionError, type PackageActionAccess } from './package-actions.js'
 import { launchApplication } from './app-launch.js'
+import { collectApkChecksums } from './apk-checksums.js'
+import { missingSha256 } from './helper-checksum.js'
 
 const quote = (value: string) => `'${value.replaceAll("'", "'\\''")}'`
 export function validateBatchAction(value: BatchActionRequest) {
@@ -91,8 +93,9 @@ export class AppActionsService {
     const snapshot = this.apps(), device = this.connection().devices.find(d => d.id === request.id && d.status === 'connected')
     if (!device || this.connection().activeDeviceId !== request.id || snapshot.status !== 'ready' || snapshot.deviceId !== request.id || snapshot.userId !== request.userId) throw new Error('Select the current connected profile.')
     const cleanup = request.cleanup ? cleanupParts.filter(p => request.cleanup!.includes(p) && !(p === 'cache' && request.cleanup!.includes('data'))) : undefined
+    const candidates = (state: AppsSnapshot) => request.action === 'install-existing' ? state.removedApps || [] : state.apps
     const items: BatchActionItem[] = request.packages.map(packageName => {
-      const app = snapshot.apps.find(a => a.packageName === packageName && a.userId === request.userId)
+      const app = candidates(snapshot).find(a => a.packageName === packageName && a.userId === request.userId)
       if (!app) throw new Error('A selected application is no longer in this profile. Review the selection.')
       const reason = batchSkipReason(request.action, app, snapshot.apps)
       return { packageName, label: app.label, uid: app.uid, versionCode: app.versionCode, system: app.system, status: reason ? 'skipped' : 'pending', message: reason || '', ...(cleanup ? { steps: (retryParts?.get(packageName) || cleanup).map(part => ({ part, status: 'pending' as const, message: '' })) } : {}) }
@@ -113,7 +116,7 @@ export class AppActionsService {
           if (item.status === 'skipped') continue
           if (this.state!.batch!.stopRequested) break
           current()
-          const app = this.apps().apps.find(a => a.packageName === item.packageName)
+          const app = candidates(this.apps()).find(a => a.packageName === item.packageName && a.userId === request.userId)
           if (!app || app.uid !== item.uid || app.versionCode !== item.versionCode) { item.status = 'skipped'; item.message = 'Application changed since confirmation. Review it again.'; publish(); continue }
           const reason = batchSkipReason(request.action, app, this.apps().apps)
           if (reason) { item.status = 'skipped'; item.message = reason; publish(); continue }
@@ -128,7 +131,7 @@ export class AppActionsService {
                 current()
                 const command = args[1].join(' ')
                 const externalDeletion = (action === 'clear-obb' || action === 'clear-media') && command.includes('-exec rm -rf --')
-                const mutation = externalDeletion || /'am' 'force-stop'|'pm' '(?:clear|enable|disable-user|uninstall|suspend|unsuspend)'|helper\.PackageActions '(?:clear-data|clear-cache|enable|disable|uninstall)'/.test(command)
+                const mutation = externalDeletion || /'am' 'force-stop'|'pm' '(?:install-existing|clear|enable|disable-user|uninstall|suspend|unsuspend)'|helper\.PackageActions '(?:clear-data|clear-cache|enable|disable|uninstall)'/.test(command)
                 try {
                   if (mutation) wrote = true
                   if (externalDeletion) externalDeletionAttempted = true
@@ -335,6 +338,7 @@ export class AppActionsService {
         this.update({ message: 'Preparing APK files…', completed: 0, total: paths.length })
         temporary = await mkdtemp(path.join(destination!, '.adb-vault-export-'))
         const files: { file: string; source: string; sha256: string; bytes: number; transfer: ApkTransferInfo; timingsMs: { deviceChecksum: number; transfer: number; localVerification: number } }[] = []
+        let helperChecksums: Awaited<ReturnType<typeof collectApkChecksums>> | undefined
         for (const [index, remote] of paths.entries()) {
           ensureCurrent()
           let transferInfo = await transferSession!.prepare(device.method, command)
@@ -344,7 +348,19 @@ export class AppActionsService {
           const fileLabel = `${name} (${index + 1}/${paths.length})`
           this.update({ message: `Reading checksum on device: ${fileLabel}…` })
           const checksumStarted = performance.now()
-          const digest = (await shell(['sha256sum', remote], 120000)).match(/^([a-f0-9]{64})\s/i)?.[1]?.toLowerCase()
+          let digest: string | undefined
+          if (!helperChecksums) {
+            try { digest = (await shell(['sha256sum', remote], 120000)).match(/^([a-f0-9]{64})\s/i)?.[1]?.toLowerCase() }
+            catch (error) {
+              if (!missingSha256(error)) throw error
+              const directory = this.packageAccess?.directory || this.permissions?.directory
+              if (!directory) throw new Error('This Android version requires the bundled helper to verify APK exports.')
+              this.update({ message: 'Calculating APK checksums with the Android helper…' })
+              helperChecksums = await collectApkChecksums(directory, (args, timeout) => command(args, timeout, true), pkg, target.userId, paths)
+              ensureCurrent()
+            }
+          }
+          if (helperChecksums) digest = helperChecksums.get(remote)?.sha256
           const deviceChecksum = Math.round(performance.now() - checksumStarted)
           if (!digest) throw new Error('Cannot verify APK integrity: Android did not return a SHA-256 checksum.')
           const local = path.join(temporary, name)
@@ -386,6 +402,7 @@ export class AppActionsService {
             const magic = Buffer.alloc(4); await handle.read(magic, 0, 4, 0)
             if (magic.toString('hex') !== '504b0304') throw new Error('Exported file is not an APK archive.')
           } finally { await handle.close() }
+          if (helperChecksums && bytes !== helperChecksums.get(remote)?.bytes) throw new Error('APK size changed during export.')
           const hash = createHash('sha256')
           for await (const chunk of createReadStream(local, { signal: controller.signal })) hash.update(chunk)
           if (hash.digest('hex') !== digest) throw new Error('APK verification failed. The package may have changed during export.')

@@ -3,13 +3,17 @@ export type AppActionId = typeof appActionIds[number]
 export const cleanupParts = ['data', 'cache', 'obb', 'media'] as const
 export type CleanupPart = typeof cleanupParts[number]
 export const cleanupLabels: Record<CleanupPart, string> = { data: 'App data', cache: 'Cache', obb: 'OBB', media: 'Media' }
-export const batchActionIds = ['force-stop', 'suspend', 'unsuspend', 'enable', 'disable', 'clear-cache', 'clear-data', 'clear-obb', 'clear-media', 'clear-storage', 'uninstall'] as const
+export const batchActionIds = ['install-existing', 'force-stop', 'suspend', 'unsuspend', 'enable', 'disable', 'clear-cache', 'clear-data', 'clear-obb', 'clear-media', 'clear-storage', 'uninstall'] as const
 export type BatchActionId = typeof batchActionIds[number]
-export const batchActionLabels: Record<BatchActionId, string> = { 'force-stop': 'Force stop', suspend: 'Freeze', unsuspend: 'Unfreeze', enable: 'Enable', disable: 'Disable', 'clear-cache': 'Clear cache', 'clear-data': 'Clear app data', 'clear-obb': 'Clear OBB', 'clear-media': 'Clear media', 'clear-storage': 'Clear storage', uninstall: 'Uninstall from profile' }
+export const batchActionLabels: Record<BatchActionId, string> = { 'install-existing': 'Restore to profile', 'force-stop': 'Force stop', suspend: 'Freeze', unsuspend: 'Unfreeze', enable: 'Enable', disable: 'Disable', 'clear-cache': 'Clear cache', 'clear-data': 'Clear app data', 'clear-obb': 'Clear OBB', 'clear-media': 'Clear media', 'clear-storage': 'Clear storage', uninstall: 'Uninstall from profile' }
 export interface BatchActionRequest { id: string; userId: number; packages: string[]; action: BatchActionId; cleanup?: CleanupPart[]; options?: import('./package-actions-protocol.js').PackageActionOptions }
 export interface CleanupStep { part: CleanupPart; status: 'pending' | 'running' | 'success' | 'error' | 'cancelled'; message: string; uncertain?: boolean }
 export interface BatchActionItem { packageName: string; label: string; uid: number; versionCode: number; system: boolean; status: 'pending' | 'running' | 'success' | 'error' | 'skipped' | 'cancelled'; message: string; uncertain?: boolean; steps?: CleanupStep[] }
 export function batchSkipReason(action: BatchActionId, app: import('./apps-protocol.js').AndroidApp, apps: import('./apps-protocol.js').AndroidApp[]) {
+  if (action === 'install-existing') {
+    if (app.installed !== false) return 'Not reported as absent from this profile'
+    if (!(app.apkSizeBytes && app.apkSizeBytes > 0)) return 'APK files are missing or unavailable. Use a saved APK/backup instead.'
+  }
   if (action === 'suspend' && app.suspended) return 'Already frozen (Suspended)'
   if (action === 'suspend' && !app.enabled) return 'Already disabled'
   if (action === 'unsuspend' && !app.suspended) return 'Not frozen'

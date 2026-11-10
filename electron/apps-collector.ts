@@ -6,6 +6,7 @@ import { emptyApps, parseAppsOutput, defaultAppsOptions, type AppsOptions } from
 import { parseAndroidProfiles } from './app-profiles.js'
 import type { BackendEvent, ConnectionSnapshot } from './contracts.js'
 import { AppsProgressReader } from './apps-progress.js'
+import { helperChecksum } from './helper-checksum.js'
 import { validateAppTarget } from './app-details-protocol.js'
 const directory = '/data/local/tmp/android-manager'
 const remote = `${directory}/manager-server.jar`
@@ -41,7 +42,7 @@ export class AppsCollector {
       const digest = createHash('sha256').update(await readFile(jar)).digest('hex')
       if (manifest.protocolVersion !== 1 || manifest.helperVersion !== '0.1.0' || digest !== manifest.sha256) throw new Error('Bundled Android helper failed verification. Rebuild it with npm run helper:build.')
       const sdk = Number(await command(['shell', 'getprop', 'ro.build.version.sdk']))
-      if (!Number.isInteger(sdk) || sdk < manifest.minSdk) throw new Error(`Apps helper requires Android 8.0 or newer (API ${manifest.minSdk}).`)
+      if (!Number.isInteger(sdk) || sdk < manifest.minSdk) throw new Error(`Reading applications requires Android 7.1 or newer (API ${manifest.minSdk}).`)
       const userText = await command(['shell', 'am', 'get-current-user'])
       if (!/^\d{1,5}$/.test(userText)) throw new Error('Cannot determine the current Android user.')
       const currentUserId = Number(userText)
@@ -55,13 +56,13 @@ export class AppsCollector {
       const userId = selectedUserId ?? currentUserId
       this.state = { ...this.state, profiles, currentUserId, profilesError, userId }; this.publish()
       if (!profiles.some(profile => profile.id === userId)) throw new Error(`Android profile ${userId} is no longer available. Select another profile.`)
-      const remoteHash = await command(['shell', `if [ -f ${remote} ]; then sha256sum ${remote}; fi`])
-      if (remoteHash.split(/\s+/)[0] !== digest) {
+      const remoteHash = await helperChecksum(command, remote, true)
+      if (remoteHash !== digest) {
         this.state = { ...this.state, message: 'Uploading the Android helper…' }; this.publish()
         await command(['shell', `mkdir -p ${directory} && rm -f ${remote}.new`])
         await command(['push', jar, `${remote}.new`], 30000)
-        const uploaded = await command(['shell', 'sha256sum', `${remote}.new`])
-        if (uploaded.split(/\s+/)[0] !== digest) throw new Error('Android helper upload checksum mismatch.')
+        const uploaded = await helperChecksum(command, `${remote}.new`)
+        if (uploaded !== digest) throw new Error('Android helper upload checksum mismatch.')
         // Fixed paths only. Do not replace a working helper until the upload is verified.
         await command(['shell', `chmod 444 ${remote}.new && mv -f ${remote}.new ${remote}`])
       }

@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 const hash = bytes => createHash('sha256').update(bytes).digest('hex')
 try {
   const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))
+  if (manifest.minSdk !== 25) throw new Error('Unexpected helper minimum Android API.')
   const sources = ['android-helper/src/dev/adbvault/helper/Main.java', 'android-helper/src/dev/adbvault/helper/ApkAddresses.java', 'android-helper/src/dev/adbvault/helper/ApkSize.java', 'android-helper/src/dev/adbvault/helper/PackageActions.java', 'android-helper/src/dev/adbvault/helper/PhoneTools.java', 'android-helper/src/dev/adbvault/helper/PhoneClipboard.java', 'android-helper/src/dev/adbvault/helper/PhoneContext.java']
   sources.push('android-helper/src/dev/adbvault/helper/PhoneContentResolver.java', 'android-helper/stubs/android/content/IContentProvider.java')
   sources.push('android-helper/src/dev/adbvault/helper/TouchServer.java')

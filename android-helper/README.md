@@ -16,7 +16,7 @@ npm run helper:build
 npm run helper:check
 ```
 
-Setup downloads publisher-checksummed portable Temurin JDK 17, Android platform 35 and build-tools 35.0.0 into `.tools/helper/`. It changes neither PATH nor global SDK/JDK installations. Google SDK tools are covered by the [Android SDK License Agreement](https://developer.android.com/studio/terms). Compilation uses javac followed by [D8](https://developer.android.com/tools/d8), targeting API 26. Keep `dist/manager-server.jar` and `dist/helper-manifest.json` together when distributing the source project.
+Setup downloads publisher-checksummed portable Temurin JDK 17, Android platform 35 and build-tools 35.0.0 into `.tools/helper/`. It changes neither PATH nor global SDK/JDK installations. Google SDK tools are covered by the [Android SDK License Agreement](https://developer.android.com/studio/terms). Compilation uses javac followed by [D8](https://developer.android.com/tools/d8), targeting API 25. Keep `dist/manager-server.jar` and `dist/helper-manifest.json` together when distributing the source project.
 
 ## Session and protocol 1
 
@@ -46,7 +46,16 @@ PackageManager supplies labels in the device locale, application flags, versions
 
 The desktop selects one profile returned by `pm list users` and passes its explicit ID to the helper. This includes accessible users, work profiles and OEM spaces; inventory is not merged across profiles. Package UID user ranges are validated against the requested ID. Selecting a profile never starts, unlocks or switches users. Restricted profiles can return errors; unlocking/resuming must be done on the phone. `stopped` is a package flag, not process liveness. Timestamps and installer come from Android and may be absent or reflect firmware defaults.
 
-The shell context is initialized through ActivityThread, with shell application identity. On the tested MediaTek ROM, the app-only AsyncDrawableCache fails outside a normal app lifecycle; its optimization is disabled **inside this helper process** using reflection. No global property is changed. This private-framework integration follows the same general approach as [scrcpy's context initialization](https://github.com/Genymobile/scrcpy/blob/master/server/src/main/java/com/genymobile/scrcpy/Workarounds.java), but this collector is separate code. OEM/Android compatibility needs device testing; Android 16 is verified, API 26 is the build/runtime minimum, not a claim that every intervening ROM has been tested.
+The shell context is initialized through ActivityThread, with shell application identity. Older Android versions use `createPackageContextAsUser` when `createContextAsUser` is absent, preserving the requested profile. On the tested MediaTek ROM, the app-only AsyncDrawableCache fails outside a normal app lifecycle; its optimization is disabled **inside this helper process** using reflection. No global property is changed. This private-framework integration follows the same general approach as [scrcpy's context initialization](https://github.com/Genymobile/scrcpy/blob/master/server/src/main/java/com/genymobile/scrcpy/Workarounds.java), but this collector is separate code. API 25 (Android 7.1) is the inventory build/runtime minimum, not a claim that every newer ROM or feature has been tested. Storage statistics and phone-provider actions still require Android 8.0 or newer.
+
+ROMs without `sha256sum` use a bounded `od` read and compute SHA-256 on the PC before activating the uploaded helper. Missing or malformed bytes, cancellation, access denial and checksum mismatch remain failures; no unverified helper is executed.
+
+APK export normally uses the phone's `sha256sum`. When that command is missing,
+the verified helper's `--checksums <package> <userId>` mode resolves the installed
+APK set through PackageManager and streams each APK into SHA-256 on the phone.
+The desktop validates the package, profile, exact file set and sizes, then compares
+every copied APK against these digests. Permission and connection failures do not
+activate this fallback. No APK is installed and app data is not read by this mode.
 
 ## Tests
 

@@ -37,7 +37,7 @@ async function fixture(options = {}) {
     }
     if (cmd[0] === 'sha256sum') return ok(`${sha}  ${cmd[1]}`)
     throw new Error(`Unexpected ADB command ${args}`)
-  }, catalogue, undefined, () => options.zstd === true)
+  }, catalogue, undefined, () => options.zstd === true, options.helperDirectory)
   return { catalogue, root, service, connection, apps, calls, events, setLoad: file => { loadPath = file } }
 }
 async function unzip(file) {
@@ -56,6 +56,29 @@ async function reports(output) {
   const names = (await readdir(output)).filter(name => name.startsWith('manifest-') && name.endsWith('.json'))
   return Promise.all(names.map(async name => JSON.parse(await readFile(path.join(output, name), 'utf8'))))
 }
+
+test('batch APK backup passes the bundled helper to legacy checksum exports for single and split applications', async () => {
+  const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))
+  let checksums = 0
+  const f = await fixture({ helperDirectory: 'android-helper/dist', runner: async args => {
+    const command = args.at(-1)
+    if (command.startsWith("'sha256sum'")) return { code: 127, stdout: '', stderr: 'sha256sum: not found' }
+    if (command.includes('sha256sum /data/local/tmp')) return ok(manifest.sha256 + ' helper')
+    if (command.includes('--checksums')) {
+      checksums++
+      const packageName = command.match(/--checksums ([\w.]+) 11$/)?.[1]
+      assert.ok(packageName)
+      const sources = [`/data/app/${packageName}/base.apk`, ...(packageName.endsWith('two') ? [`/data/app/${packageName}/split.apk`] : [])]
+      return ok(JSON.stringify({ type: 'apk-checksums', protocolVersion: 1, packageName, userId: 11, files: sources.map(source => ({ source, bytes: apk.length, sha256: sha })) }))
+    }
+  } })
+  await f.service.execute(selection, false)
+  assert.equal(f.service.state.status, 'complete', f.service.state.message)
+  assert.equal(checksums, 2)
+  assert.equal(f.service.state.items.length, 2)
+  assert.ok(f.service.state.items.every(item => item.status === 'success'))
+  assert.equal(f.calls.filter(args => args[2] === 'pull').length, 3)
+})
 
 test('preset saves are fixed selections, versioned, readable and never overwrite previous content', async () => {
   const f = await fixture(); await f.service.execute(selection, true)

@@ -279,7 +279,7 @@ export class Backend {
     this.appActions = new AppActionsService(() => this.components.adbPath(), () => this.connection.state, () => this.apps.state,
       state => publish({ type: 'appAction', state }),
       () => {}, {
-        confirmBatch: state => this.confirmations.ask(batchActionConfirmation(state, this.apps.state.apps)),
+        confirmBatch: state => this.confirmations.ask(batchActionConfirmation(state, state.action === 'install-existing' ? this.apps.state.removedApps || [] : this.apps.state.apps)),
         confirm: (action, application, deviceName, profileName, options) => this.confirmations.ask(singleActionConfirmation(action, application, deviceName, profileName, options)),
         exportFolder: () => this.exportDestination.resolve(),
       }, target => this.closing ? Promise.resolve() : this.apps.refreshAfterAction(target.id, target.userId, target.packageName), runner, { directory: helperDirectory, publish: (target, state) => this.apps.applyPermissions(target, state) }, () => new ApkTransferSession(storage.data.apkZstd === true), { directory: helperDirectory, observe: (application, action, options, context, outcome, message) => {
@@ -295,7 +295,7 @@ export class Backend {
       state => { publish({ type: 'backup', state }); this.failureDiagnostics.observe(state) }, () => {}, {
         folder: () => this.exportDestination.resolve(),
         presetFile: async () => { const result = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0], { title: 'Load application preset', properties: ['openFile'], filters: [{ name: 'Application preset', extensions: ['json'] }] }); return result.canceled ? null : result.filePaths[0] || null },
-      }, this.failureDiagnostics.wrap(runner), this.backupCatalogue, (id, userId, packageName) => this.closing ? Promise.resolve() : this.apps.refreshAfterAction(id, userId, packageName), () => storage.data.apkZstd === true)
+      }, this.failureDiagnostics.wrap(runner), this.backupCatalogue, (id, userId, packageName) => this.closing ? Promise.resolve() : this.apps.refreshAfterAction(id, userId, packageName), () => storage.data.apkZstd === true, helperDirectory)
     this.restores = new AppRestoreService(() => this.components.adbPath(), () => this.connection.state, () => this.apps.state,
       state => publish({ type: 'restore', state }), {
         file: async () => { const result = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0], { title: 'Open ADB Vault backup', properties: ['openFile'], filters: [{ name: 'Backup manifest or ZIP', extensions: ['json', 'zip'] }] }); return result.canceled ? null : result.filePaths[0] || null },

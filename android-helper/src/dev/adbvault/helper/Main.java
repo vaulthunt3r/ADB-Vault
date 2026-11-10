@@ -46,12 +46,18 @@ public final class Main {
         Class<?> activityThread = Class.forName("android.app.ActivityThread");
         Object thread = activityThread.getMethod("systemMain").invoke(null);
         Context system = (Context) activityThread.getMethod("getSystemContext").invoke(thread);
-        Constructor<UserHandle> constructor = UserHandle.class.getDeclaredConstructor(int.class);
-        constructor.setAccessible(true);
-        Context user = (Context) Context.class.getMethod("createContextAsUser", UserHandle.class, int.class)
-                .invoke(system, constructor.newInstance(userId), 0);
+        Context user = contextAsUser(system, userId);
         // Attribute framework calls to the actual shell package, not an installed companion.
-        Context shell = user.createPackageContext("com.android.shell", Context.CONTEXT_IGNORE_SECURITY);
+        Context shell;
+        try { shell = user.createPackageContext("com.android.shell", Context.CONTEXT_IGNORE_SECURITY); }
+        catch (PackageManager.NameNotFoundException missingShell) {
+            if (userId == 0) throw missingShell;
+            // Some clone profiles omit the shell package. Keep its process identity,
+            // but explicitly scope the context (and PackageManager) to the selected user.
+            shell = contextAsUser(system.createPackageContext("com.android.shell", Context.CONTEXT_IGNORE_SECURITY), userId);
+        }
+        if (((Integer) Context.class.getMethod("getUserId").invoke(shell)) != userId)
+            throw new IllegalStateException("Cannot initialize applications for the selected Android user.");
         // OEM resource caches consult ActivityThread.currentPackageName()/currentProcessName().
         // app_process has no normal bindApplication phase, so provide the shell identity locally.
         Class<?> bindingClass = Class.forName("android.app.ActivityThread$AppBindData");
@@ -74,6 +80,23 @@ public final class Main {
             feature.setAccessible(true); feature.set(null, "0");
         } catch (ReflectiveOperationException ignored) { /* Other OEMs do not have this cache. */ }
         return shell;
+    }
+
+    static Context contextAsUser(Context base, int userId) throws Exception {
+        Constructor<UserHandle> constructor = UserHandle.class.getDeclaredConstructor(int.class);
+        constructor.setAccessible(true);
+        UserHandle user = constructor.newInstance(userId);
+        java.lang.reflect.Method create;
+        try {
+            create = Context.class.getMethod("createContextAsUser", UserHandle.class, int.class);
+        } catch (NoSuchMethodException olderAndroid) {
+            // The legacy "android" branch copies the base ContextImpl's LoadedApk
+            // into the requested user. It retains shell identity even if a clone profile
+            // has no shell package of its own. Never use the process's default user.
+            return (Context) Context.class.getMethod("createPackageContextAsUser", String.class, int.class, UserHandle.class)
+                    .invoke(base, "android", Context.CONTEXT_IGNORE_SECURITY, user);
+        }
+        return (Context) create.invoke(base, user, 0);
     }
 
     private static String icon(Drawable drawable) throws Exception {
@@ -331,6 +354,7 @@ public final class Main {
         else { badges.put("openLinks", JSONObject.NULL); issues.put(new JSONObject().put("area", "App links").put("message", "Domain verification details require Android 12 or newer.")); }
         JSONObject sizes = new JSONObject().put("requested", storage).put("appBytes", JSONObject.NULL).put("dataBytes", JSONObject.NULL).put("cacheBytes", JSONObject.NULL);
         if (storage) try {
+            if (Build.VERSION.SDK_INT < 26) throw new UnsupportedOperationException("Storage statistics require Android 8.0 or newer.");
             StorageStatsManager manager = context.getSystemService(StorageStatsManager.class);
             if (manager == null) throw new IllegalStateException("Storage statistics unavailable");
             Constructor<UserHandle> constructor = UserHandle.class.getDeclaredConstructor(int.class); constructor.setAccessible(true);
@@ -687,6 +711,37 @@ public final class Main {
             .put("addresses", new JSONObject().put("candidates", candidates).put("files", addresses.files).put("issues", new JSONArray(addresses.issues))));
     }
 
+    private static void apkChecksums(Context context, String name, int userId) throws Exception {
+        PackageInfo pkg = context.getPackageManager().getPackageInfo(name, 0);
+        ApplicationInfo app = pkg.applicationInfo;
+        if (app == null || app.uid / 100000 != userId || (app.flags & ApplicationInfo.FLAG_INSTALLED) == 0)
+            throw new IllegalStateException("Application profile mismatch");
+        LinkedHashSet<String> paths = new LinkedHashSet<String>();
+        if (app.sourceDir == null) throw new IllegalStateException("APK location unavailable");
+        paths.add(app.sourceDir);
+        if (app.splitSourceDirs != null) java.util.Collections.addAll(paths, app.splitSourceDirs);
+        if (paths.size() > 512) throw new IllegalStateException("Too many APK files");
+        JSONArray files = new JSONArray();
+        byte[] buffer = new byte[65536];
+        for (String source : paths) {
+            StructStat before = Os.stat(source);
+            if (!OsConstants.S_ISREG(before.st_mode) || before.st_size <= 0) throw new IllegalStateException("APK is not a regular file");
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            long bytes = 0;
+            try (java.io.InputStream input = new java.io.FileInputStream(source)) {
+                int count;
+                while ((count = input.read(buffer)) != -1) { digest.update(buffer, 0, count); bytes = Math.addExact(bytes, count); }
+            }
+            StructStat after = Os.stat(source);
+            if (bytes != before.st_size || before.st_size != after.st_size || before.st_ino != after.st_ino || before.st_dev != after.st_dev || before.st_mtime != after.st_mtime || before.st_ctime != after.st_ctime)
+                throw new IllegalStateException("APK changed during checksum calculation");
+            StringBuilder hex = new StringBuilder(64);
+            for (byte value : digest.digest()) { hex.append(Character.forDigit((value & 255) >>> 4, 16)); hex.append(Character.forDigit(value & 15, 16)); }
+            files.put(new JSONObject().put("source", source).put("bytes", bytes).put("sha256", hex.toString()));
+        }
+        emit(new JSONObject().put("type", "apk-checksums").put("protocolVersion", PROTOCOL).put("packageName", name).put("userId", userId).put("files", files));
+    }
+
     public static void main(String[] args) {
         // Reserve stdout for the versioned protocol, redirect Java/framework diagnostics.
         System.setOut(System.err);
@@ -699,10 +754,11 @@ public final class Main {
         try {
             if (args.length < 1 || !args[args.length - 1].matches("[0-9]{1,5}")) throw new IllegalArgumentException("Expected Android user ID");
             boolean icons = true, storage = false, permissions = false;
-            String detailPackage = null, scanPackage = null, rootPackage = null, singlePackage = null, permissionPackage = null;
+            String detailPackage = null, scanPackage = null, rootPackage = null, singlePackage = null, permissionPackage = null, checksumPackage = null;
             int expectedUid = -1;
             for (int i = 0; i < args.length - 1; i++) {
                 if (args[i].equals("--no-icons")) icons = false;
+                else if (args[i].equals("--checksums") && i + 1 < args.length - 1 && args[i + 1].matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*")) checksumPackage = args[++i];
                 else if (args[i].equals("--package") && i + 1 < args.length - 1 && args[i + 1].matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*")) singlePackage = args[++i];
                 else if (args[i].equals("--root-details") && i + 2 < args.length - 1 && args[i + 1].matches("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*") && args[i + 2].matches("[0-9]{1,10}")) { rootPackage = args[++i]; expectedUid = Integer.parseInt(args[++i]); }
                 else if (args[i].equals("--storage")) storage = true;
@@ -715,16 +771,17 @@ public final class Main {
             int userId = Integer.parseInt(args[args.length - 1]);
             long started = android.os.SystemClock.elapsedRealtime();
             Context context = context(userId);
+            if (checksumPackage != null) { apkChecksums(context, checksumPackage, userId); System.exit(0); return; }
             if (permissionPackage != null) { permissionState(context, permissionPackage, userId); System.exit(0); return; }
             if (rootPackage != null) { rootDetails(context, rootPackage, userId, expectedUid); System.exit(0); return; }
             if (scanPackage != null) { scanApks(context, scanPackage, userId); System.exit(0); return; }
             if (detailPackage != null) { details(context, detailPackage, userId, storage, permissions); System.exit(0); return; }
             PackageManager pm = context.getPackageManager();
-            StorageStatsManager stats = storage ? context.getSystemService(StorageStatsManager.class) : null;
+            StorageStatsManager stats = storage && Build.VERSION.SDK_INT >= 26 ? context.getSystemService(StorageStatsManager.class) : null;
             Constructor<UserHandle> userConstructor = UserHandle.class.getDeclaredConstructor(int.class);
             userConstructor.setAccessible(true);
             UserHandle statsUser = userConstructor.newInstance(userId);
-            String storageDenied = null;
+            String storageDenied = storage && Build.VERSION.SDK_INT < 26 ? "Storage statistics require Android 8.0 or newer." : null;
             int flags = PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE | PackageManager.MATCH_UNINSTALLED_PACKAGES;
             List<PackageInfo> packages;
             if (singlePackage == null) packages = pm.getInstalledPackages(flags);

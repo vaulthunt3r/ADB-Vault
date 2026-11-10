@@ -8,7 +8,27 @@ import { parseAppsOutput } from '../dist-electron/apps-protocol.js'
 import { run } from '../dist-electron/process.js'
 import { parseAndroidProfiles } from '../dist-electron/app-profiles.js'
 import { AppsProgressReader } from '../dist-electron/apps-progress.js'
+import { helperChecksum } from '../dist-electron/helper-checksum.js'
+import { createHash } from 'node:crypto'
 const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))
+
+test('legacy helper verification preserves binary bytes and never hides errors or accepts malformed output', async () => {
+  const remote = '/data/local/tmp/android-manager/manager-server.jar.new'
+  const bytes = Buffer.from([0, 255, 13, 10, 128, 1, 254])
+  const missing = Object.assign(new Error('sha256sum: not found'), { commandResult: { code: 127, stdout: '', stderr: 'sha256sum: not found' } })
+  const hex = [...bytes].map(n => n.toString(16).padStart(2, '0')).join(' ')
+  const fallback = output => async args => { if (args[1] === 'sha256sum') throw missing; assert.deepEqual(args, ['shell', 'od', '-An', '-v', '-tx1', '-N', '524289', remote]); return output }
+  assert.equal(await helperChecksum(fallback(` ${hex}\r\n`), remote), createHash('sha256').update(bytes).digest('hex'))
+  for (const output of ['', '00 invalid', '0 01', '00\n*\n00']) await assert.rejects(helperChecksum(fallback(output), remote), /Invalid.*verification/)
+  await assert.rejects(helperChecksum(fallback('00 '.repeat(524289)), remote), /size limit/)
+  for (const error of [new Error('Operation cancelled.'), Object.assign(new Error('Permission denied'), { commandResult: { code: 1, stdout: '', stderr: 'sha256sum: Permission denied' } })]) {
+    let calls = 0
+    await assert.rejects(helperChecksum(async () => { calls++; throw error }, remote), { message: error.message })
+    assert.equal(calls, 1)
+  }
+  assert.equal(await helperChecksum(async () => '', remote, true), '')
+  await assert.rejects(helperChecksum(async () => assert.fail('Unexpected command'), remote + ';anything'), /Invalid.*path/)
+})
 
 test('absent packages stay separate and a one-package update moves between lists in the selected profile', async () => {
   let installed = false
@@ -51,6 +71,28 @@ test('Apps publishes actual counts while streaming without accepting a partial i
   release(); await pending; assert.equal(f.service.state.status, 'ready'); assert.equal(f.service.state.progress, null)
 })
 
+test('helper failures before the header or during collection retain the Android error without accepting partial apps', async () => {
+  const failure = { type: 'error', message: 'NoSuchMethodException: createContextAsUser' }
+  for (const prefix of [[], records().slice(0, 2)]) {
+    const output = stream([...prefix, failure]) + '\n'
+    const reason = /Android helper: NoSuchMethodException: createContextAsUser/
+    assert.throws(() => parseAppsOutput(output, 0, '0.1.0'), reason)
+    const reader = new AppsProgressReader(0, '0.1.0', () => {})
+    assert.throws(() => {
+      for (let offset = 0; offset < output.length; offset += 7) reader.push(output.slice(offset, offset + 7))
+    }, reason)
+    const f = fixture({ helper: async options => {
+      options.onStdout(output)
+      return { stdout: output, stderr: '', code: 1 }
+    } })
+    await assert.rejects(f.service.refresh('device-id'), reason)
+    assert.equal(f.service.state.status, 'error')
+    assert.match(f.service.state.error, reason)
+    assert.deepEqual(f.service.state.apps, [])
+    assert.equal(f.service.state.progress, null)
+  }
+})
+
 test('APK sizes and split counts preserve unknown values and reject invalid metadata', () => {
   for (const size of [null, 10485760]) {
     const values = records(); Object.assign(values[1], { apkSizeBytes: size, splitCount: 3 })
@@ -83,7 +125,7 @@ test('Apps protocol rejects truncation, protocol drift, wrong users, duplicate p
   for (const mutate of mutations) { const values = records(); mutate(values); assert.throws(() => parseAppsOutput(stream(values), 0, '0.1.0')) }
 })
 const ok = stdout => ({ stdout, stderr: '', code: 0 })
-function fixture({ cached = true, failUpload = false, helper, users = 'Users:\n UserInfo{0:Owner:c13} running\n UserInfo{10:Work:30} running\n UserInfo{999:Second space:10}' } = {}) {
+function fixture({ cached = true, failUpload = false, helper, sdk = 36, users = 'Users:\n UserInfo{0:Owner:c13} running\n UserInfo{10:Work:30} running\n UserInfo{999:Second space:10}' } = {}) {
   const device = { id: 'device-id', serial: 'usb-serial', status: 'connected' }
   let connection = { activeDeviceId: device.id, devices: [device] }
   const calls = [], events = []
@@ -91,7 +133,7 @@ function fixture({ cached = true, failUpload = false, helper, users = 'Users:\n 
     calls.push(args)
     assert.deepEqual(args.slice(0, 2), ['-s', device.serial])
     const cmd = args.slice(2).join(' ')
-    if (cmd.includes('ro.build.version.sdk')) return ok('36')
+    if (cmd.includes('ro.build.version.sdk')) return ok(String(sdk))
     if (cmd.includes('get-current-user')) return ok('0')
     if (cmd === 'shell pm list users') return ok(users)
     if (cmd.includes('if [ -f')) return ok(cached ? `${manifest.sha256}  manager-server.jar` : '')
@@ -114,6 +156,16 @@ test('Apps cache skips push; one helper invocation collects metadata and icons',
   assert.equal(calls.length, 5)
   assert.equal(calls.filter(a => a.includes('push')).length, 0)
   assert.equal(calls.filter(a => a.some(v => v.includes('app_process'))).length, 1)
+})
+
+test('Apps accepts Android 7.1 and rejects older Android before uploading or running a helper', async () => {
+  const supported = fixture({ sdk: 25 })
+  await supported.service.refresh('device-id')
+  assert.equal(supported.service.state.status, 'ready')
+  const unsupported = fixture({ sdk: 24, cached: false })
+  await assert.rejects(unsupported.service.refresh('device-id'), /Android 7\.1 or newer/)
+  assert.equal(unsupported.service.state.status, 'error')
+  assert.deepEqual(unsupported.calls.map(args => args.slice(2).join(' ')), ['shell getprop ro.build.version.sdk'])
 })
 
 test('post-action update reads one package, keeps the table ready and updates the profile cache', async () => {

@@ -26,7 +26,7 @@ try {
   let fallback = false
   const service = new AppActionsService(() => adb, () => connection, () => apps, state => {
     if (state.message.startsWith('Copying through Android shell')) fallback = true
-  }, () => {}, { confirm: async () => false, exportFolder: async () => folder }, async () => {}, lifecycle.runner, undefined, () => new ApkTransferSession(mode === '--zstd'))
+  }, () => {}, { confirm: async () => false, exportFolder: async () => folder }, async () => {}, lifecycle.runner, undefined, () => new ApkTransferSession(mode === '--zstd'), { directory: path.resolve('android-helper/dist') })
   await service.execute({ id: device.id, userId: 0, packageName }, 'export')
   if (service.state.status !== 'success') throw new Error(service.state.message)
   const manifest = JSON.parse(await fs.readFile(path.join(service.state.exportPath, 'manifest.json'), 'utf8'))

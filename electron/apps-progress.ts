@@ -12,6 +12,7 @@ export class AppsProgressReader {
       if (!line) continue
       if (line.length > 200_000) throw new Error('Apps record exceeds its size limit.')
       const record = JSON.parse(line)
+      if (record?.type === 'error') throw new Error(`Android helper: ${String(record.message).slice(0, 500)}`)
       if (this.total === null) {
         if (record.type !== 'header' || record.protocolVersion !== 1 || record.helperVersion !== this.version || record.userId !== this.userId || !Number.isInteger(record.total) || record.total < 0 || record.total > 10000) throw new Error('Invalid Apps progress header.')
         this.total = record.total; this.report(0, record.total)

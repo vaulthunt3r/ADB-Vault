@@ -7,12 +7,54 @@ import { createHash } from 'node:crypto'
 import { AppActionsService, parseApkPaths, actionOutput } from '../dist-electron/app-actions.js'
 import { ApkTransferSession } from '../dist-electron/apk-transfer.js'
 import { emptyApps } from '../dist-electron/apps-protocol.js'
+import { parseApkChecksums } from '../dist-electron/apk-checksums.js'
 
 const apk = Buffer.concat([Buffer.from('504b0304', 'hex'), Buffer.from('test APK content')])
 const digest = createHash('sha256').update(apk).digest('hex')
 const target = { id: 'PHONE', userId: 11, packageName: 'org.example.app' }
 const ok = stdout => ({ code: 0, stderr: '', stdout })
 const shellTokens = command => command.slice(1, -1).split("' '")
+
+test('APK helper checksums are bound to the exact profile and complete APK set', () => {
+  const paths = ['/data/app/example/base.apk', '/data/app/example/split.apk']
+  const reply = () => ({ type: 'apk-checksums', protocolVersion: 1, packageName: target.packageName, userId: target.userId, files: paths.map(source => ({ source, bytes: apk.length, sha256: digest })) })
+  assert.equal(parseApkChecksums(JSON.stringify(reply()), target.packageName, target.userId, paths).size, 2)
+  for (const mutate of [v => v.userId++, v => v.packageName = 'other.app', v => v.protocolVersion++, v => v.files.pop(), v => v.files[1] = v.files[0], v => v.files[0].source = '/other.apk', v => v.files[0].bytes = 0, v => v.files[0].sha256 = 'invalid']) {
+    const value = reply(); mutate(value)
+    assert.throws(() => parseApkChecksums(JSON.stringify(value), target.packageName, target.userId, paths))
+  }
+})
+
+test('APK export uses one verified helper checksum collection when sha256sum is missing, including splits', async () => {
+  const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))
+  const paths = ['/data/app/example/base.apk', '/data/app/example/split.apk']
+  for (const problem of ['none', 'hash', 'size', 'profile', 'denied', 'disconnect']) {
+    const folder = await mkdtemp(path.join(tmpdir(), 'adb-vault-legacy-apk-'))
+    let checksumCalls = 0
+    const f = fixture({ folder, paths, packageAccess: { directory: 'android-helper/dist' }, runner: async args => {
+      const command = args.at(-1)
+      if (command.startsWith("'sha256sum'")) return { code: problem === 'denied' ? 1 : 127, stdout: '', stderr: problem === 'denied' ? 'sha256sum: Permission denied' : '/system/bin/sh: sha256sum: not found' }
+      if (command.includes('sha256sum /data/local/tmp')) return ok(manifest.sha256 + ' file')
+      if (command.includes('--checksums')) {
+        checksumCalls++
+        if (problem === 'disconnect') f.connection.activeDeviceId = 'OTHER'
+        return ok(JSON.stringify({ type: 'apk-checksums', protocolVersion: 1, packageName: target.packageName, userId: problem === 'profile' ? 0 : target.userId, files: [...paths].reverse().map(source => ({ source, bytes: apk.length + (problem === 'size' ? 1 : 0), sha256: problem === 'hash' ? 'a'.repeat(64) : digest })) }))
+      }
+    } })
+    await f.service.execute(target, 'export')
+    assert.equal(checksumCalls, problem === 'denied' ? 0 : 1, problem)
+    if (problem === 'none') {
+      assert.equal(f.service.state.status, 'success', f.service.state.message)
+      const saved = JSON.parse(await readFile(path.join(f.service.state.exportPath, 'manifest.json'), 'utf8'))
+      assert.equal(saved.files.length, 2)
+      assert.ok(saved.files.every(file => file.sha256 === digest && file.bytes === apk.length))
+      assert.equal(f.calls.filter(args => args.at(-1).startsWith("'sha256sum'")).length, 1)
+    } else {
+      assert.notEqual(f.service.state.status, 'success', problem)
+      assert.deepEqual(await readdir(folder), [], problem)
+    }
+  }
+})
 
 test('restore-existing confirms target, skips installed-path lookup, verifies identity and refreshes once', async () => {
   const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))

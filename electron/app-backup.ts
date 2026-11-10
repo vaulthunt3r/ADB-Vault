@@ -129,7 +129,7 @@ export class AppBackupService {
   get busy() { return this.locked }
   constructor(private adb: () => string | null, private connection: () => ConnectionSnapshot, private apps: () => AppsSnapshot,
     private publish: (state: BackupState) => void, private log: (message: string, tone: 'success' | 'warning' | 'info') => void,
-    private dialogs: Dialogs, private runner: Runner = run, private catalogue?: BackupCatalog, private refreshApp?: (id: string, userId: number, packageName: string) => Promise<void>, private apkZstd: () => boolean = () => false) {}
+    private dialogs: Dialogs, private runner: Runner = run, private catalogue?: BackupCatalog, private refreshApp?: (id: string, userId: number, packageName: string) => Promise<void>, private apkZstd: () => boolean = () => false, private helperDirectory?: string) {}
   private update(patch: Partial<BackupState>) { this.state = { ...this.state!, ...patch }; this.publish(this.state) }
   contextChanged() {
     if (!this.context || this.controller?.signal.aborted) return
@@ -274,7 +274,7 @@ export class AppBackupService {
             try {
               const exporter = new AppActionsService(this.adb, this.connection, this.apps, state => {
                 if (state.status === 'running') this.update({ message: `${app.label}: ${state.message}`, currentFile: state.total ? { completed: state.completed || 0, total: state.total } : undefined })
-              }, () => {}, { confirm: async () => false, exportFolder: async () => temporary }, async () => {}, runner, undefined, () => transferSession)
+              }, () => {}, { confirm: async () => false, exportFolder: async () => temporary }, async () => {}, runner, undefined, () => transferSession, this.helperDirectory ? { directory: this.helperDirectory } : undefined)
               this.current = exporter
               const outcome = await exporter.execute({ id: request.id, userId: request.userId, packageName: app.packageName }, 'export', request.format === 'apk' || request.format === 'apks' ? request.format : undefined)
               this.ensureCurrent()

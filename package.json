@@ -1,6 +1,6 @@
 {
   "name": "adb-vault",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "ADB Vault — Android device manager for Windows",
   "author": "ADB Vault",

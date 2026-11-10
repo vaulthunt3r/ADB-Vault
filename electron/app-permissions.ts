@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { helperChecksum } from './helper-checksum.js'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { parsePermissionSnapshot, permissionRestriction, type PermissionChange, type PermissionSnapshot } from './app-permissions-protocol.js'
@@ -17,10 +18,10 @@ export async function changePermission(request: PermissionChange, app: AndroidAp
   const digest = createHash('sha256').update(await readFile(jar)).digest('hex')
   if (manifest.protocolVersion !== 1 || manifest.helperVersion !== '0.1.0' || digest !== manifest.sha256) throw new Error('Bundled Android helper failed verification.')
   const remote = '/data/local/tmp/android-manager/manager-server.jar'
-  if ((await command(['shell', `if [ -f ${remote} ]; then sha256sum ${remote}; fi`])).split(/\s+/)[0] !== digest) {
+  if ((await helperChecksum(command, remote, true)) !== digest) {
     await command(['shell', 'mkdir -p /data/local/tmp/android-manager'])
     await command(['push', jar, `${remote}.permissions-new`], 30000)
-    if ((await command(['shell', 'sha256sum', `${remote}.permissions-new`])).split(/\s+/)[0] !== digest) throw new Error('Android helper upload checksum mismatch.')
+    if ((await helperChecksum(command, `${remote}.permissions-new`)) !== digest) throw new Error('Android helper upload checksum mismatch.')
     await command(['shell', `chmod 444 ${remote}.permissions-new && mv -f ${remote}.permissions-new ${remote}`])
   }
   const read = async () => {

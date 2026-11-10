@@ -36,6 +36,8 @@ test('inline selection controls keep the table stable and selection independent 
   await expect(bar(page)).toContainText('1 hidden by filters')
   await expect(page.getByRole('button', { name: 'Review selection', exact: true })).toHaveCount(0)
   await page.getByRole('tab', { name: 'Actions', exact: true }).click()
+  await expect(page.getByRole('tabpanel')).toContainText('Selected 1 applications')
+  await page.getByRole('tab', { name: 'Details', exact: true }).click()
   await expect(page.getByRole('tabpanel')).toContainText('org.example.alpha')
   expect(await page.evaluate(() => window.backendTest.requests.some(r => r.type === 'apps.action'))).toBe(false)
   await page.getByRole('button', { name: 'Clear selection', exact: true }).click()

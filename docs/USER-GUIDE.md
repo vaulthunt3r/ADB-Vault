@@ -45,6 +45,14 @@ copy does not include app data. Review the reported contents of each backup.
 Split applications may require all APK parts. Restoring a system package removed
 for a user depends on its files still being present on the phone.
 
+**Removed apps** (the package-minus shortcut) lists packages Android still knows
+about but does not have installed in the selected profile. This is not a complete
+uninstall history. Use the table headings to sort, check individual rows or select
+all filtered rows, then choose **Restore selected**. Checked rows hidden by filters
+remain selected and are counted in the toolbar. One confirmation identifies the
+phone, profile and packages; unavailable APKs are skipped. Results are available
+below the table and in Activity. Restoration does not recover deleted app data.
+
 **Find online** offers configurable search websites and scanner pages. Scanner
 preparation saves APKs locally and opens the website; uploading is manual.
 Local APK Inspector and version comparison do not require a phone and do not
@@ -105,7 +113,7 @@ There is no dedicated settings export/import feature in this release.
 
 - Windows x64 is the supported desktop target. macOS, Linux and Windows ARM64 builds are not provided.
 - The interface is English only; device-provided labels retain their original language.
-- The Android helper targets Android 8/API 26 and newer. This is a technical minimum, not a claim that every Android release or OEM has been tested.
+- Reading applications targets Android 7.1/API 25 and newer. Storage statistics and phone-provider actions require Android 8/API 26 or newer. These are technical minimums, not a claim that every Android release, OEM or feature has been tested.
 - Camera, virtual display, physical input, provider exports, root and package-management behavior depend on Android/firmware permissions.
 - A locked phone, Wi-Fi sleep or a dropped connection may interrupt operations. Check results before retrying.
 - APK detection is not an antivirus verdict; absence of a signature is not proof of safety.

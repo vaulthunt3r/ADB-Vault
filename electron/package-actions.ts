@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { helperChecksum } from './helper-checksum.js'
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import type { AndroidApp } from './apps-protocol.js'
@@ -29,21 +30,21 @@ export function parsePackageResult(output: string, app: AndroidApp, action: stri
   if (r.protocol !== 1 || r.packageName !== app.packageName || r.userId !== app.userId || r.action !== action || !['confirmed', 'denied', 'uncertain', 'failed'].includes(r.outcome) || !c || typeof c.fingerprint !== 'string' || !c.fingerprint.length || c.fingerprint.length > 1024 || !Number.isInteger(c.sdk) || ![0, 2000].includes(c.callerUid) || !['granted', 'denied', 'unknown'].includes(c.cachePermission) || (r.message !== undefined && (typeof r.message !== 'string' || r.message.length > 8192))) throw new Error('Android package helper response does not match the requested target.')
   return r
 }
-async function prepare(access: PackageActionAccess, command: PackageCommand) {
+export async function preparePackageHelper(access: PackageActionAccess, command: PackageCommand) {
   const jar = path.join(access.directory, 'manager-server.jar'), manifest = JSON.parse(await readFile(path.join(access.directory, 'helper-manifest.json'), 'utf8'))
   const digest = createHash('sha256').update(await readFile(jar)).digest('hex')
   if (manifest.protocolVersion !== 1 || digest !== manifest.sha256) throw new Error('Bundled Android helper failed verification.')
   const remote = '/data/local/tmp/android-manager/manager-server.jar'
-  if ((await command(['shell', `if [ -f ${remote} ]; then sha256sum ${remote}; fi`])).split(/\s+/)[0] !== digest) {
+  if ((await helperChecksum(command, remote, true)) !== digest) {
     await command(['shell', 'mkdir -p /data/local/tmp/android-manager'])
     await command(['push', jar, `${remote}.actions-new`], 30000)
-    if ((await command(['shell', 'sha256sum', `${remote}.actions-new`])).split(/\s+/)[0] !== digest) throw new Error('Android helper upload checksum mismatch.')
+    if ((await helperChecksum(command, `${remote}.actions-new`)) !== digest) throw new Error('Android helper upload checksum mismatch.')
     await command(['shell', `chmod 444 ${remote}.actions-new && mv -f ${remote}.actions-new ${remote}`])
   }
   return remote
 }
 export async function runPackageAction(app: AndroidApp, action: PackageAction, options: PackageActionOptions, access: PackageActionAccess, command: PackageCommand, shell: (script: string, timeout?: number) => Promise<string>) {
-  const remote = await prepare(access, command)
+  const remote = await preparePackageHelper(access, command)
   const helper = async (operation: string) => parsePackageResult(await shell(`CLASSPATH=${remote} app_process / dev.adbvault.helper.PackageActions ${[operation, app.packageName, String(app.userId), String(app.uid), String(app.versionCode), String(options.keepData === true)].map(quote).join(' ')}`, 40000), app, operation)
   const before = await helper('inspect')
   if (before.outcome !== 'confirmed' || !before.state?.installed || before.state.uid !== app.uid || before.state.versionCode !== app.versionCode || typeof before.state.enabled !== 'boolean') throw new Error(before.message || 'The application changed. Refresh applications before trying again.')
@@ -113,7 +114,7 @@ export async function runPackageAction(app: AndroidApp, action: PackageAction, o
 }
 
 export async function runRestoreExisting(app: AndroidApp, access: PackageActionAccess, command: PackageCommand, attempted: () => void) {
-  const remote = await prepare(access, command)
+  const remote = await preparePackageHelper(access, command)
   const inspect = async () => parsePackageResult(await command(['shell', '-T', `CLASSPATH=${remote} app_process / dev.adbvault.helper.PackageActions ${['inspect-restore', app.packageName, String(app.userId), String(app.uid), String(app.versionCode), 'false'].map(quote).join(' ')}`], 40000), app, 'inspect-restore')
   const before = await inspect()
   if (before.outcome !== 'confirmed' || before.state?.installed !== false || before.state.apkAvailable !== true || before.state.uid !== app.uid || before.state.versionCode !== app.versionCode || before.context.callerUid !== 2000 || app.actionContext && before.context.fingerprint !== app.actionContext.fingerprint) throw new Error('The package changed or its APK files are unavailable. Refresh the list before restoring.')

@@ -18,6 +18,13 @@ They included package reads/exports, provider access, screen sessions and mixed
 Unicode input on an Android 16 device. Test records and real device identifiers
 are intentionally not part of the public source repository.
 
+Inventory fixes were also checked on Android 8.1 and 7.1 phones. The Android 7.1
+check covered application/icon reads, PackageManager list comparison, Details,
+MIUI XSpace profile separation and two hidden packaged launches with preloading.
+This does not establish full feature compatibility on those Android versions.
+An Android 7.1 Google split-APK backup was also copied and verified on hardware
+using the checksum fallback for firmware without `sha256sum`.
+
 ## Release-preparation checks
 
 The publication preparation validates a clean exported source tree, lockfile
@@ -29,7 +36,7 @@ records the exact checks completed for the candidate.
 ## Remaining coverage
 
 - The final visible installer flow and all-users elevation under a separate Windows account have not received a full interactive retest after the destination fix.
-- Broad OEM/Android-version coverage is not established. API 26 is the helper's target minimum, not a certification matrix.
+- Broad OEM/Android-version coverage is not established. API 25 is the application inventory helper's target minimum; storage statistics and phone-provider actions require API 26. These limits are not a certification matrix.
 - Root, managed/secondary profiles, device cameras, provider restrictions and native gamepad support need device-specific validation.
 - Builds are unsigned. No SmartScreen reputation or third-party antivirus certification is claimed.
 - No external security audit or network penetration test has been performed.

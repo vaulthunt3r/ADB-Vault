@@ -7,6 +7,7 @@ const sources = ['android-helper/src/dev/adbvault/helper/Main.java', 'android-he
 sources.push('android-helper/src/dev/adbvault/helper/PhoneContentResolver.java', 'android-helper/stubs/android/content/IContentProvider.java')
 sources.push('android-helper/src/dev/adbvault/helper/TouchServer.java')
 const output = path.resolve('android-helper/dist')
+const minSdk = 25
 await mkdir(output, { recursive: true }); await mkdir('android-helper/build', { recursive: true })
 // Fresh output prevents removed/renamed nested classes from leaking into later builds.
 const classes = await mkdtemp(path.resolve('android-helper/build/classes-'))
@@ -18,7 +19,7 @@ async function run(file, args) {
 await run(tools.javac, ['-encoding', 'UTF-8', '-source', '8', '-target', '8', '-bootclasspath', tools.android, '-d', classes, ...sources])
 // Include only our package. Hidden Android signatures are compile-time stubs, never runtime classes.
 await run(tools.jar, ['cf', 'android-helper/build/classes.jar', '-C', classes, 'dev'])
-await run(tools.java, ['-cp', tools.d8, 'com.android.tools.r8.D8', '--release', '--min-api', '26', '--lib', tools.android, '--output', path.join(output, 'manager-server.jar'), 'android-helper/build/classes.jar'])
+await run(tools.java, ['-cp', tools.d8, 'com.android.tools.r8.D8', '--release', '--min-api', String(minSdk), '--lib', tools.android, '--output', path.join(output, 'manager-server.jar'), 'android-helper/build/classes.jar'])
 const hash = data => createHash('sha256').update(data).digest('hex')
-await writeFile(path.join(output, 'helper-manifest.json'), JSON.stringify({ protocolVersion: 1, helperVersion: '0.1.0', minSdk: 26, sha256: hash(await readFile(path.join(output, 'manager-server.jar'))), sourceSha256: hash(Buffer.concat(await Promise.all(sources.map(source => readFile(source))))) }, null, 2))
+await writeFile(path.join(output, 'helper-manifest.json'), JSON.stringify({ protocolVersion: 1, helperVersion: '0.1.0', minSdk, sha256: hash(await readFile(path.join(output, 'manager-server.jar'))), sourceSha256: hash(Buffer.concat(await Promise.all(sources.map(source => readFile(source))))) }, null, 2))
 console.log('Built Android helper and SHA-256 manifest.')

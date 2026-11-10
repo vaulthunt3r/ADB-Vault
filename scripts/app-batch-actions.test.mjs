@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { AppActionsService, validateBatchAction } from '../dist-electron/app-actions.js'
 import { emptyApps } from '../dist-electron/apps-protocol.js'
 const ok = stdout => ({ code: 0, stdout, stderr: '' })
@@ -10,7 +11,7 @@ function fixture(options = {}) {
   const service = new AppActionsService(() => 'adb', () => connection, () => apps, s => options.publish?.(s, service), () => {}, {
     confirm: async () => { throw Error('Individual confirmation must not be repeated') }, exportFolder: async () => null,
     confirmBatch: async s => { confirmations.push(structuredClone(s)); return options.confirm ? options.confirm(s, connection, apps) : true },
-  }, async target => { refreshed.push(target); if (service.state.action === 'uninstall') apps.apps = apps.apps.filter(a => a.packageName !== target.packageName); if (options.refresh) options.refresh(apps) }, async (_exe, args) => {
+  }, async target => { refreshed.push(target); if (service.state.action === 'uninstall') apps.apps = apps.apps.filter(a => a.packageName !== target.packageName); if (options.refresh) options.refresh(apps, target) }, async (_exe, args) => {
     calls.push(args); const command = args.at(-1)
     if (options.runner) { const r = await options.runner(command, service); if (r !== undefined) return r }
     if (command.includes("'path'")) return ok('package:/data/app/base.apk')
@@ -20,10 +21,72 @@ function fixture(options = {}) {
     if (command.includes("'disable-user'")) return ok('new state: disabled-user')
     if (command.includes("'force-stop'")) return ok('')
     return ok('Success')
-  })
+  }, undefined, undefined, options.packageAccess)
   const run = action => service.executeBatch({ id: 'phone', userId: 10, packages: apps.apps.map(a => a.packageName), action })
   return { service, apps, connection, calls, confirmations, refreshed, run }
 }
+
+async function removedFixture(mode = 'success') {
+  const manifest = JSON.parse(await readFile('android-helper/dist/helper-manifest.json', 'utf8'))
+  const restored = new Set(), mutations = []
+  const f = fixture({
+    packageAccess: { directory: 'android-helper/dist' },
+    confirm: (_s, connection) => { if (mode === 'switch') connection.activeDeviceId = 'OTHER'; return mode !== 'cancel' },
+    refresh: (apps, target) => {
+      if (restored.has(target.packageName)) { apps.apps.push({ ...apps.removedApps.find(a => a.packageName === target.packageName), installed: true }); apps.removedApps = apps.removedApps.filter(a => a.packageName !== target.packageName) }
+      if (mode === 'changed' && apps.removedApps[0]) apps.removedApps[0].versionCode++
+    },
+    runner: command => {
+      if (command.includes('sha256sum')) return ok(manifest.sha256 + ' file')
+      if (command.includes('helper.PackageActions')) {
+        if (mode === 'lost' && mutations.length) throw Error('connection lost')
+        const pkg = command.match(/'inspect-restore' '([^']+)'/)[1]
+        const app = [...f.apps.removedApps, ...f.apps.apps].find(a => a.packageName === pkg)
+        return ok(JSON.stringify({ protocol: 1, action: 'inspect-restore', packageName: pkg, userId: 10, context: { fingerprint: 'test-build', sdk: 25, callerUid: 2000, cachePermission: 'denied' }, state: { installed: restored.has(pkg), apkAvailable: true, uid: app.uid, versionCode: app.versionCode }, outcome: 'confirmed' }))
+      }
+      if (command.includes("'install-existing'")) {
+        assert.match(command, /^'pm' 'install-existing' '--user' '10' 'org\.example\.(alpha|beta)'$/)
+        const pkg = command.match(/'(org\.example\.[^']+)'$/)[1]; mutations.push(pkg)
+        if (mode === 'lost') throw Error('connection lost')
+        if (mode === 'denied' && pkg.endsWith('.alpha')) return ok('java.lang.SecurityException: Permission denied')
+        restored.add(pkg); return ok('Package installed for user: 10')
+      }
+    },
+  })
+  f.apps.removedApps = f.apps.apps.map((app, i) => ({ ...app, installed: false, apkSizeBytes: i === 2 ? null : 1200 })); f.apps.apps = []
+  return { ...f, mutations, run: () => f.service.executeBatch({ id: 'phone', userId: 10, packages: f.apps.removedApps.map(a => a.packageName), action: 'install-existing' }) }
+}
+
+test('batch restore uses removed inventory, skips unavailable APKs and survives restored rows leaving that inventory', async () => {
+  const f = await removedFixture(); await f.run()
+  assert.equal(f.confirmations.length, 1)
+  assert.deepEqual(f.service.state.batch.items.map(i => i.status), ['success', 'success', 'skipped'])
+  assert.equal(f.apps.apps.length, 2); assert.equal(f.apps.removedApps.length, 1)
+  assert.deepEqual(f.mutations, ['org.example.alpha', 'org.example.beta'])
+  assert.equal(f.calls.some(args => /'uninstall'|'enable'|'clear'/.test(args.at(-1))), false)
+})
+test('batch restore cancellation, changed phone and wrong profile perform no mutations', async () => {
+  for (const mode of ['cancel', 'switch']) {
+    const f = await removedFixture(mode); await f.run(); assert.equal(f.calls.length, 0)
+  }
+  const f = await removedFixture(); f.apps.removedApps[0].userId = 0
+  assert.throws(() => f.run(), /no longer in this profile/); assert.equal(f.calls.length, 0)
+})
+test('batch restore skips a queued package whose identity changes and continues after a definite denial', async () => {
+  const changed = await removedFixture('changed'); await changed.run()
+  assert.deepEqual(changed.service.state.batch.items.map(i => i.status), ['success', 'skipped', 'skipped'])
+  const denied = await removedFixture('denied'); await denied.run()
+  assert.deepEqual(denied.service.state.batch.items.map(i => i.status), ['error', 'success', 'skipped'])
+  assert.equal(denied.service.state.batch.items[0].uncertain, false)
+})
+test('batch restore stops on an unverified outcome and never retries that package blindly', async () => {
+  const f = await removedFixture('lost'); await f.run()
+  assert.deepEqual(f.service.state.batch.items.map(i => i.status), ['error', 'cancelled', 'skipped'])
+  assert.equal(f.service.state.batch.items[0].uncertain, true)
+  assert.deepEqual(f.mutations, ['org.example.alpha'])
+  await f.service.retryBatch()
+  assert.deepEqual(f.service.state.batch.items.map(i => i.packageName), ['org.example.beta'])
+})
 test('batch Freeze/Unfreeze skips matching states and keeps the Android profile', async () => {
   for (const action of ['suspend', 'unsuspend']) {
     const f = fixture({ runner: command => {

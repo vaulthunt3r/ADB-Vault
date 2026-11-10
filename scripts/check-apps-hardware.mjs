@@ -58,9 +58,13 @@ const allPackages = checked(await run(adb, ['-s', device.serial, 'shell', 'pm', 
 const known = allPackages.split(/\r?\n/).filter(line => line.startsWith('package:')).map(line => line.slice(8)).sort()
 assert.deepEqual([...service.state.apps, ...(service.state.removedApps || [])].map(a => a.packageName).sort(), known, 'Known-package inventory differs from pm list packages -u')
 assert.ok((service.state.removedApps || []).every(app => app.installed === false))
-const processes = checked(await run(adb, ['-s', device.serial, 'shell', 'ps', '-A', '-o', 'ARGS']))
-assert.equal(processes.includes('dev.adbvault.helper.Main'), false, 'Helper did not exit')
+const processes = await run(adb, ['-s', device.serial, 'shell', 'ps', '-A', '-o', 'ARGS'])
+if (processes.code === 0) assert.equal(processes.stdout.includes('dev.adbvault.helper.Main'), false, 'Helper did not exit')
+else if (!/bad pid '-A'|invalid option|unknown option/i.test(processes.stdout + processes.stderr)) checked(processes)
+// Legacy toolbox ps cannot list full command lines. The successful foreground
+// app_process command still confirms helper exit; do not claim a separate ps check.
+const helperExitCheck = processes.code === 0 ? 'adb-process-exit-and-ps' : 'adb-process-exit'
 await mkdir('desktop-test-results/apps', { recursive: true })
-await writeFile('desktop-test-results/apps/hardware-report.json', JSON.stringify({ reports, matchesPackageManager: true, helperExited: true }, null, 2))
+await writeFile('desktop-test-results/apps/hardware-report.json', JSON.stringify({ reports, matchesPackageManager: true, helperExited: true, helperExitCheck }, null, 2))
 await writeFile('desktop-test-results/apps/inventory.json', JSON.stringify(service.state))
 console.log('Package coverage matches pm list packages; helper process exited.')

@@ -10,6 +10,7 @@ import type { AppsSnapshot } from './apps-protocol.js'
 import type { ConnectionSnapshot } from './contracts.js'
 import { collectTrackerBadges, sensorBadge } from './app-badges.js'
 import { RootBadgeReader } from './root-badges.js'
+import { helperChecksum } from './helper-checksum.js'
 
 export class AppDetailsReader {
   private rootReader = new RootBadgeReader()
@@ -43,11 +44,11 @@ export class AppDetailsReader {
         const digest = createHash('sha256').update(await readFile(jar)).digest('hex')
         if (manifest.protocolVersion !== 1 || manifest.helperVersion !== '0.1.0' || digest !== manifest.sha256) throw new Error('Bundled Android helper failed verification.')
         const remote = '/data/local/tmp/android-manager/manager-server.jar'
-        const hash = await command(['shell', `if [ -f ${remote} ]; then sha256sum ${remote}; fi`])
-        if (hash.split(/\s+/)[0] !== digest) {
+        const hash = await helperChecksum(command, remote, true)
+        if (hash !== digest) {
           await command(['shell', 'mkdir -p /data/local/tmp/android-manager'])
           await command(['push', jar, `${remote}.details-new`], 30000)
-          if ((await command(['shell', 'sha256sum', `${remote}.details-new`])).split(/\s+/)[0] !== digest) throw new Error('Android helper upload checksum mismatch.')
+          if ((await helperChecksum(command, `${remote}.details-new`)) !== digest) throw new Error('Android helper upload checksum mismatch.')
           await command(['shell', `chmod 444 ${remote}.details-new && mv -f ${remote}.details-new ${remote}`])
         }
         const output = await command(['shell', `CLASSPATH=${remote} app_process / dev.adbvault.helper.Main --details ${packageName} ${permissions ? '--permissions ' : ''}${storage ? '--storage ' : ''}${userId}`], 60000)

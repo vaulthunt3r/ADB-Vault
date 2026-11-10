@@ -1,5 +1,5 @@
 .personal-database,.removed-apps { display:flex; flex-direction:column; min-height:0; overflow:hidden; gap:16px; }
-.personal-database-scroll,.removed-apps-scroll { overflow:auto; min-height:0; padding-right:12px; }
+.personal-database-scroll { overflow:auto; min-height:0; padding-right:12px; }
 .personal-database h1,.removed-apps h1 { margin:0 0 8px; font-size:22px; }
 .personal-dialog { width:min(800px,90vw); }
 .personal-panel { min-width:0; }
@@ -44,9 +44,21 @@
 .personal-compact .personal-badge-button { min-width:0; overflow:hidden; }
 .personal-compact .personal-badge { max-width:90px; }
 .apps-selection-controls .apps-collection-shortcut { flex:0 0 32px; width:32px; min-height:var(--control-height); padding:0; justify-content:center; }
-.removed-app-row { display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:12px 8px; }
-.removed-app-row>div { flex:1; min-width:0; }
-.removed-app-row code { display:block; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
-.removed-app-row.selected { background:var(--surface-alt); }
-.removed-app-select { text-align:left; background:transparent; padding:0; display:block; width:100%; }
 .removed-app-count { font-size:12px; color:var(--muted); }
+.removed-selection-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; font-size:12px; }
+.removed-selection-toolbar .removed-app-count { flex:1; }
+.removed-apps-table { min-width:830px; }
+.removed-sort { display:flex; align-items:center; gap:5px; padding:0; background:transparent; color:inherit; font:inherit; letter-spacing:inherit; text-transform:uppercase; }
+.removed-package { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.removed-unavailable { color:var(--muted); }
+.removed-apps-table .personal-compact { max-width:100%; }
+.removed-apps .personal-toolbar { margin:0; }
+.removed-apps > :not(.apps-table-scroll) { flex-shrink:0; }
+.removed-apps .apps-table-scroll { min-height:100px; }
+.density-compact .removed-apps-table td { padding:5px 8px; }
+.removed-restore-result { max-height:30vh; overflow:auto; font-size:12px; }
+.removed-restore-result p { margin:4px 0; }
+.removed-restore-result summary { cursor:pointer; padding:6px 0; }
+.removed-restore-result ul { list-style:none; padding:0; margin:0; }
+.removed-restore-result li { border-top:1px solid var(--line); padding:8px 0; }
+.removed-restore-result code { display:block; color:var(--muted); overflow-wrap:anywhere; }

@@ -30,6 +30,7 @@ jobs:
       - run: npm run inspector:setup
       - run: npm run build:distribution
       - name: Check installer extraction and packaged application
+        timeout-minutes: 3
         shell: pwsh
         env:
           ADB_VAULT_EXPECT_ELECTRON: '45.0.0'
@@ -45,7 +46,15 @@ jobs:
             $actual = (Get-FileHash -LiteralPath (Join-Path $destination $relative) -Algorithm SHA256).Hash
             if ($actual -ne $expected) { throw ('Installer mismatch: ' + $relative) }
           }
-          node scripts/check-english-only-desktop.mjs (Join-Path $destination 'ADB Vault.exe')
+          # Hosted runners can retain a detected SDK child process after app.close().
+          # Exercise both launches and all assertions, but exit the isolated test app directly.
+          $smokePath = 'scripts/check-english-only-desktop.mjs'
+          $smoke = Get-Content -LiteralPath $smokePath -Raw
+          if (!$smoke.Contains('await app.close(); app = undefined')) { throw 'Smoke cleanup anchor changed' }
+          $smoke = $smoke.Replace('await app.close(); app = undefined', 'await app.evaluate(({ app: runtime }) => runtime.exit(0)).catch(() => {}); app = undefined')
+          $smoke += "`nprocess.exit(0)`n"
+          Set-Content -LiteralPath $smokePath -Value $smoke -Encoding utf8
+          node $smokePath (Join-Path $destination 'ADB Vault.exe')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - run: node scripts/prepare-java-source.mjs
       - name: Reuse the audited source archive

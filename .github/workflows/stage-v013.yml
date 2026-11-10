@@ -1,0 +1,87 @@
+name: Stage validated 0.1.3 release files
+on:
+  push:
+    branches: [publication/v0.1.3]
+permissions:
+  contents: read
+concurrency:
+  group: stage-v013-release
+  cancel-in-progress: false
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 7a6ecb523a2b8d8428ce203442bb3d36b56752aa
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run desktop:setup
+      - run: npm run check:source
+      - run: npm run notices:generate -- --check
+      - run: npm run helper:setup
+      - run: npm run inspector:setup
+      - run: npm run build:distribution
+      - name: Check installer extraction and packaged application
+        shell: pwsh
+        env:
+          ADB_VAULT_EXPECT_ELECTRON: '45.0.0'
+        run: |
+          New-Item -ItemType Directory -Path desktop-test-results | Out-Null
+          $setup = Join-Path (Get-Location) 'release/ADB-Vault-0.1.3-Windows-x64-Setup.exe'
+          $destination = Join-Path (Get-Location) 'desktop-test-results/installer-extracted'
+          $process = Start-Process -FilePath $setup -WindowStyle Hidden -Wait -PassThru -ArgumentList ('/S /PORTABLE /DESKTOP=0 /STARTMENU=0 /D=' + $destination)
+          if ($process.ExitCode -ne 0) { throw 'Setup extraction failed' }
+          if (!(Test-Path -LiteralPath (Join-Path $destination 'portable-mode'))) { throw 'Portable marker missing' }
+          foreach ($relative in @('ADB Vault.exe','resources/app.asar','locales/en-US.pak')) {
+            $expected = (Get-FileHash -LiteralPath (Join-Path 'release/win-unpacked' $relative) -Algorithm SHA256).Hash
+            $actual = (Get-FileHash -LiteralPath (Join-Path $destination $relative) -Algorithm SHA256).Hash
+            if ($actual -ne $expected) { throw ('Installer mismatch: ' + $relative) }
+          }
+          node scripts/check-english-only-desktop.mjs (Join-Path $destination 'ADB Vault.exe')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - run: node scripts/prepare-java-source.mjs
+      - name: Reuse the audited source archive
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $release = gh api repos/vaulthunt3r/ADB-Vault/releases/439583539 | ConvertFrom-Json
+          if (!$release.draft -or $release.tag_name -ne 'v0.1.3' -or $release.target_commitish -ne 'release/0.1.3') { throw 'Unexpected release state' }
+          $head = gh api repos/vaulthunt3r/ADB-Vault/git/ref/heads/release/0.1.3 --jq '.object.sha'
+          if ($head -ne '7a6ecb523a2b8d8428ce203442bb3d36b56752aa') { throw 'Release source changed' }
+          gh release download v0.1.3 --repo vaulthunt3r/ADB-Vault --pattern ADB-Vault-0.1.3-Source.zip --dir github-ready
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $hash = (Get-FileHash -LiteralPath github-ready/ADB-Vault-0.1.3-Source.zip -Algorithm SHA256).Hash
+          if ($hash -ne '355895316fdc653ea7572a1f753404121924076eaaacb1c59d76a38234721839') { throw 'Audited source hash mismatch' }
+      - run: node scripts/prepare-release-assets.mjs
+      - name: Upload complete files to the existing draft
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $release = gh api repos/vaulthunt3r/ADB-Vault/releases/439583539 | ConvertFrom-Json
+          if (!$release.draft) { throw 'Refusing to change a published release' }
+          gh release upload v0.1.3 --repo vaulthunt3r/ADB-Vault --clobber release/ADB-Vault-0.1.3-Windows-x64-Setup.exe release/ADB-Vault-0.1.3-Windows-x64-Portable.zip release/OpenJDK17U-jdk-sources_17.0.20.1_1.tar.gz release/third-party-sources.json release/SHA256SUMS.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $release = gh api repos/vaulthunt3r/ADB-Vault/releases/439583539 | ConvertFrom-Json
+          if ($release.assets.Count -ne 6) { throw 'Unexpected release asset count' }
+          foreach ($line in Get-Content release/SHA256SUMS.txt) {
+            $parts = $line -split '  ', 2
+            $asset = @($release.assets | Where-Object name -eq $parts[1])
+            if ($asset.Count -ne 1 -or $asset[0].state -ne 'uploaded' -or $asset[0].digest -ne ('sha256:' + $parts[0])) { throw ('Remote digest mismatch: ' + $parts[1]) }
+          }
+          Get-Content release/SHA256SUMS.txt
+          Write-Output 'PASS: all six draft assets uploaded; remote SHA-256 matches the verified build. The release remains unpublished.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v013-publication-checksums
+          path: release/SHA256SUMS.txt
+          retention-days: 14
